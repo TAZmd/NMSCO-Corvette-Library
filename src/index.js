@@ -114,7 +114,7 @@ async function publishToGitHub({ shipUrl, imageUrl, name }, env) {
 
     return true;
   } catch (err) {
-    console.error("publishToGitHub failed:", err);
+    console.error("publishToGitHub failed: " + (err && err.message ? err.message : String(err)));
     return false;
   }
 }
