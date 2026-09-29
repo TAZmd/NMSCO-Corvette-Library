@@ -1,0 +1,10 @@
+name = "corvette-library-bot"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+DISCORD_APPLICATION_ID = "1554537284173439106"
+DISCORD_GUILD_ID = "285756001469202432"
+APPROVER_USER_ID = "80942727767785472"
+GITHUB_OWNER = "PUT-YOUR-GITHUB-USERNAME-HERE"
+GITHUB_REPO = "nmsco-corvette-library"
