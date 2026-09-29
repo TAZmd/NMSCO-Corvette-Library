@@ -161,7 +161,7 @@ async function handleCommand(interaction, env, ctx) {
   if (!shipAtt) problems.push("geen ship-bestand toegevoegd");
   if (!imgAtt) problems.push("geen afbeelding toegevoegd");
   if (shipAtt && shipAtt.size > 3 * 1024 * 1024) problems.push("ship-bestand is groter dan 3 MB");
-  if (shipAtt && !/\.(nmsship|json)$/i.test(shipAtt.filename)) problems.push("ship-bestand moet .nmsship of .json zijn");
+  if (shipAtt && !/\.(nmsship|json|txt)$/i.test(shipAtt.filename)) problems.push("ship-bestand moet .nmsship, .json of .txt zijn");
   if (imgAtt && imgAtt.size > 8 * 1024 * 1024) problems.push("afbeelding is groter dan 8 MB");
   if (imgAtt && !/^image\//.test(imgAtt.content_type || "")) problems.push("bijlage voor afbeelding is geen afbeelding");
 
