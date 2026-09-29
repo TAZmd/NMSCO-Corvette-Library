@@ -202,10 +202,13 @@ async function handleCommand(interaction, env, ctx) {
           ]
         }
       ];
-      await discordApi(`/channels/${env.APPROVAL_CHANNEL_ID}/messages`, env, {
+      const postResp = await discordApi(`/channels/${env.APPROVAL_CHANNEL_ID}/messages`, env, {
         method: "POST",
         body: JSON.stringify({ embeds: [embed], components })
       });
+      if (!postResp.ok) {
+        console.error("post to approval channel failed: " + postResp.status + " " + (await postResp.text()));
+      }
     })()
   );
 
