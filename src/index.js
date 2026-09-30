@@ -676,6 +676,34 @@ async function handleTrackDownload(request, env) {
   }
 }
 
+async function deleteShip(id, env) {
+  const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
+  if (!idxResp.ok) throw new Error("Could not read index.json");
+  const idxData = await idxResp.json();
+  let list = JSON.parse(decodeBase64Utf8(idxData.content));
+  if (!Array.isArray(list)) list = [];
+
+  const entry = list.find((e) => e.id === id);
+  const newList = list.filter((e) => e.id !== id);
+  if (newList.length === list.length) throw new Error("ship id not found in index.json");
+
+  const updResp = await ghRequest(`/contents/index.json`, env, {
+    method: "PUT",
+    body: JSON.stringify({
+      message: `Remove ${id} from index`,
+      content: utf8ToBase64(JSON.stringify(newList, null, 2)),
+      sha: idxData.sha
+    })
+  });
+  if (!updResp.ok) throw new Error(`index.json update failed: ${updResp.status} ${await updResp.text()}`);
+
+  await deleteFile(`ships/${id}/ship.json`, `Delete ${id}`, env);
+  await deleteFile(`ships/${id}/preview.png`, `Delete ${id}`, env);
+  await deleteFile(`ships/${id}/info.json`, `Delete ${id}`, env);
+
+  return entry ? entry.name : id;
+}
+
 async function handleReport(request, env) {
   let body;
   try {
@@ -686,19 +714,29 @@ async function handleReport(request, env) {
   const id = (body.id || "unknown").toString().slice(0, 100);
   const name = (body.name || "").toString().slice(0, 100);
   const reason = (body.reason || "No reason given").toString().slice(0, 500);
+  const reporter = (body.reporter || "").toString().slice(0, 100);
 
   const channel = env.REPORTS_CHANNEL_ID || env.APPROVAL_CHANNEL_ID;
+  const fields = [
+    { name: "Ship id", value: id, inline: true },
+    { name: "Reason", value: reason, inline: false }
+  ];
+  if (reporter) fields.push({ name: "Reported by", value: reporter, inline: true });
+
   const embed = {
     title: `Report: ${name || id}`,
     color: 0xe05555,
-    fields: [
-      { name: "Ship id", value: id, inline: true },
-      { name: "Reason", value: reason, inline: false }
-    ]
+    fields
   };
+  const components = [
+    {
+      type: 1,
+      components: [{ type: 2, style: 4, label: "Delete Ship", custom_id: `deleteship:${id}` }]
+    }
+  ];
   const resp = await discordApi(`/channels/${channel}/messages`, env, {
     method: "POST",
-    body: JSON.stringify({ embeds: [embed] })
+    body: JSON.stringify({ embeds: [embed], components })
   });
   if (!resp.ok) {
     console.error("handleReport post failed: " + resp.status + " " + (await resp.text()));
@@ -712,7 +750,7 @@ async function handleRegister(url, env) {
   if (!env.SETUP_KEY || key !== env.SETUP_KEY) {
     return new Response("Not authorized.", { status: 401 });
   }
-  const command = {
+  const submitCommand = {
     name: "submit",
     description: "Submit a Corvette to the community library",
     options: [
@@ -721,10 +759,17 @@ async function handleRegister(url, env) {
       { name: "image", description: "A preview screenshot", type: 11, required: true }
     ]
   };
+  const deleteCommand = {
+    name: "delete",
+    description: "Admin only: remove a Corvette from the library",
+    options: [
+      { name: "query", description: "Ship name or id to remove", type: 3, required: true }
+    ]
+  };
   const resp = await discordApi(
     `/applications/${env.DISCORD_APPLICATION_ID}/guilds/${env.DISCORD_GUILD_ID}/commands`,
     env,
-    { method: "PUT", body: JSON.stringify([command]) }
+    { method: "PUT", body: JSON.stringify([submitCommand, deleteCommand]) }
   );
   const text = await resp.text();
   return new Response(`Status ${resp.status}\n${text}`, {
@@ -733,7 +778,65 @@ async function handleRegister(url, env) {
   });
 }
 
+async function handleDeleteCommand(interaction, env) {
+  const clicker = interaction.member?.user || interaction.user;
+  if (!clicker || clicker.id !== env.APPROVER_USER_ID) {
+    return json({
+      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+      data: { content: "Only the library admin can use this command.", flags: 64 }
+    });
+  }
+
+  const opts = {};
+  for (const o of interaction.data.options || []) opts[o.name] = o.value;
+  const query = (opts.query || "").toString().trim();
+  if (!query) {
+    return json({ type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, data: { content: "Give a ship name or id.", flags: 64 } });
+  }
+
+  try {
+    const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
+    if (!idxResp.ok) throw new Error("Could not read index.json");
+    const idxData = await idxResp.json();
+    let list = JSON.parse(decodeBase64Utf8(idxData.content));
+    if (!Array.isArray(list)) list = [];
+
+    const byId = list.find((e) => e.id === query);
+    if (byId) {
+      const deletedName = await deleteShip(byId.id, env);
+      return json({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: { content: `Deleted "${deletedName}" (${byId.id}).`, flags: 64 }
+      });
+    }
+
+    const matches = list.filter((e) => (e.name || "").toLowerCase().includes(query.toLowerCase()));
+    if (matches.length === 0) {
+      return json({ type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, data: { content: `No ship matches "${query}".`, flags: 64 } });
+    }
+    if (matches.length > 1) {
+      const list_text = matches.slice(0, 15).map((m) => `${m.name} - \`${m.id}\``).join("\n");
+      return json({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: { content: `Multiple matches, run /delete again with the exact id:\n${list_text}`, flags: 64 }
+      });
+    }
+
+    const deletedName = await deleteShip(matches[0].id, env);
+    return json({
+      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+      data: { content: `Deleted "${deletedName}" (${matches[0].id}).`, flags: 64 }
+    });
+  } catch (err) {
+    console.error("handleDeleteCommand failed: " + (err && err.message ? err.message : String(err)));
+    return json({ type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, data: { content: "Could not delete that ship - check logs.", flags: 64 } });
+  }
+}
+
 async function handleCommand(interaction, env, ctx) {
+  if (interaction.data.name === "delete") {
+    return handleDeleteCommand(interaction, env);
+  }
   if (interaction.data.name !== "submit") {
     return json({ type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, data: { content: "Unknown command.", flags: 64 } });
   }
@@ -843,6 +946,22 @@ async function handleComponent(interaction, env, ctx) {
   const [action, slug] = customId.split(":");
   if (!slug) {
     return json({ type: InteractionResponseType.UPDATE_MESSAGE, data: {} });
+  }
+
+  if (action === "deleteship") {
+    ctx.waitUntil(
+      deleteShip(slug, env)
+        .then((deletedName) => {
+          console.log(`Deleted ${deletedName} (${slug})`);
+        })
+        .catch((err) => {
+          console.error("deleteShip failed: " + (err && err.message ? err.message : String(err)));
+        })
+    );
+    return json({
+      type: InteractionResponseType.UPDATE_MESSAGE,
+      data: { embeds: [{ ...embed, color: 0x8b2020, title: `Deleted - ${embed.title}` }], components: [] }
+    });
   }
 
   if (action === "reject") {
