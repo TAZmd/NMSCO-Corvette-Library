@@ -251,13 +251,6 @@ async function sha256HexBytes(bytes) {
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-function readUint16LE(view, off) {
-  return view.getUint16(off, true);
-}
-function readUint32LE(view, off) {
-  return view.getUint32(off, true);
-}
-
 function validateZipEntries(bytes) {
   const allowed = new Set(["objects.json", "so.json"]);
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
