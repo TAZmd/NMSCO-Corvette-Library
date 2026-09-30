@@ -209,6 +209,82 @@ function computeShipMeta(objectsText) {
   }
 }
 
+function matchBracket(text, start) {
+  let depth = 0;
+  for (let i = start; i < text.length; i++) {
+    const c = text[i];
+    if (c === '"') {
+      i++;
+      while (i < text.length && text[i] !== '"') {
+        if (text[i] === "\\") i++;
+        i++;
+      }
+      continue;
+    }
+    if (c === "[" || c === "{") depth++;
+    else if (c === "]" || c === "}") {
+      depth--;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+
+function extractObjectsArrayText(text) {
+  let depth = 0;
+  let i = 0;
+  const n = text.length;
+  while (i < n) {
+    const c = text[i];
+    if (c === '"') {
+      let j = i + 1;
+      while (j < n && text[j] !== '"') {
+        if (text[j] === "\\") j++;
+        j++;
+      }
+      if (depth === 1 && text.slice(i + 1, j) === "Objects") {
+        let k = j + 1;
+        while (k < n && /\s/.test(text[k])) k++;
+        if (text[k] === ":") {
+          k++;
+          while (k < n && /\s/.test(text[k])) k++;
+          if (text[k] === "[") {
+            const end = matchBracket(text, k);
+            if (end > 0) {
+              const lineStart = text.lastIndexOf("\n", i) + 1;
+              const lead = text.slice(lineStart, i);
+              const indent = /^[ \t]*$/.test(lead) ? lead : "";
+              const lines = text.slice(k, end + 1).split("\n");
+              const fixed = lines.map((line, idx) => (idx > 0 && indent && line.startsWith(indent) ? line.slice(indent.length) : line));
+              return fixed.join("\n");
+            }
+          }
+        }
+      }
+      i = j + 1;
+      continue;
+    }
+    if (c === "{" || c === "[") depth++;
+    else if (c === "}" || c === "]") depth--;
+    i++;
+  }
+  return null;
+}
+
+function sameJson(a, b) {
+  try {
+    return JSON.stringify(JSON.parse(a)) === JSON.stringify(b);
+  } catch (e) {
+    return false;
+  }
+}
+
+function objectsTextKeepingLayout(text, objects) {
+  const raw = extractObjectsArrayText(text);
+  if (raw && raw.includes("\n") && sameJson(raw, objects)) return raw;
+  return JSON.stringify(objects, null, 2);
+}
+
 // Whatever gets submitted - a real .nmsship zip, a plain .json, or a .txt paste of the
 // objects array - is reduced to just that plain objects.json text right away. Nothing
 // beyond that array is ever stored, and no zip container is ever written to the repo.
@@ -233,7 +309,7 @@ async function normalizeShipBytes(bytes) {
     if (Array.isArray(parsed)) {
       objectsText = text;
     } else if (parsed && typeof parsed === "object" && Array.isArray(parsed.Objects)) {
-      objectsText = JSON.stringify(parsed.Objects);
+      objectsText = objectsTextKeepingLayout(text, parsed.Objects);
     } else {
       return { ok: false, error: "file is not a list of objects" };
     }
