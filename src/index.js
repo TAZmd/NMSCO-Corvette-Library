@@ -336,6 +336,17 @@ async function checkRateLimit(ip) {
   return true;
 }
 
+// One download counts per (ship, visitor) per day - stops someone inflating a ship's
+// count, and therefore its place in "Most downloaded", by repeatedly clicking Import/Download.
+async function checkDownloadDedup(ip, id) {
+  const cache = caches.default;
+  const key = new Request(`https://downloadDedup.internal/${encodeURIComponent(id)}/${encodeURIComponent(ip)}`);
+  const cached = await cache.match(key);
+  if (cached) return false;
+  await cache.put(key, new Response("1", { headers: { "Cache-Control": "max-age=86400" } }));
+  return true;
+}
+
 async function verifyTurnstile(token, ip, env) {
   if (!env.TURNSTILE_SECRET_KEY) return true;
   const form = new FormData();
@@ -679,6 +690,12 @@ async function handleTrackDownload(request, env) {
   }
   const id = (body.id || "").toString();
   if (!id) return new Response("Missing id.", { status: 400 });
+
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  const allowed = await checkDownloadDedup(ip, id);
+  if (!allowed) {
+    return json({ ok: true, deduped: true });
+  }
 
   try {
     const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
