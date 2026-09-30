@@ -316,7 +316,13 @@ document.getElementById('f').addEventListener('submit', async (e) => {
   btn.disabled = true;
   status.textContent = 'Uploading...';
   try {
-    const resp = await fetch('/upload', { method: 'POST', body: new FormData(e.target) });
+    const form = new FormData(e.target);
+    const imageInput = e.target.querySelector('input[name="image"]');
+    if (imageInput.files && imageInput.files[0]) {
+      const compressed = await compressImage(imageInput.files[0]);
+      form.set('image', compressed, 'preview.jpg');
+    }
+    const resp = await fetch('/upload', { method: 'POST', body: form });
     const text = await resp.text();
     status.textContent = text;
     if (resp.ok) e.target.reset();
@@ -325,6 +331,27 @@ document.getElementById('f').addEventListener('submit', async (e) => {
   }
   btn.disabled = false;
 });
+
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const maxDim = 1280;
+      let w = img.width, h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+        else { w = Math.round(w * maxDim / h); h = maxDim; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('compression failed')), 'image/jpeg', 0.85);
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
 </script>
 </body>
 </html>`;
@@ -368,7 +395,7 @@ async function handleUploadSubmit(request, env, ctx) {
   if (shipFile instanceof File && !/\.(nmsship|json|txt)$/i.test(shipFile.name)) {
     problems.push("ship file must be .nmsship, .json or .txt");
   }
-  if (imageFile instanceof File && imageFile.size > 8 * 1024 * 1024) problems.push("image is larger than 8 MB");
+  if (imageFile instanceof File && imageFile.size > 10 * 1024 * 1024) problems.push("image is larger than 10 MB");
   if (imageFile instanceof File && !/^image\//.test(imageFile.type || "")) problems.push("image attachment is not an image");
 
   if (problems.length) {
