@@ -547,8 +547,10 @@ document.getElementById('f').addEventListener('submit', async (e) => {
     const text = await resp.text();
     status.textContent = text;
     if (resp.ok) e.target.reset();
+    if (typeof turnstile !== 'undefined') turnstile.reset();
   } catch (err) {
     status.textContent = 'Something went wrong. Please try again.';
+    if (typeof turnstile !== 'undefined') turnstile.reset();
   }
   btn.disabled = false;
 });
