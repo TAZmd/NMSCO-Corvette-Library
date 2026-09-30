@@ -24,5 +24,92 @@
     "name": "Obsidian Crown v2",
     "sha256": "a4fed7bb54210c07d24523145b5061d4da8bd924d9de49d645e37536451f9f8d",
     "submitter": "website"
+  },
+  {
+    "id": "federal-corvette-v3-2ddgu",
+    "name": "Federal Corvette v3",
+    "sha256": "d6b8e684f7351f1c1323899a259d10ccfa688e87e0a28f9830534a922f619db3",
+    "submitter": "website",
+    "objectCount": 695,
+    "score": 8.6,
+    "utilities": [
+      {
+        "label": "Teleporter",
+        "value": 1
+      },
+      {
+        "label": "Room Scanner",
+        "value": 1
+      },
+      {
+        "label": "Build Terminal",
+        "value": 1
+      },
+      {
+        "label": "1x1 Magnet Base",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Tech Wall",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Kitchen",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Set",
+        "value": 1
+      },
+      {
+        "label": "Game Table",
+        "value": 1
+      },
+      {
+        "label": "Exocraft Upgrade Tree",
+        "value": 1
+      },
+      {
+        "label": "Ship Upgrade Tree",
+        "value": 1
+      },
+      {
+        "label": "Suit Upgrade Tree",
+        "value": 1
+      },
+      {
+        "label": "Weapon Upgrade Tree",
+        "value": 1
+      },
+      {
+        "label": "Expedition Upgrade Tree",
+        "value": 1
+      },
+      {
+        "label": "Extraction Room",
+        "value": 1
+      },
+      {
+        "label": "Dressing Table",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-09-30T07:42:51.378Z"
   }
 ]
