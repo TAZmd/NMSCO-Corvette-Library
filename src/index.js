@@ -279,10 +279,84 @@ function sameJson(a, b) {
   }
 }
 
+function prettyPrintJsonText(text) {
+  const unit = "    ";
+  let out = "";
+  let level = 0;
+  let i = 0;
+  const n = text.length;
+  const nl = () => "\n" + unit.repeat(Math.max(level, 0));
+  while (i < n) {
+    const c = text[i];
+    if (c === " " || c === "\t" || c === "\n" || c === "\r") {
+      i++;
+      continue;
+    }
+    if (c === '"') {
+      let j = i + 1;
+      while (j < n && text[j] !== '"') {
+        if (text[j] === "\\") j++;
+        j++;
+      }
+      out += text.slice(i, j + 1);
+      i = j + 1;
+      continue;
+    }
+    if (c === "{" || c === "[") {
+      let k = i + 1;
+      while (k < n && /\s/.test(text[k])) k++;
+      const close = c === "{" ? "}" : "]";
+      if (text[k] === close) {
+        out += c + close;
+        i = k + 1;
+        continue;
+      }
+      level++;
+      out += c + nl();
+      i++;
+      continue;
+    }
+    if (c === "}" || c === "]") {
+      level--;
+      out += nl() + c;
+      i++;
+      continue;
+    }
+    if (c === ",") {
+      out += "," + nl();
+      i++;
+      continue;
+    }
+    if (c === ":") {
+      out += ": ";
+      i++;
+      continue;
+    }
+    let j = i;
+    while (j < n && !/[\s,\]\}:]/.test(text[j])) j++;
+    out += text.slice(i, j);
+    i = j;
+  }
+  return out;
+}
+
+function ensureLayout(objectsText) {
+  if (objectsText.includes("\n")) return objectsText;
+  try {
+    const pretty = prettyPrintJsonText(objectsText);
+    if (sameJson(pretty, JSON.parse(objectsText))) return pretty;
+  } catch (e) {}
+  return objectsText;
+}
+
 function objectsTextKeepingLayout(text, objects) {
   const raw = extractObjectsArrayText(text);
-  if (raw && raw.includes("\n") && sameJson(raw, objects)) return raw;
-  return JSON.stringify(objects, null, 2);
+  if (raw) {
+    if (raw.includes("\n") && sameJson(raw, objects)) return raw;
+    const pretty = prettyPrintJsonText(raw);
+    if (sameJson(pretty, objects)) return pretty;
+  }
+  return JSON.stringify(objects, null, 4);
 }
 
 // Whatever gets submitted - a real .nmsship zip, a plain .json, or a .txt paste of the
@@ -299,7 +373,7 @@ async function normalizeShipBytes(bytes) {
     } catch (e) {
       return { ok: false, error: "objects.json inside the zip is not valid JSON" };
     }
-    return { ok: true, objectsText };
+    return { ok: true, objectsText: ensureLayout(objectsText) };
   }
 
   const text = new TextDecoder().decode(bytes);
@@ -307,7 +381,7 @@ async function normalizeShipBytes(bytes) {
   try {
     const parsed = JSON.parse(text);
     if (Array.isArray(parsed)) {
-      objectsText = text;
+      objectsText = ensureLayout(text);
     } else if (parsed && typeof parsed === "object" && Array.isArray(parsed.Objects)) {
       objectsText = objectsTextKeepingLayout(text, parsed.Objects);
     } else {
