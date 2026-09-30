@@ -1,0 +1,85 @@
+{
+  "name": "test",
+  "id": "test-vk6id",
+  "submitter": "website",
+  "objectCount": 556,
+  "score": 7.1,
+  "utilities": [
+    {
+      "label": "Teleporter",
+      "value": 1
+    },
+    {
+      "label": "Room Scanner",
+      "value": 1
+    },
+    {
+      "label": "Build Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Tech Wall",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Kitchen",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Staff Set",
+      "value": 1
+    },
+    {
+      "label": "Shield Station",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Expedition Upgrade Tree",
+      "value": 1
+    },
+    {
+      "label": "Extraction Room",
+      "value": 1
+    },
+    {
+      "label": "Harvester",
+      "value": 1
+    },
+    {
+      "label": "Gas Harvester",
+      "value": 1
+    },
+    {
+      "label": "Oxygen Harvester",
+      "value": 1
+    },
+    {
+      "label": "Antimatter Harvester",
+      "value": 1
+    }
+  ],
+  "stagedAt": "2026-09-30T08:02:16.772Z"
+}
