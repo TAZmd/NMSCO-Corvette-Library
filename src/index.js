@@ -211,13 +211,20 @@ async function normalizeShipBytes(bytes) {
   }
 
   const text = new TextDecoder().decode(bytes);
+  let objectsText = text;
   try {
     const parsed = JSON.parse(text);
-    if (!Array.isArray(parsed)) return { ok: false, error: "file is not a list of objects" };
+    if (Array.isArray(parsed)) {
+      objectsText = text;
+    } else if (parsed && typeof parsed === "object" && Array.isArray(parsed.Objects)) {
+      objectsText = JSON.stringify(parsed.Objects);
+    } else {
+      return { ok: false, error: "file is not a list of objects" };
+    }
   } catch (e) {
     return { ok: false, error: "file is not valid JSON" };
   }
-  return { ok: true, objectsText: text };
+  return { ok: true, objectsText };
 }
 
 function utf8ToBase64(str) {
