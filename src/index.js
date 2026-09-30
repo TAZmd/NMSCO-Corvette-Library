@@ -973,7 +973,45 @@ async function handleAutocomplete(interaction, env) {
   }
 }
 
-async function handleDeleteCommand(interaction, env) {
+async function runDelete(query, code, force, env) {
+  const list = await readIndexList(env);
+
+  let target = list.find((e) => e.id === query);
+  if (!target) {
+    const matches = list.filter((e) => (e.name || "").toLowerCase().includes(query.toLowerCase()));
+    if (matches.length === 0) return `No ship matches "${query}".`;
+    if (matches.length > 1) {
+      const list_text = matches.slice(0, 15).map((m) => `${shipLabel(m)} - \`${m.id}\``).join("\n");
+      return `Multiple matches. Run /delete again and pick one from the list:\n${list_text}`;
+    }
+    target = matches[0];
+  }
+
+  const stored = await getStoredDeleteCode(target.id, env);
+  let note = "";
+
+  if (stored) {
+    if (force) {
+      note = " (code check skipped)";
+    } else if (!code) {
+      return `"${shipLabel(target)}" has a delete code. Run /delete again and fill in the code the builder gave you. Nothing was deleted.`;
+    } else if (!deleteCodesReady(env) || !(await verifyDeleteCode(target.id, code, env))) {
+      return `Wrong delete code for "${shipLabel(target)}". Nothing was deleted.`;
+    } else {
+      note = " (code matched)";
+    }
+  } else {
+    if (code && !force) {
+      return `"${shipLabel(target)}" has no delete code on file, so a code cannot be checked. Run /delete again without a code to delete it anyway. Nothing was deleted.`;
+    }
+    note = " (no delete code was set)";
+  }
+
+  const deletedName = await deleteShip(target.id, env);
+  return `Deleted "${deletedName}" by ${target.submitter || "unknown"} (${target.id})${note}.`;
+}
+
+async function handleDeleteCommand(interaction, env, ctx) {
   const clicker = interaction.member?.user || interaction.user;
   if (!clicker || clicker.id !== env.APPROVER_USER_ID) {
     return ephemeral("Only the library admin can use this command.");
@@ -987,51 +1025,31 @@ async function handleDeleteCommand(interaction, env) {
   if (!query) return ephemeral("Pick a ship first.");
   if (code && !DELETE_CODE_RE.test(code)) return ephemeral("The delete code must be exactly 6 digits. Nothing was deleted.");
 
-  try {
-    const list = await readIndexList(env);
-
-    let target = list.find((e) => e.id === query);
-    if (!target) {
-      const matches = list.filter((e) => (e.name || "").toLowerCase().includes(query.toLowerCase()));
-      if (matches.length === 0) return ephemeral(`No ship matches "${query}".`);
-      if (matches.length > 1) {
-        const list_text = matches.slice(0, 15).map((m) => `${shipLabel(m)} - \`${m.id}\``).join("\n");
-        return ephemeral(`Multiple matches. Run /delete again and pick one from the list:\n${list_text}`);
+  ctx.waitUntil(
+    (async () => {
+      let content;
+      try {
+        content = await runDelete(query, code, force, env);
+      } catch (err) {
+        console.error("handleDeleteCommand failed: " + (err && err.message ? err.message : String(err)));
+        content = "Could not delete that ship - check logs.";
       }
-      target = matches[0];
-    }
-
-    const stored = await getStoredDeleteCode(target.id, env);
-    let note = "";
-
-    if (stored) {
-      if (force) {
-        note = " (code check skipped)";
-      } else if (!code) {
-        return ephemeral(`"${shipLabel(target)}" has a delete code. Run /delete again and fill in the code the builder gave you. Nothing was deleted.`);
-      } else if (!deleteCodesReady(env) || !(await verifyDeleteCode(target.id, code, env))) {
-        return ephemeral(`Wrong delete code for "${shipLabel(target)}". Nothing was deleted.`);
-      } else {
-        note = " (code matched)";
+      const resp = await discordApi(`/webhooks/${env.DISCORD_APPLICATION_ID}/${interaction.token}/messages/@original`, env, {
+        method: "PATCH",
+        body: JSON.stringify({ content })
+      });
+      if (!resp.ok) {
+        console.error("delete reply failed: " + resp.status + " " + (await resp.text()));
       }
-    } else {
-      if (code && !force) {
-        return ephemeral(`"${shipLabel(target)}" has no delete code on file, so a code cannot be checked. Run /delete again without a code to delete it anyway. Nothing was deleted.`);
-      }
-      note = " (no delete code was set)";
-    }
+    })()
+  );
 
-    const deletedName = await deleteShip(target.id, env);
-    return ephemeral(`Deleted "${deletedName}" by ${target.submitter || "unknown"} (${target.id})${note}.`);
-  } catch (err) {
-    console.error("handleDeleteCommand failed: " + (err && err.message ? err.message : String(err)));
-    return ephemeral("Could not delete that ship - check logs.");
-  }
+  return json({ type: 5, data: { flags: 64 } });
 }
 
 async function handleCommand(interaction, env, ctx) {
   if (interaction.data.name === "delete") {
-    return handleDeleteCommand(interaction, env);
+    return handleDeleteCommand(interaction, env, ctx);
   }
   if (interaction.data.name !== "submit") {
     return json({ type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, data: { content: "Unknown command.", flags: 64 } });
