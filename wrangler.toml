@@ -10,6 +10,6 @@ GITHUB_OWNER = "TAZmd"
 GITHUB_REPO = "nmsco-corvette-library"
 APPROVAL_CHANNEL_ID = "1554536984255401994"
 
-[[kv_namespaces]]
+[kv_namespaces]
 binding = "DELETE_CODES"
 id = "981225a2c74c468597591ddcc9fa0411"
