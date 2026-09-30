@@ -1,0 +1,86 @@
+{
+  "name": "Federal Corvette v3",
+  "id": "federal-corvette-v3-usbc3",
+  "submitter": "TAZmd",
+  "patreonUrl": "",
+  "objectCount": 695,
+  "score": 8.6,
+  "utilities": [
+    {
+      "label": "Teleporter",
+      "value": 1
+    },
+    {
+      "label": "Room Scanner",
+      "value": 1
+    },
+    {
+      "label": "Build Terminal",
+      "value": 1
+    },
+    {
+      "label": "1x1 Magnet Base",
+      "value": 1
+    },
+    {
+      "label": "20 Storage containers"
+    },
+    {
+      "label": "Tech Wall",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Kitchen",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Staff Set",
+      "value": 1
+    },
+    {
+      "label": "Game Table",
+      "value": 1
+    },
+    {
+      "label": "Exocraft Upgrade Tree",
+      "value": 1
+    },
+    {
+      "label": "Ship Upgrade Tree",
+      "value": 1
+    },
+    {
+      "label": "Suit Upgrade Tree",
+      "value": 1
+    },
+    {
+      "label": "Weapon Upgrade Tree",
+      "value": 1
+    },
+    {
+      "label": "Expedition Upgrade Tree",
+      "value": 1
+    },
+    {
+      "label": "Extraction Room",
+      "value": 1
+    },
+    {
+      "label": "Dressing Table",
+      "value": 1
+    }
+  ],
+  "stagedAt": "2026-09-30T10:41:53.660Z"
+}
