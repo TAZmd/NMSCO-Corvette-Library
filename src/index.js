@@ -394,7 +394,69 @@ async function putFile(path, contentB64, message, env) {
   }
 }
 
-async function stageSubmission({ name, submitter, patreonUrl, shipBytes, imageBufs }, env) {
+const DELETE_CODE_RE = /^[0-9]{6}$/;
+
+function normalizeDeleteCode(raw) {
+  return (raw || "").toString().trim();
+}
+
+function deleteCodesReady(env) {
+  return !!(env.DELETE_CODES && env.DELETE_PEPPER);
+}
+
+async function hashDeleteCode(slug, code, env) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(env.DELETE_PEPPER),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(`${slug}:${code}`));
+  return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function safeEqualHex(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+async function storeDeleteCode(slug, code, env) {
+  const h = await hashDeleteCode(slug, code, env);
+  await env.DELETE_CODES.put(`code:${slug}`, JSON.stringify({ h, at: new Date().toISOString() }));
+}
+
+async function getStoredDeleteCode(slug, env) {
+  if (!env.DELETE_CODES) return null;
+  const raw = await env.DELETE_CODES.get(`code:${slug}`);
+  if (!raw) return null;
+  try {
+    const rec = JSON.parse(raw);
+    return rec && rec.h ? rec : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function verifyDeleteCode(slug, code, env) {
+  const rec = await getStoredDeleteCode(slug, env);
+  if (!rec) return false;
+  const h = await hashDeleteCode(slug, code, env);
+  return safeEqualHex(h, rec.h);
+}
+
+async function removeDeleteCode(slug, env) {
+  try {
+    if (env.DELETE_CODES) await env.DELETE_CODES.delete(`code:${slug}`);
+  } catch (err) {
+    console.error("removeDeleteCode failed: " + (err && err.message ? err.message : String(err)));
+  }
+}
+
+async function stageSubmission({ name, submitter, patreonUrl, shipBytes, imageBufs, deleteCode }, env) {
   const norm = await normalizeShipBytes(shipBytes);
   if (!norm.ok) return { ok: false, error: norm.error };
 
@@ -416,7 +478,9 @@ async function stageSubmission({ name, submitter, patreonUrl, shipBytes, imageBu
   }
   await putFile(`pending/${slug}/info.json`, utf8ToBase64(JSON.stringify(info, null, 2)), `Pending info: ${name}`, env);
 
-  return { ok: true, slug, meta };
+  if (deleteCode) await storeDeleteCode(slug, deleteCode, env);
+
+  return { ok: true, slug, meta, hasDeleteCode: !!deleteCode };
 }
 
 async function deleteFile(path, message, env) {
@@ -507,6 +571,7 @@ async function rejectPending(slug, env) {
     await deleteFile(`pending/${slug}/ship.json`, "Reject submission", env);
     await deleteFile(`pending/${slug}/preview.png`, "Reject submission", env);
     await deleteFile(`pending/${slug}/info.json`, "Reject submission", env);
+    await removeDeleteCode(slug, env);
   } catch (err) {
     console.error("rejectPending failed: " + (err && err.message ? err.message : String(err)));
   }
@@ -527,6 +592,7 @@ input[type=text],input[type=file]{width:100%;padding:8px;margin-top:4px;backgrou
 button{margin-top:20px;padding:10px 18px;background:#3a6ea5;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:15px}
 button:disabled{opacity:.5}
 #status{margin-top:16px;font-size:14px}
+.hint{font-size:12px;color:#9da5b4;margin-top:6px;line-height:1.45}
 </style>
 </head>
 <body>
@@ -535,6 +601,8 @@ button:disabled{opacity:.5}
 <label>Your name (builder)<input type="text" name="builder" required maxlength="80"></label>
 <label>Ship name<input type="text" name="name" required maxlength="80"></label>
 <label>Patreon link (optional)<input type="text" name="patreon" placeholder="https://www.patreon.com/yourname" maxlength="200"></label>
+<label>Fill in your delete code (optional)<input type="text" name="deletecode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="off" placeholder="6 digits, for example 482915"></label>
+<div class="hint">A delete code is what you supply to me when you want your ship to be removed from the Corvette library. Use a random 6-digit code made only for this. Do NOT use a code you use anywhere else (bank card, phone, door, accounts). I cannot see or recover it, so write it down. Without it I cannot check that a ship is yours.</div>
 <label>Ship file (.nmsship, .json or .txt)<input type="file" name="ship" accept=".nmsship,.json,.txt" required></label>
 <label>Preview image<input type="file" name="image1" accept="image/*" required></label>
 <label>Extra image 2 (optional)<input type="file" name="image2" accept="image/*"></label>
@@ -655,12 +723,20 @@ async function handleUploadSubmit(request, env, ctx) {
     return new Response(`Could not accept this submission: ${patreonCheck.error}.`, { status: 400 });
   }
 
+  const deleteCode = normalizeDeleteCode(form.get("deletecode"));
+  if (deleteCode && !DELETE_CODE_RE.test(deleteCode)) {
+    return new Response("Could not accept this submission: the delete code must be exactly 6 digits.", { status: 400 });
+  }
+  if (deleteCode && !deleteCodesReady(env)) {
+    return new Response("Delete codes are not available right now. Leave the delete code empty or try again later.", { status: 503 });
+  }
+
   const shipBytes = new Uint8Array(await shipFile.arrayBuffer());
   const imageBufs = [];
   for (const f of imageFiles) imageBufs.push(await f.arrayBuffer());
 
   const staged = await stageSubmission(
-    { name, submitter: builder, patreonUrl: patreonCheck.url, shipBytes, imageBufs },
+    { name, submitter: builder, patreonUrl: patreonCheck.url, shipBytes, imageBufs, deleteCode },
     env
   );
   if (!staged.ok) {
@@ -679,7 +755,8 @@ async function handleUploadSubmit(request, env, ctx) {
         image: { url: imageRawUrl },
         fields: [
           { name: "Submitted by", value: `${builder} (via website)`, inline: true },
-          { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true }
+          { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true },
+          { name: "Delete code", value: staged.hasDeleteCode ? "set" : "not set", inline: true }
         ]
       };
       const components = [
@@ -776,6 +853,7 @@ async function deleteShip(id, env) {
     await deleteFile(`ships/${id}/${fname}`, `Delete ${id}`, env);
   }
   await deleteFile(`ships/${id}/info.json`, `Delete ${id}`, env);
+  await removeDeleteCode(id, env);
 
   return entry ? entry.name : id;
 }
@@ -794,14 +872,21 @@ async function handleRegister(url, env) {
       { name: "image1", description: "A preview screenshot", type: 11, required: true },
       { name: "image2", description: "Extra screenshot (optional)", type: 11, required: false },
       { name: "image3", description: "Extra screenshot (optional)", type: 11, required: false },
-      { name: "patreon", description: "Your Patreon link (optional)", type: 3, required: false }
+      { name: "patreon", description: "Your Patreon link (optional)", type: 3, required: false },
+      {
+        name: "delete_code",
+        description: "Optional 6-digit code to remove your ship later. Random, made only for this. Never reuse a real code.",
+        type: 3, required: false, min_length: 6, max_length: 6
+      }
     ]
   };
   const deleteCommand = {
     name: "delete",
     description: "Admin only: remove a Corvette from the library",
     options: [
-      { name: "query", description: "Ship name or id to remove", type: 3, required: true }
+      { name: "ship", description: "Start typing a ship name or builder and pick the ship", type: 3, required: true, autocomplete: true },
+      { name: "code", description: "The 6-digit delete code the builder gave you", type: 3, required: false, min_length: 6, max_length: 6 },
+      { name: "force", description: "Skip the code check (only if the code is lost or the builder cannot give it)", type: 5, required: false }
     ]
   };
   const resp = await discordApi(
@@ -816,58 +901,109 @@ async function handleRegister(url, env) {
   });
 }
 
+function ephemeral(content) {
+  return json({
+    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+    data: { content, flags: 64 }
+  });
+}
+
+async function readIndexList(env) {
+  const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
+  if (!idxResp.ok) throw new Error("Could not read index.json");
+  const idxData = await idxResp.json();
+  let list = JSON.parse(decodeBase64Utf8(idxData.content));
+  if (!Array.isArray(list)) list = [];
+  return list;
+}
+
+function shipLabel(e) {
+  const by = e.submitter ? ` - by ${e.submitter}` : "";
+  return `${e.name || e.id}${by}`;
+}
+
+async function handleAutocomplete(interaction, env) {
+  const empty = json({ type: 8, data: { choices: [] } });
+  const clicker = interaction.member?.user || interaction.user;
+  if (!clicker || clicker.id !== env.APPROVER_USER_ID) return empty;
+  if (interaction.data.name !== "delete") return empty;
+
+  const focused = (interaction.data.options || []).find((o) => o.focused);
+  if (!focused || focused.name !== "ship") return empty;
+  const q = (focused.value || "").toString().trim().toLowerCase();
+
+  try {
+    const list = await readIndexList(env);
+    const matches = list
+      .filter((e) => {
+        if (!q) return true;
+        return (e.name || "").toLowerCase().includes(q) ||
+          (e.submitter || "").toLowerCase().includes(q) ||
+          (e.id || "").toLowerCase().includes(q);
+      })
+      .sort((a, b) => (b.approvedAt || "").localeCompare(a.approvedAt || ""))
+      .slice(0, 25)
+      .map((e) => ({ name: shipLabel(e).slice(0, 100), value: e.id }));
+    return json({ type: 8, data: { choices: matches } });
+  } catch (err) {
+    console.error("handleAutocomplete failed: " + (err && err.message ? err.message : String(err)));
+    return empty;
+  }
+}
+
 async function handleDeleteCommand(interaction, env) {
   const clicker = interaction.member?.user || interaction.user;
   if (!clicker || clicker.id !== env.APPROVER_USER_ID) {
-    return json({
-      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: { content: "Only the library admin can use this command.", flags: 64 }
-    });
+    return ephemeral("Only the library admin can use this command.");
   }
 
   const opts = {};
   for (const o of interaction.data.options || []) opts[o.name] = o.value;
-  const query = (opts.query || "").toString().trim();
-  if (!query) {
-    return json({ type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, data: { content: "Give a ship name or id.", flags: 64 } });
-  }
+  const query = (opts.ship || "").toString().trim();
+  const code = normalizeDeleteCode(opts.code);
+  const force = opts.force === true;
+  if (!query) return ephemeral("Pick a ship first.");
+  if (code && !DELETE_CODE_RE.test(code)) return ephemeral("The delete code must be exactly 6 digits. Nothing was deleted.");
 
   try {
-    const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
-    if (!idxResp.ok) throw new Error("Could not read index.json");
-    const idxData = await idxResp.json();
-    let list = JSON.parse(decodeBase64Utf8(idxData.content));
-    if (!Array.isArray(list)) list = [];
+    const list = await readIndexList(env);
 
-    const byId = list.find((e) => e.id === query);
-    if (byId) {
-      const deletedName = await deleteShip(byId.id, env);
-      return json({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: { content: `Deleted "${deletedName}" (${byId.id}).`, flags: 64 }
-      });
+    let target = list.find((e) => e.id === query);
+    if (!target) {
+      const matches = list.filter((e) => (e.name || "").toLowerCase().includes(query.toLowerCase()));
+      if (matches.length === 0) return ephemeral(`No ship matches "${query}".`);
+      if (matches.length > 1) {
+        const list_text = matches.slice(0, 15).map((m) => `${shipLabel(m)} - \`${m.id}\``).join("\n");
+        return ephemeral(`Multiple matches. Run /delete again and pick one from the list:\n${list_text}`);
+      }
+      target = matches[0];
     }
 
-    const matches = list.filter((e) => (e.name || "").toLowerCase().includes(query.toLowerCase()));
-    if (matches.length === 0) {
-      return json({ type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, data: { content: `No ship matches "${query}".`, flags: 64 } });
-    }
-    if (matches.length > 1) {
-      const list_text = matches.slice(0, 15).map((m) => `${m.name} - \`${m.id}\``).join("\n");
-      return json({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: { content: `Multiple matches, run /delete again with the exact id:\n${list_text}`, flags: 64 }
-      });
+    const stored = await getStoredDeleteCode(target.id, env);
+    let note = "";
+
+    if (stored) {
+      if (force) {
+        note = " (code check skipped)";
+      } else if (!code) {
+        return ephemeral(`"${shipLabel(target)}" has a delete code. Run /delete again and fill in the code the builder gave you. Nothing was deleted.`);
+      } else if (!deleteCodesReady(env) || !(await verifyDeleteCode(target.id, code, env))) {
+        return ephemeral(`Wrong delete code for "${shipLabel(target)}". Nothing was deleted.`);
+      } else {
+        note = " (code matched)";
+      }
+    } else {
+      if (code && !force) {
+        return ephemeral(`"${shipLabel(target)}" has no delete code on file, so a code cannot be checked. Run /delete again without a code to delete it anyway. Nothing was deleted.`);
+      }
+      note = " (no delete code was set)";
     }
 
-    const deletedName = await deleteShip(matches[0].id, env);
-    return json({
-      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-      data: { content: `Deleted "${deletedName}" (${matches[0].id}).`, flags: 64 }
-    });
+    const deletedName = await deleteShip(target.id, env);
+    return ephemeral(`Deleted "${deletedName}" by ${target.submitter || "unknown"} (${target.id})${note}.`);
   } catch (err) {
     console.error("handleDeleteCommand failed: " + (err && err.message ? err.message : String(err)));
-    return json({ type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, data: { content: "Could not delete that ship - check logs.", flags: 64 } });
+    return ephemeral("Could not delete that ship - check logs.");
   }
 }
 
@@ -911,6 +1047,14 @@ async function handleCommand(interaction, env, ctx) {
     });
   }
 
+  const deleteCode = normalizeDeleteCode(opts.delete_code);
+  if (deleteCode && !DELETE_CODE_RE.test(deleteCode)) {
+    return ephemeral("Could not accept this submission: the delete code must be exactly 6 digits.");
+  }
+  if (deleteCode && !deleteCodesReady(env)) {
+    return ephemeral("Delete codes are not available right now. Submit again without a delete code or try later.");
+  }
+
   ctx.waitUntil(
     (async () => {
       const submitter = interaction.member?.user || interaction.user;
@@ -926,7 +1070,7 @@ async function handleCommand(interaction, env, ctx) {
       }
 
       const staged = await stageSubmission(
-        { name, submitter: submitter.username || "", patreonUrl: patreonCheck.url, shipBytes, imageBufs },
+        { name, submitter: submitter.username || "", patreonUrl: patreonCheck.url, shipBytes, imageBufs, deleteCode },
         env
       );
 
@@ -947,7 +1091,8 @@ async function handleCommand(interaction, env, ctx) {
         image: { url: imageRawUrl },
         fields: [
           { name: "Submitted by", value: `<@${submitter.id}> (${submitter.username})`, inline: true },
-          { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true }
+          { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true },
+          { name: "Delete code", value: staged.hasDeleteCode ? "set" : "not set", inline: true }
         ]
       };
       const components = [
@@ -1059,6 +1204,9 @@ export default {
       }
       if (interaction.type === InteractionType.APPLICATION_COMMAND) {
         return handleCommand(interaction, env, ctx);
+      }
+      if (interaction.type === 4) {
+        return handleAutocomplete(interaction, env);
       }
       if (interaction.type === InteractionType.MESSAGE_COMPONENT) {
         return handleComponent(interaction, env, ctx);
