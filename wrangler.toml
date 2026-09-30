@@ -10,3 +10,7 @@ APPROVER_USER_ID = "80942727767785472"
 GITHUB_OWNER = "TAZmd"
 GITHUB_REPO = "nmsco-corvette-library"
 TURNSTILE_SITE_KEY = "0x4AAAAAAFJ2-ulEDxzRxFIL"
+
+[observability.logs]
+enabled = true
+invocation_logs = true
