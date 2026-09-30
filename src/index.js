@@ -16,6 +16,22 @@ function slugify(s) {
   );
 }
 
+function validatePatreonUrl(raw) {
+  const url = (raw || "").toString().trim();
+  if (!url) return { ok: true, url: "" };
+  let parsed;
+  try {
+    parsed = new URL(url);
+  } catch (e) {
+    return { ok: false, error: "Patreon link is not a valid URL" };
+  }
+  const host = parsed.hostname.toLowerCase();
+  if (parsed.protocol !== "https:" || (host !== "patreon.com" && host !== "www.patreon.com")) {
+    return { ok: false, error: "the link must be a patreon.com link" };
+  }
+  return { ok: true, url: parsed.toString() };
+}
+
 const TIER_RED = new Set([
   "BUILD_REFINER1", "BUILD_REFINER2", "BUILD_REFINER3", "FRE_ROOM_REFINE",
   "BASE_FLAG", "SET_B_MONU", "SET_MONUMENT", "SET_T_MONU", "SET_F_MONU",
@@ -367,7 +383,7 @@ async function putFile(path, contentB64, message, env) {
   }
 }
 
-async function stageSubmission({ name, submitter, shipBytes, imageBuf }, env) {
+async function stageSubmission({ name, submitter, patreonUrl, shipBytes, imageBuf }, env) {
   const norm = await normalizeShipBytes(shipBytes);
   if (!norm.ok) return { ok: false, error: norm.error };
 
@@ -375,7 +391,7 @@ async function stageSubmission({ name, submitter, shipBytes, imageBuf }, env) {
   const slug = `${slugify(name)}-${Math.random().toString(36).slice(2, 7)}`;
 
   const info = {
-    name, id: slug, submitter: submitter || "",
+    name, id: slug, submitter: submitter || "", patreonUrl: patreonUrl || "",
     objectCount: meta.objectCount, score: meta.score, utilities: meta.utilities,
     stagedAt: new Date().toISOString()
   };
@@ -432,6 +448,7 @@ async function promotePendingToLibrary(slug, env) {
   }
   list.push({
     id: slug, name: stagedInfo.name, sha256: shipHash, submitter: stagedInfo.submitter || "",
+    patreonUrl: stagedInfo.patreonUrl || "",
     objectCount: stagedInfo.objectCount, score: stagedInfo.score, utilities: stagedInfo.utilities,
     downloads: 0, approvedAt: info.approvedAt
   });
@@ -494,6 +511,7 @@ button:disabled{opacity:.5}
 <form id="f">
 <label>Your name (builder)<input type="text" name="builder" required maxlength="80"></label>
 <label>Ship name<input type="text" name="name" required maxlength="80"></label>
+<label>Patreon link (optional)<input type="text" name="patreon" placeholder="https://www.patreon.com/yourname" maxlength="200"></label>
 <label>Ship file (.nmsship, .json or .txt)<input type="file" name="ship" accept=".nmsship,.json,.txt" required></label>
 <label>Preview image<input type="file" name="image" accept="image/*" required></label>
 <div class="cf-turnstile" data-sitekey="${siteKey}" style="margin-top:16px"></div>
@@ -599,10 +617,18 @@ async function handleUploadSubmit(request, env, ctx) {
     return new Response(`Could not accept this submission: ${problems.join(", ")}.`, { status: 400 });
   }
 
+  const patreonCheck = validatePatreonUrl(form.get("patreon"));
+  if (!patreonCheck.ok) {
+    return new Response(`Could not accept this submission: ${patreonCheck.error}.`, { status: 400 });
+  }
+
   const shipBytes = new Uint8Array(await shipFile.arrayBuffer());
   const imageBuf = await imageFile.arrayBuffer();
 
-  const staged = await stageSubmission({ name, submitter: builder, shipBytes, imageBuf }, env);
+  const staged = await stageSubmission(
+    { name, submitter: builder, patreonUrl: patreonCheck.url, shipBytes, imageBuf },
+    env
+  );
   if (!staged.ok) {
     return new Response(`Could not accept this ship file: ${staged.error}.`, { status: 400 });
   }
@@ -710,50 +736,6 @@ async function deleteShip(id, env) {
   return entry ? entry.name : id;
 }
 
-async function handleReport(request, env) {
-  let body;
-  try {
-    body = await request.json();
-  } catch (e) {
-    return new Response("Invalid request.", { status: 400 });
-  }
-  const id = (body.id || "unknown").toString().slice(0, 100);
-  const name = (body.name || "").toString().slice(0, 100);
-  const reason = (body.reason || "No reason given").toString().slice(0, 500);
-  const reporter = (body.reporter || "").toString().trim().slice(0, 100);
-  if (!reporter) {
-    return new Response("Your name is required.", { status: 400 });
-  }
-
-  const channel = env.REPORTS_CHANNEL_ID || env.APPROVAL_CHANNEL_ID;
-  const fields = [
-    { name: "Ship id", value: id, inline: true },
-    { name: "Reason", value: reason, inline: false }
-  ];
-  if (reporter) fields.push({ name: "Reported by", value: reporter, inline: true });
-
-  const embed = {
-    title: `Report: ${name || id}`,
-    color: 0xe05555,
-    fields
-  };
-  const components = [
-    {
-      type: 1,
-      components: [{ type: 2, style: 4, label: "Delete Ship", custom_id: `deleteship:${id}` }]
-    }
-  ];
-  const resp = await discordApi(`/channels/${channel}/messages`, env, {
-    method: "POST",
-    body: JSON.stringify({ embeds: [embed], components })
-  });
-  if (!resp.ok) {
-    console.error("handleReport post failed: " + resp.status + " " + (await resp.text()));
-    return new Response("Could not submit report.", { status: 500 });
-  }
-  return new Response("Report submitted. Thank you.", { status: 200 });
-}
-
 async function handleRegister(url, env) {
   const key = url.searchParams.get("key");
   if (!env.SETUP_KEY || key !== env.SETUP_KEY) {
@@ -765,7 +747,8 @@ async function handleRegister(url, env) {
     options: [
       { name: "name", description: "Name for this Corvette", type: 3, required: true },
       { name: "ship", description: "The .nmsship or .json ship file", type: 11, required: true },
-      { name: "image", description: "A preview screenshot", type: 11, required: true }
+      { name: "image", description: "A preview screenshot", type: 11, required: true },
+      { name: "patreon", description: "Your Patreon link (optional)", type: 3, required: false }
     ]
   };
   const deleteCommand = {
@@ -872,6 +855,14 @@ async function handleCommand(interaction, env, ctx) {
     });
   }
 
+  const patreonCheck = validatePatreonUrl(opts.patreon);
+  if (!patreonCheck.ok) {
+    return json({
+      type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+      data: { content: `Could not accept this submission: ${patreonCheck.error}.`, flags: 64 }
+    });
+  }
+
   ctx.waitUntil(
     (async () => {
       const submitter = interaction.member?.user || interaction.user;
@@ -886,7 +877,7 @@ async function handleCommand(interaction, env, ctx) {
       }
 
       const staged = await stageSubmission(
-        { name, submitter: submitter.username || "", shipBytes, imageBuf },
+        { name, submitter: submitter.username || "", patreonUrl: patreonCheck.url, shipBytes, imageBuf },
         env
       );
 
@@ -957,22 +948,6 @@ async function handleComponent(interaction, env, ctx) {
     return json({ type: InteractionResponseType.UPDATE_MESSAGE, data: {} });
   }
 
-  if (action === "deleteship") {
-    ctx.waitUntil(
-      deleteShip(slug, env)
-        .then((deletedName) => {
-          console.log(`Deleted ${deletedName} (${slug})`);
-        })
-        .catch((err) => {
-          console.error("deleteShip failed: " + (err && err.message ? err.message : String(err)));
-        })
-    );
-    return json({
-      type: InteractionResponseType.UPDATE_MESSAGE,
-      data: { embeds: [{ ...embed, color: 0x8b2020, title: `Deleted - ${embed.title}` }], components: [] }
-    });
-  }
-
   if (action === "reject") {
     ctx.waitUntil(rejectPending(slug, env));
     return json({
@@ -1017,7 +992,6 @@ export default {
     if (request.method === "POST") {
       if (url.pathname === "/upload") return handleUploadSubmit(request, env, ctx);
       if (url.pathname === "/track-download") return handleTrackDownload(request, env);
-      if (url.pathname === "/report") return handleReport(request, env);
 
       const signature = request.headers.get("x-signature-ed25519");
       const timestamp = request.headers.get("x-signature-timestamp");
