@@ -62,7 +62,7 @@ const UTILITY_CATALOG = {
       { label: "Base Teleport Module", chain: [["TELEPORTER"]] },
       { label: "Scanner Room", chain: [["FRE_ROOM_SCAN"]] },
       { label: "Galactic Trade Terminal", chain: [["BUILDTERMINAL"]] },
-      { label: "Corvette Utility Module", chain: [["B_MAG_1X1"]] }
+      { label: "Tractor Beam", chain: [["B_MAG_1X1"]] }
     ]
   },
   goodToHave: {
@@ -74,7 +74,7 @@ const UTILITY_CATALOG = {
       { label: "Weapon Case", chain: [["SET_WEAPONBOX"]] },
       { label: "Nutrition Unit", chain: [["B_WALL_KITC0"], ["COOKER"]] },
       { label: "Weapon Rack", chain: [["WEAPONRACK"]] },
-      { label: "Staff Set", chain: [["SET_STAFFBUILD"]] },
+      { label: "Staff Builder", chain: [["SET_STAFFBUILD"]] },
       { label: "Hazard Protection Unit", chain: [["SHIELDSTATION"]] },
       { label: "Health Station", chain: [["HEALTHSTATION"]] },
       { label: "Signal Booster", chain: [["BUILDSIGNAL"]] },
@@ -98,7 +98,7 @@ const UTILITY_CATALOG = {
       { label: "Livestock Unit", chain: [["CREATURE_FARM"]] },
       { label: "Automated Feeder", chain: [["CREATURE_FEED"]] },
       { label: "Nip Plant", chain: [["NIPPLANT"]] },
-      { label: "Fish Pond", chain: [["SET_FISHPOND"]] }
+      { label: "Fishpond", chain: [["SET_FISHPOND"]] }
     ]
   }
 };
