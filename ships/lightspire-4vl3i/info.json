@@ -1,0 +1,41 @@
+{
+  "name": "LightSpire",
+  "id": "lightspire-4vl3i",
+  "submitter": "TAZmd",
+  "patreonUrl": "",
+  "objectCount": 927,
+  "score": 5.3,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    }
+  ],
+  "imageCount": 2,
+  "sha256": "464f9ac64dfcdd1e1998982cc4c829d9faa29316a31489ef233fbc5f49292fde",
+  "downloads": 0,
+  "approvedAt": "2026-09-30T19:23:43.430Z"
+}
