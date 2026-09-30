@@ -608,6 +608,7 @@ button:disabled{opacity:.5}
 <label>Extra image 2 (optional)<input type="file" name="image2" accept="image/*"></label>
 <label>Extra image 3 (optional)<input type="file" name="image3" accept="image/*"></label>
 <div class="cf-turnstile" data-sitekey="${siteKey}" style="margin-top:16px"></div>
+${siteKey ? '' : '<div class="hint">Verification is not set up on the server (TURNSTILE_SITE_KEY is missing). Uploads will fail until the admin fixes this.</div>'}
 <button type="submit">Submit for approval</button>
 </form>
 <div id="status"></div>
@@ -637,14 +638,20 @@ document.getElementById('f').addEventListener('submit', async (e) => {
     const text = await resp.text();
     status.textContent = text;
     if (resp.ok) e.target.reset();
-    if (typeof turnstile !== 'undefined') turnstile.reset();
+    resetTurnstile();
   } catch (err) {
     const why = err && err.message ? err.message : 'unknown error';
     status.textContent = 'Something went wrong while ' + stage + ' (' + why + '). Try a smaller JPG image, or tell the admin this message.';
-    if (typeof turnstile !== 'undefined') turnstile.reset();
+    resetTurnstile();
   }
   btn.disabled = false;
 });
+
+function resetTurnstile() {
+  try {
+    if (typeof turnstile !== 'undefined') turnstile.reset();
+  } catch (e) {}
+}
 
 function compressImage(file) {
   return new Promise((resolve, reject) => {

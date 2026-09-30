@@ -1,6 +1,7 @@
 name = "nmsco-corvette-library"
 main = "src/index.js"
 compatibility_date = "2026-09-01"
+keep_vars = true
 
 [vars]
 DISCORD_APPLICATION_ID = "1554537284173439106"
