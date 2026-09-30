@@ -645,7 +645,7 @@ async function handleUploadSubmit(request, env, ctx) {
         image: { url: imageRawUrl },
         fields: [
           { name: "Submitted by", value: `${builder} (via website)`, inline: true },
-          { name: "Objects", value: `${staged.meta.objectCount} \u00b7 score ${staged.meta.score}/10`, inline: true }
+          { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true }
         ]
       };
       const components = [
@@ -898,7 +898,7 @@ async function handleCommand(interaction, env, ctx) {
         image: { url: imageRawUrl },
         fields: [
           { name: "Submitted by", value: `<@${submitter.id}> (${submitter.username})`, inline: true },
-          { name: "Objects", value: `${staged.meta.objectCount} \u00b7 score ${staged.meta.score}/10`, inline: true }
+          { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true }
         ]
       };
       const components = [
