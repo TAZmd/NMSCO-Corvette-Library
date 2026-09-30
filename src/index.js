@@ -59,44 +59,44 @@ const UTILITY_CATALOG = {
   mostRequired: {
     weight: 6.0,
     items: [
-      { label: "Teleporter", chain: [["TELEPORTER"]] },
-      { label: "Room Scanner", chain: [["FRE_ROOM_SCAN"]] },
-      { label: "Build Terminal", chain: [["BUILDTERMINAL"]] },
-      { label: "1x1 Magnet Base", chain: [["B_MAG_1X1"]] }
+      { label: "Base Teleport Module", chain: [["TELEPORTER"]] },
+      { label: "Scanner Room", chain: [["FRE_ROOM_SCAN"]] },
+      { label: "Galactic Trade Terminal", chain: [["BUILDTERMINAL"]] },
+      { label: "Corvette Utility Module", chain: [["B_MAG_1X1"]] }
     ]
   },
   goodToHave: {
     weight: 3.0,
     items: [
       { label: "Storage containers", countPrefixes: ["B_WALL_CARG", "CONTAINER"] },
-      { label: "Tech Wall", chain: [["B_WALL_TECH1"]] },
+      { label: "Mission Radar", chain: [["B_WALL_TECH1"]] },
       { label: "Refiner", chain: [["FRE_ROOM_REFINE", "BUILD_REFINER3", "B_WALL_TECH0"], ["BUILD_REFINER2"], ["BUILD_REFINER1"]] },
       { label: "Weapon Case", chain: [["SET_WEAPONBOX"]] },
-      { label: "Kitchen", chain: [["B_WALL_KITC0"], ["COOKER"]] },
+      { label: "Nutrition Unit", chain: [["B_WALL_KITC0"], ["COOKER"]] },
       { label: "Weapon Rack", chain: [["WEAPONRACK"]] },
       { label: "Staff Set", chain: [["SET_STAFFBUILD"]] },
-      { label: "Shield Station", chain: [["SHIELDSTATION"]] },
+      { label: "Hazard Protection Unit", chain: [["SHIELDSTATION"]] },
       { label: "Health Station", chain: [["HEALTHSTATION"]] },
       { label: "Signal Booster", chain: [["BUILDSIGNAL"]] },
-      { label: "Game Table", chain: [["GAMETABLE"]] },
-      { label: "Exocraft Upgrade Tree", chain: [["AM_EXOCRAFTTREE"]] },
-      { label: "Ship Upgrade Tree", chain: [["AM_SHIPTREE"]] },
-      { label: "Suit Upgrade Tree", chain: [["AM_SUITTREE"]] },
-      { label: "Weapon Upgrade Tree", chain: [["AM_WEAPONTREE"]] },
-      { label: "Expedition Upgrade Tree", chain: [["S9_BUILDERTREE"]] }
+      { label: "Holo-Arena Game Table", chain: [["GAMETABLE"]] },
+      { label: "Exocraft Research Station", chain: [["AM_EXOCRAFTTREE"]] },
+      { label: "Ship Research Station", chain: [["AM_SHIPTREE"]] },
+      { label: "Exosuit Research Station", chain: [["AM_SUITTREE"]] },
+      { label: "Multi-Tool Research Station", chain: [["AM_WEAPONTREE"]] },
+      { label: "Utopia Build Station", chain: [["S9_BUILDERTREE"]] }
     ]
   },
   overboard: {
     weight: 1.0,
     items: [
-      { label: "Extraction Room", chain: [["FRE_ROOM_EXTR"]] },
-      { label: "Harvester", chain: [["BUILDHARVESTER"]] },
+      { label: "Stellar Extractor Room", chain: [["FRE_ROOM_EXTR"]] },
+      { label: "Autonomous Mining Unit", chain: [["BUILDHARVESTER"]] },
       { label: "Gas Harvester", chain: [["BUILDGASHARVEST"]] },
       { label: "Oxygen Harvester", chain: [["O2_HARVESTER"]] },
-      { label: "Antimatter Harvester", chain: [["BUILDANTIMATTER"]] },
-      { label: "Dressing Table", chain: [["DRESSING_TABLE"]] },
-      { label: "Creature Farm", chain: [["CREATURE_FARM"]] },
-      { label: "Creature Feeder", chain: [["CREATURE_FEED"]] },
+      { label: "Antimatter Reactor", chain: [["BUILDANTIMATTER"]] },
+      { label: "Appearance Modifier", chain: [["DRESSING_TABLE"]] },
+      { label: "Livestock Unit", chain: [["CREATURE_FARM"]] },
+      { label: "Automated Feeder", chain: [["CREATURE_FEED"]] },
       { label: "Nip Plant", chain: [["NIPPLANT"]] },
       { label: "Fish Pond", chain: [["SET_FISHPOND"]] }
     ]
