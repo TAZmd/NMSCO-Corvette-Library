@@ -1,0 +1,26 @@
+{
+  "name": "Aquara",
+  "id": "aquara-rsrvt",
+  "submitter": "TAZmd",
+  "patreonUrl": "",
+  "objectCount": 73,
+  "score": 4.5,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    }
+  ],
+  "imageCount": 2,
+  "sha256": "44265343fb6ba3f12f55afd52b356a58c0412f62762faef4200ebc2c937fef4e",
+  "downloads": 0,
+  "approvedAt": "2026-09-30T19:22:59.469Z"
+}
