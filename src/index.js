@@ -492,7 +492,8 @@ button:disabled{opacity:.5}
 <body>
 <h2>Submit a Corvette</h2>
 <form id="f">
-<label>Name<input type="text" name="name" required maxlength="80"></label>
+<label>Your name (builder)<input type="text" name="builder" required maxlength="80"></label>
+<label>Ship name<input type="text" name="name" required maxlength="80"></label>
 <label>Ship file (.nmsship, .json or .txt)<input type="file" name="ship" accept=".nmsship,.json,.txt" required></label>
 <label>Preview image<input type="file" name="image" accept="image/*" required></label>
 <div class="cf-turnstile" data-sitekey="${siteKey}" style="margin-top:16px"></div>
@@ -576,8 +577,13 @@ async function handleUploadSubmit(request, env, ctx) {
   }
 
   const name = (form.get("name") || "Unnamed Corvette").toString().slice(0, 80);
+  const builder = (form.get("builder") || "").toString().trim().slice(0, 80);
   const shipFile = form.get("ship");
   const imageFile = form.get("image");
+
+  if (!builder) {
+    return new Response("Could not accept this submission: your name is required.", { status: 400 });
+  }
 
   const problems = [];
   if (!(shipFile instanceof File)) problems.push("no ship file attached");
@@ -596,7 +602,7 @@ async function handleUploadSubmit(request, env, ctx) {
   const shipBytes = new Uint8Array(await shipFile.arrayBuffer());
   const imageBuf = await imageFile.arrayBuffer();
 
-  const staged = await stageSubmission({ name, submitter: "website", shipBytes, imageBuf }, env);
+  const staged = await stageSubmission({ name, submitter: builder, shipBytes, imageBuf }, env);
   if (!staged.ok) {
     return new Response(`Could not accept this ship file: ${staged.error}.`, { status: 400 });
   }
@@ -612,7 +618,7 @@ async function handleUploadSubmit(request, env, ctx) {
         color: 0x5b9bd5,
         image: { url: imageRawUrl },
         fields: [
-          { name: "Submitted by", value: "via website", inline: true },
+          { name: "Submitted by", value: `${builder} (via website)`, inline: true },
           { name: "Objects", value: `${staged.meta.objectCount} \u00b7 score ${staged.meta.score}/10`, inline: true }
         ]
       };
@@ -714,7 +720,10 @@ async function handleReport(request, env) {
   const id = (body.id || "unknown").toString().slice(0, 100);
   const name = (body.name || "").toString().slice(0, 100);
   const reason = (body.reason || "No reason given").toString().slice(0, 500);
-  const reporter = (body.reporter || "").toString().slice(0, 100);
+  const reporter = (body.reporter || "").toString().trim().slice(0, 100);
+  if (!reporter) {
+    return new Response("Your name is required.", { status: 400 });
+  }
 
   const channel = env.REPORTS_CHANNEL_ID || env.APPROVAL_CHANNEL_ID;
   const fields = [
