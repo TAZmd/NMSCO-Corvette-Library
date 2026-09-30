@@ -16,6 +16,210 @@ function slugify(s) {
   );
 }
 
+const TIER_RED = new Set([
+  "BUILD_REFINER1", "BUILD_REFINER2", "BUILD_REFINER3", "FRE_ROOM_REFINE",
+  "BASE_FLAG", "SET_B_MONU", "SET_MONUMENT", "SET_T_MONU", "SET_F_MONU",
+  "SET_INT_SHIPSAL", "SET_CONSTRUCT", "SET_INT_SUMMARY", "SET_MAYORTERM"
+]);
+const TIER_ORANGE = new Set([
+  "BUILDBEACON", "MESSAGEMODULE", "NPCBUILDERTERM", "NPCFARMTERM", "NPCSCIENCETERM",
+  "NPCVEHICLETERM", "NPCWEAPONTERM", "SUMMON_GARAGE", "GARAGE_B", "GARAGE_FLOAT",
+  "GARAGE_FREIGHT", "GARAGE_L", "GARAGE_M", "GARAGE_MECH", "GARAGE_S", "GARAGE_SUB"
+]);
+
+function normalizeId(id) {
+  return (id || "").toString().replace(/^\^/, "").toUpperCase();
+}
+
+function tierPenalty(id) {
+  const n = normalizeId(id);
+  if (TIER_RED.has(n)) return 0.5;
+  if (TIER_ORANGE.has(n)) return 0.75;
+  return 1.0;
+}
+
+// Weight per category sums to 10 - a ship with every utility present scores exactly 10.
+const UTILITY_CATALOG = {
+  mostRequired: {
+    weight: 6.0,
+    items: [
+      { label: "Teleporter", chain: [["TELEPORTER"]] },
+      { label: "Room Scanner", chain: [["FRE_ROOM_SCAN"]] },
+      { label: "Build Terminal", chain: [["BUILDTERMINAL"]] },
+      { label: "1x1 Magnet Base", chain: [["B_MAG_1X1"]] }
+    ]
+  },
+  goodToHave: {
+    weight: 3.0,
+    items: [
+      { label: "Storage containers", countPrefixes: ["B_WALL_CARG", "CONTAINER"] },
+      { label: "Tech Wall", chain: [["B_WALL_TECH1"]] },
+      { label: "Refiner", chain: [["FRE_ROOM_REFINE", "BUILD_REFINER3", "B_WALL_TECH0"], ["BUILD_REFINER2"], ["BUILD_REFINER1"]] },
+      { label: "Weapon Case", chain: [["SET_WEAPONBOX"]] },
+      { label: "Kitchen", chain: [["B_WALL_KITC0"], ["COOKER"]] },
+      { label: "Weapon Rack", chain: [["WEAPONRACK"]] },
+      { label: "Staff Set", chain: [["SET_STAFFBUILD"]] },
+      { label: "Shield Station", chain: [["SHIELDSTATION"]] },
+      { label: "Health Station", chain: [["HEALTHSTATION"]] },
+      { label: "Signal Booster", chain: [["BUILDSIGNAL"]] },
+      { label: "Game Table", chain: [["GAMETABLE"]] },
+      { label: "Exocraft Upgrade Tree", chain: [["AM_EXOCRAFTTREE"]] },
+      { label: "Ship Upgrade Tree", chain: [["AM_SHIPTREE"]] },
+      { label: "Suit Upgrade Tree", chain: [["AM_SUITTREE"]] },
+      { label: "Weapon Upgrade Tree", chain: [["AM_WEAPONTREE"]] },
+      { label: "Expedition Upgrade Tree", chain: [["S9_BUILDERTREE"]] }
+    ]
+  },
+  overboard: {
+    weight: 1.0,
+    items: [
+      { label: "Extraction Room", chain: [["FRE_ROOM_EXTR"]] },
+      { label: "Harvester", chain: [["BUILDHARVESTER"]] },
+      { label: "Gas Harvester", chain: [["BUILDGASHARVEST"]] },
+      { label: "Oxygen Harvester", chain: [["O2_HARVESTER"]] },
+      { label: "Antimatter Harvester", chain: [["BUILDANTIMATTER"]] },
+      { label: "Dressing Table", chain: [["DRESSING_TABLE"]] },
+      { label: "Creature Farm", chain: [["CREATURE_FARM"]] },
+      { label: "Creature Feeder", chain: [["CREATURE_FEED"]] },
+      { label: "Nip Plant", chain: [["NIPPLANT"]] },
+      { label: "Fish Pond", chain: [["SET_FISHPOND"]] }
+    ]
+  }
+};
+
+function scoreShip(objectIds) {
+  const normIds = objectIds.map(normalizeId);
+  const present = new Set(normIds);
+  let score = 0;
+  const utilities = [];
+
+  function scanItem(item) {
+    if (item.countPrefixes) {
+      let count = 0;
+      for (const id of normIds) {
+        if (item.countPrefixes.some((p) => id.startsWith(p))) count++;
+      }
+      if (count > 0) {
+        utilities.push({ label: `${count} ${item.label}` });
+        return 1;
+      }
+      return 0;
+    }
+    for (let lvl = 0; lvl < item.chain.length; lvl++) {
+      for (const candidate of item.chain[lvl]) {
+        const cnorm = normalizeId(candidate);
+        if (present.has(cnorm)) {
+          const levelValue = 1 - lvl / item.chain.length;
+          const value = levelValue * tierPenalty(cnorm);
+          utilities.push({ label: item.label, value: Math.round(value * 100) / 100 });
+          return value;
+        }
+      }
+    }
+    return 0;
+  }
+
+  for (const catKey of ["mostRequired", "goodToHave", "overboard"]) {
+    const cat = UTILITY_CATALOG[catKey];
+    const perItem = cat.weight / cat.items.length;
+    for (const item of cat.items) score += scanItem(item) * perItem;
+  }
+
+  return { score: Math.round(score * 10) / 10, utilities };
+}
+
+function readUint16LE(view, off) {
+  return view.getUint16(off, true);
+}
+function readUint32LE(view, off) {
+  return view.getUint32(off, true);
+}
+
+async function extractZipEntry(bytes, entryName) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const maxBack = Math.min(bytes.length, 66000);
+  let eocdOffset = -1;
+  for (let i = bytes.length - 22; i >= bytes.length - maxBack && i >= 0; i--) {
+    if (readUint32LE(view, i) === 0x06054b50) {
+      eocdOffset = i;
+      break;
+    }
+  }
+  if (eocdOffset < 0) return null;
+
+  const totalEntries = readUint16LE(view, eocdOffset + 10);
+  const cdOffset = readUint32LE(view, eocdOffset + 16);
+  let offset = cdOffset;
+
+  for (let i = 0; i < totalEntries; i++) {
+    if (readUint32LE(view, offset) !== 0x02014b50) return null;
+    const method = readUint16LE(view, offset + 10);
+    const compSize = readUint32LE(view, offset + 20);
+    const nameLen = readUint16LE(view, offset + 28);
+    const extraLen = readUint16LE(view, offset + 30);
+    const commentLen = readUint16LE(view, offset + 32);
+    const localOffset = readUint32LE(view, offset + 42);
+    const name = new TextDecoder().decode(bytes.slice(offset + 46, offset + 46 + nameLen));
+
+    if (name.toLowerCase() === entryName.toLowerCase()) {
+      if (readUint32LE(view, localOffset) !== 0x04034b50) return null;
+      const lNameLen = readUint16LE(view, localOffset + 26);
+      const lExtraLen = readUint16LE(view, localOffset + 28);
+      const dataStart = localOffset + 30 + lNameLen + lExtraLen;
+      const compData = bytes.slice(dataStart, dataStart + compSize);
+
+      if (method === 0) return new TextDecoder().decode(compData);
+      if (method === 8) {
+        const stream = new Blob([compData]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+        const buf = await new Response(stream).arrayBuffer();
+        return new TextDecoder().decode(buf);
+      }
+      return null;
+    }
+    offset += 46 + nameLen + extraLen + commentLen;
+  }
+  return null;
+}
+
+function computeShipMeta(objectsText) {
+  try {
+    const arr = JSON.parse(objectsText);
+    if (!Array.isArray(arr)) return { objectCount: 0, score: 0, utilities: [] };
+    const ids = arr.map((o) => o && o.ObjectID).filter(Boolean);
+    const { score, utilities } = scoreShip(ids);
+    return { objectCount: arr.length, score, utilities };
+  } catch (err) {
+    return { objectCount: 0, score: 0, utilities: [] };
+  }
+}
+
+// Whatever gets submitted - a real .nmsship zip, a plain .json, or a .txt paste of the
+// objects array - is reduced to just that plain objects.json text right away. Nothing
+// beyond that array is ever stored, and no zip container is ever written to the repo.
+async function normalizeShipBytes(bytes) {
+  if (bytes.length > 2 && bytes[0] === 0x50 && bytes[1] === 0x4b) {
+    const zipCheck = validateZipEntries(bytes);
+    if (!zipCheck.ok) return { ok: false, error: zipCheck.error };
+    const objectsText = await extractZipEntry(bytes, "objects.json");
+    if (!objectsText) return { ok: false, error: "could not read objects.json from the zip" };
+    try {
+      JSON.parse(objectsText);
+    } catch (e) {
+      return { ok: false, error: "objects.json inside the zip is not valid JSON" };
+    }
+    return { ok: true, objectsText };
+  }
+
+  const text = new TextDecoder().decode(bytes);
+  try {
+    const parsed = JSON.parse(text);
+    if (!Array.isArray(parsed)) return { ok: false, error: "file is not a list of objects" };
+  } catch (e) {
+    return { ok: false, error: "file is not valid JSON" };
+  }
+  return { ok: true, objectsText: text };
+}
+
 function utf8ToBase64(str) {
   const bytes = new TextEncoder().encode(str);
   let binary = "";
@@ -163,48 +367,24 @@ async function putFile(path, contentB64, message, env) {
   }
 }
 
-async function publishToGitHub({ shipUrl, imageUrl, name, submitter }, env) {
-  try {
-    const slug = `${slugify(name)}-${Math.random().toString(36).slice(2, 7)}`;
+async function stageSubmission({ name, submitter, shipBytes, imageBuf }, env) {
+  const norm = await normalizeShipBytes(shipBytes);
+  if (!norm.ok) return { ok: false, error: norm.error };
 
-    const shipText = await (await fetch(shipUrl)).text();
-    const imageBuf = await (await fetch(imageUrl)).arrayBuffer();
-    const shipHash = await sha256Hex(shipText);
+  const meta = computeShipMeta(norm.objectsText);
+  const slug = `${slugify(name)}-${Math.random().toString(36).slice(2, 7)}`;
 
-    await putFile(`ships/${slug}/ship.nmsship`, utf8ToBase64(shipText), `Add ${name}`, env);
-    await putFile(`ships/${slug}/preview.png`, arrayBufferToBase64(imageBuf), `Add preview for ${name}`, env);
+  const info = {
+    name, id: slug, submitter: submitter || "",
+    objectCount: meta.objectCount, score: meta.score, utilities: meta.utilities,
+    stagedAt: new Date().toISOString()
+  };
 
-    const info = { name, id: slug, sha256: shipHash, submitter: submitter || "", approvedAt: new Date().toISOString() };
-    await putFile(`ships/${slug}/info.json`, utf8ToBase64(JSON.stringify(info, null, 2)), `Add info for ${name}`, env);
+  await putFile(`pending/${slug}/ship.json`, utf8ToBase64(norm.objectsText), `Pending: ${name}`, env);
+  await putFile(`pending/${slug}/preview.png`, arrayBufferToBase64(imageBuf), `Pending preview: ${name}`, env);
+  await putFile(`pending/${slug}/info.json`, utf8ToBase64(JSON.stringify(info, null, 2)), `Pending info: ${name}`, env);
 
-    const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
-    if (!idxResp.ok) throw new Error("Could not read index.json");
-    const idxData = await idxResp.json();
-
-    let list = [];
-    try {
-      list = JSON.parse(decodeBase64Utf8(idxData.content));
-      if (!Array.isArray(list)) list = [];
-    } catch (e) {
-      list = [];
-    }
-    list.push({ id: slug, name, sha256: shipHash, submitter: submitter || "" });
-
-    const updResp = await ghRequest(`/contents/index.json`, env, {
-      method: "PUT",
-      body: JSON.stringify({
-        message: `Add ${name} to index`,
-        content: utf8ToBase64(JSON.stringify(list, null, 2)),
-        sha: idxData.sha
-      })
-    });
-    if (!updResp.ok) throw new Error(`index.json update failed: ${updResp.status} ${await updResp.text()}`);
-
-    return true;
-  } catch (err) {
-    console.error("publishToGitHub failed: " + (err && err.message ? err.message : String(err)));
-    return false;
-  }
+  return { ok: true, slug, meta };
 }
 
 async function deleteFile(path, message, env) {
@@ -217,23 +397,28 @@ async function deleteFile(path, message, env) {
   });
 }
 
-async function promotePendingToLibrary(slug, name, env) {
-  const shipResp = await ghRequest(`/contents/pending/${slug}/ship.nmsship`, env, { method: "GET" });
+async function promotePendingToLibrary(slug, env) {
+  const shipResp = await ghRequest(`/contents/pending/${slug}/ship.json`, env, { method: "GET" });
   const imgResp = await ghRequest(`/contents/pending/${slug}/preview.png`, env, { method: "GET" });
-  if (!shipResp.ok || !imgResp.ok) throw new Error("pending files not found");
+  const infoResp = await ghRequest(`/contents/pending/${slug}/info.json`, env, { method: "GET" });
+  if (!shipResp.ok || !imgResp.ok || !infoResp.ok) throw new Error("pending files not found");
+
   const shipData = await shipResp.json();
   const imgData = await imgResp.json();
+  const infoData = await infoResp.json();
 
   const shipContentB64 = shipData.content.replace(/\n/g, "");
   const imgContentB64 = imgData.content.replace(/\n/g, "");
+  const stagedInfo = JSON.parse(decodeBase64Utf8(infoData.content));
   const shipBytes = Uint8Array.from(atob(shipContentB64), (c) => c.charCodeAt(0));
   const shipHash = await sha256HexBytes(shipBytes);
 
-  await putFile(`ships/${slug}/ship.nmsship`, shipContentB64, `Add ${name}`, env);
-  await putFile(`ships/${slug}/preview.png`, imgContentB64, `Add preview for ${name}`, env);
+  await putFile(`ships/${slug}/ship.json`, shipContentB64, `Add ${stagedInfo.name}`, env);
+  await putFile(`ships/${slug}/preview.png`, imgContentB64, `Add preview for ${stagedInfo.name}`, env);
 
-  const info = { name, id: slug, sha256: shipHash, submitter: "website", approvedAt: new Date().toISOString() };
-  await putFile(`ships/${slug}/info.json`, utf8ToBase64(JSON.stringify(info, null, 2)), `Add info for ${name}`, env);
+  const info = { ...stagedInfo, sha256: shipHash, downloads: 0, approvedAt: new Date().toISOString() };
+  delete info.stagedAt;
+  await putFile(`ships/${slug}/info.json`, utf8ToBase64(JSON.stringify(info, null, 2)), `Add info for ${stagedInfo.name}`, env);
 
   const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
   if (!idxResp.ok) throw new Error("Could not read index.json");
@@ -245,35 +430,41 @@ async function promotePendingToLibrary(slug, name, env) {
   } catch (e) {
     list = [];
   }
-  list.push({ id: slug, name, sha256: shipHash, submitter: "website" });
+  list.push({
+    id: slug, name: stagedInfo.name, sha256: shipHash, submitter: stagedInfo.submitter || "",
+    objectCount: stagedInfo.objectCount, score: stagedInfo.score, utilities: stagedInfo.utilities,
+    downloads: 0, approvedAt: info.approvedAt
+  });
   const updResp = await ghRequest(`/contents/index.json`, env, {
     method: "PUT",
     body: JSON.stringify({
-      message: `Add ${name} to index`,
+      message: `Add ${stagedInfo.name} to index`,
       content: utf8ToBase64(JSON.stringify(list, null, 2)),
       sha: idxData.sha
     })
   });
   if (!updResp.ok) throw new Error(`index.json update failed: ${updResp.status} ${await updResp.text()}`);
 
-  await deleteFile(`pending/${slug}/ship.nmsship`, `Clean up pending ${name}`, env);
-  await deleteFile(`pending/${slug}/preview.png`, `Clean up pending ${name}`, env);
-  await deleteFile(`pending/${slug}/info.json`, `Clean up pending ${name}`, env);
+  await deleteFile(`pending/${slug}/ship.json`, `Clean up pending ${stagedInfo.name}`, env);
+  await deleteFile(`pending/${slug}/preview.png`, `Clean up pending ${stagedInfo.name}`, env);
+  await deleteFile(`pending/${slug}/info.json`, `Clean up pending ${stagedInfo.name}`, env);
+
+  return stagedInfo.name;
 }
 
-async function promotePendingToLibraryTry(slug, name, env) {
+async function promotePendingToLibraryTry(slug, env) {
   try {
-    await promotePendingToLibrary(slug, name, env);
-    return true;
+    const name = await promotePendingToLibrary(slug, env);
+    return { ok: true, name };
   } catch (err) {
     console.error("promotePendingToLibrary failed: " + (err && err.message ? err.message : String(err)));
-    return false;
+    return { ok: false, name: null };
   }
 }
 
 async function rejectPending(slug, env) {
   try {
-    await deleteFile(`pending/${slug}/ship.nmsship`, "Reject submission", env);
+    await deleteFile(`pending/${slug}/ship.json`, "Reject submission", env);
     await deleteFile(`pending/${slug}/preview.png`, "Reject submission", env);
     await deleteFile(`pending/${slug}/info.json`, "Reject submission", env);
   } catch (err) {
@@ -405,35 +596,11 @@ async function handleUploadSubmit(request, env, ctx) {
   const shipBytes = new Uint8Array(await shipFile.arrayBuffer());
   const imageBuf = await imageFile.arrayBuffer();
 
-  let jsonOk = true;
-  if (shipBytes.length > 2 && shipBytes[0] === 0x50 && shipBytes[1] === 0x4b) {
-    const zipCheck = validateZipEntries(shipBytes);
-    if (!zipCheck.ok) {
-      return new Response(`Could not accept this ship file: ${zipCheck.error}.`, { status: 400 });
-    }
-  } else {
-    try {
-      JSON.parse(new TextDecoder().decode(shipBytes));
-    } catch (e) {
-      jsonOk = false;
-    }
+  const staged = await stageSubmission({ name, submitter: "website", shipBytes, imageBuf }, env);
+  if (!staged.ok) {
+    return new Response(`Could not accept this ship file: ${staged.error}.`, { status: 400 });
   }
-
-  const slug = `${slugify(name)}-${Math.random().toString(36).slice(2, 7)}`;
-
-  try {
-    await putFile(`pending/${slug}/ship.nmsship`, arrayBufferToBase64(shipBytes.buffer), `Pending: ${name}`, env);
-    await putFile(`pending/${slug}/preview.png`, arrayBufferToBase64(imageBuf), `Pending preview: ${name}`, env);
-    await putFile(
-      `pending/${slug}/info.json`,
-      utf8ToBase64(JSON.stringify({ name, submitter: "website", jsonOk }, null, 2)),
-      `Pending info: ${name}`,
-      env
-    );
-  } catch (err) {
-    console.error("pending upload failed: " + (err && err.message ? err.message : String(err)));
-    return new Response("Something went wrong while staging this submission. Please try again later.", { status: 500 });
-  }
+  const slug = staged.slug;
 
   const branch = env.GITHUB_BRANCH || "main";
   const imageRawUrl = `https://raw.githubusercontent.com/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/${branch}/pending/${slug}/preview.png`;
@@ -442,20 +609,19 @@ async function handleUploadSubmit(request, env, ctx) {
     (async () => {
       const embed = {
         title: name,
-        description: jsonOk ? "" : "Could not parse this file as JSON - check before approving.",
-        color: jsonOk ? 0x5b9bd5 : 0xe05555,
+        color: 0x5b9bd5,
         image: { url: imageRawUrl },
         fields: [
           { name: "Submitted by", value: "via website", inline: true },
-          { name: "Source", value: "web upload", inline: true }
+          { name: "Objects", value: `${staged.meta.objectCount} \u00b7 score ${staged.meta.score}/10`, inline: true }
         ]
       };
       const components = [
         {
           type: 1,
           components: [
-            { type: 2, style: 3, label: "Approve", custom_id: `webapprove:${slug}` },
-            { type: 2, style: 4, label: "Reject", custom_id: `webreject:${slug}` }
+            { type: 2, style: 3, label: "Approve", custom_id: `approve:${slug}` },
+            { type: 2, style: 4, label: "Reject", custom_id: `reject:${slug}` }
           ]
         }
       ];
@@ -470,6 +636,75 @@ async function handleUploadSubmit(request, env, ctx) {
   );
 
   return new Response("Thanks! Your Corvette was submitted for approval.", { status: 200 });
+}
+
+async function handleTrackDownload(request, env) {
+  let body;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return new Response("Invalid request.", { status: 400 });
+  }
+  const id = (body.id || "").toString();
+  if (!id) return new Response("Missing id.", { status: 400 });
+
+  try {
+    const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
+    if (!idxResp.ok) throw new Error("Could not read index.json");
+    const idxData = await idxResp.json();
+    let list = JSON.parse(decodeBase64Utf8(idxData.content));
+    if (!Array.isArray(list)) list = [];
+
+    const entry = list.find((e) => e.id === id);
+    if (!entry) return new Response("Unknown ship id.", { status: 404 });
+    entry.downloads = (entry.downloads || 0) + 1;
+
+    const updResp = await ghRequest(`/contents/index.json`, env, {
+      method: "PUT",
+      body: JSON.stringify({
+        message: `Track download: ${id}`,
+        content: utf8ToBase64(JSON.stringify(list, null, 2)),
+        sha: idxData.sha
+      })
+    });
+    if (!updResp.ok) throw new Error(`index.json update failed: ${updResp.status}`);
+
+    return json({ ok: true, downloads: entry.downloads });
+  } catch (err) {
+    console.error("handleTrackDownload failed: " + (err && err.message ? err.message : String(err)));
+    return new Response("Could not record download.", { status: 500 });
+  }
+}
+
+async function handleReport(request, env) {
+  let body;
+  try {
+    body = await request.json();
+  } catch (e) {
+    return new Response("Invalid request.", { status: 400 });
+  }
+  const id = (body.id || "unknown").toString().slice(0, 100);
+  const name = (body.name || "").toString().slice(0, 100);
+  const reason = (body.reason || "No reason given").toString().slice(0, 500);
+
+  const channel = env.REPORTS_CHANNEL_ID || env.APPROVAL_CHANNEL_ID;
+  const embed = {
+    title: `Report: ${name || id}`,
+    color: 0xe05555,
+    fields: [
+      { name: "Ship id", value: id, inline: true },
+      { name: "Reason", value: reason, inline: false }
+    ]
+  };
+  const resp = await discordApi(`/channels/${channel}/messages`, env, {
+    method: "POST",
+    body: JSON.stringify({ embeds: [embed] })
+  });
+  if (!resp.ok) {
+    console.error("handleReport post failed: " + resp.status + " " + (await resp.text()));
+    return new Response("Could not submit report.", { status: 500 });
+  }
+  return new Response("Report submitted. Thank you.", { status: 200 });
 }
 
 async function handleRegister(url, env) {
@@ -527,31 +762,48 @@ async function handleCommand(interaction, env, ctx) {
 
   ctx.waitUntil(
     (async () => {
-      let jsonOk = true;
+      const submitter = interaction.member?.user || interaction.user;
+
+      let shipBytes, imageBuf;
       try {
-        JSON.parse(await (await fetch(shipAtt.url)).text());
-      } catch (e) {
-        jsonOk = false;
+        shipBytes = new Uint8Array(await (await fetch(shipAtt.url)).arrayBuffer());
+        imageBuf = await (await fetch(imgAtt.url)).arrayBuffer();
+      } catch (err) {
+        console.error("could not fetch discord attachments: " + (err && err.message ? err.message : String(err)));
+        return;
       }
 
-      const submitter = interaction.member?.user || interaction.user;
+      const staged = await stageSubmission(
+        { name, submitter: submitter.username || "", shipBytes, imageBuf },
+        env
+      );
+
+      if (!staged.ok) {
+        await discordApi(`/webhooks/${env.DISCORD_APPLICATION_ID}/${interaction.token}`, env, {
+          method: "POST",
+          body: JSON.stringify({ content: `Could not accept this submission: ${staged.error}.`, flags: 64 })
+        });
+        return;
+      }
+
+      const branch = env.GITHUB_BRANCH || "main";
+      const imageRawUrl = `https://raw.githubusercontent.com/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/${branch}/pending/${staged.slug}/preview.png`;
+
       const embed = {
         title: name,
-        description: jsonOk ? "" : "Could not parse this file as JSON - check before approving.",
-        color: jsonOk ? 0x5b9bd5 : 0xe05555,
-        image: { url: imgAtt.url },
+        color: 0x5b9bd5,
+        image: { url: imageRawUrl },
         fields: [
           { name: "Submitted by", value: `<@${submitter.id}> (${submitter.username})`, inline: true },
-          { name: "Ship file", value: shipAtt.url, inline: false },
-          { name: "Image file", value: imgAtt.url, inline: false }
+          { name: "Objects", value: `${staged.meta.objectCount} \u00b7 score ${staged.meta.score}/10`, inline: true }
         ]
       };
       const components = [
         {
           type: 1,
           components: [
-            { type: 2, style: 3, label: "Approve", custom_id: "approve" },
-            { type: 2, style: 4, label: "Reject", custom_id: "reject" }
+            { type: 2, style: 3, label: "Approve", custom_id: `approve:${staged.slug}` },
+            { type: 2, style: 4, label: "Reject", custom_id: `reject:${staged.slug}` }
           ]
         }
       ];
@@ -588,58 +840,26 @@ async function handleComponent(interaction, env, ctx) {
     return json({ type: InteractionResponseType.UPDATE_MESSAGE, data: { embeds: [], components: [] } });
   }
 
-  if (customId.startsWith("webapprove:") || customId.startsWith("webreject:")) {
-    const slug = customId.split(":")[1];
-
-    if (customId.startsWith("webreject:")) {
-      ctx.waitUntil(rejectPending(slug, env));
-      return json({
-        type: InteractionResponseType.UPDATE_MESSAGE,
-        data: { embeds: [{ ...embed, color: 0x8b2020, title: `Rejected - ${embed.title}` }], components: [] }
-      });
-    }
-
-    ctx.waitUntil(
-      promotePendingToLibraryTry(slug, embed.title, env).then(async (ok) => {
-        const finalEmbed = {
-          ...embed,
-          color: ok ? 0x2d7a2d : 0xe05555,
-          title: `${ok ? "Approved" : "Approve failed - check logs"} - ${embed.title}`
-        };
-        await discordApi(`/channels/${env.APPROVAL_CHANNEL_ID}/messages/${message.id}`, env, {
-          method: "PATCH",
-          body: JSON.stringify({ embeds: [finalEmbed], components: [] })
-        });
-      })
-    );
-    return json({
-      type: InteractionResponseType.UPDATE_MESSAGE,
-      data: { embeds: [{ ...embed, title: `Publishing - ${embed.title}` }], components: [] }
-    });
+  const [action, slug] = customId.split(":");
+  if (!slug) {
+    return json({ type: InteractionResponseType.UPDATE_MESSAGE, data: {} });
   }
 
-  const fields = embed.fields || [];
-  const getField = (label) => fields.find((f) => f.name === label)?.value;
-  const shipUrl = getField("Ship file");
-  const imageUrl = getField("Image file");
-  const submittedByRaw = getField("Submitted by") || "";
-  const submitterMatch = submittedByRaw.match(/\(([^)]+)\)/);
-  const submitter = submitterMatch ? submitterMatch[1] : "";
-
-  if (customId === "reject") {
+  if (action === "reject") {
+    ctx.waitUntil(rejectPending(slug, env));
     return json({
       type: InteractionResponseType.UPDATE_MESSAGE,
       data: { embeds: [{ ...embed, color: 0x8b2020, title: `Rejected - ${embed.title}` }], components: [] }
     });
   }
 
-  if (customId === "approve") {
+  if (action === "approve") {
     ctx.waitUntil(
-      publishToGitHub({ shipUrl, imageUrl, name: embed.title, submitter }, env).then(async (ok) => {
+      promotePendingToLibraryTry(slug, env).then(async (result) => {
         const finalEmbed = {
           ...embed,
-          color: ok ? 0x2d7a2d : 0xe05555,
-          title: `${ok ? "Approved" : "Approve failed - check logs"} - ${embed.title}`
+          color: result.ok ? 0x2d7a2d : 0xe05555,
+          title: `${result.ok ? "Approved" : "Approve failed - check logs"} - ${embed.title}`
         };
         await discordApi(`/channels/${env.APPROVAL_CHANNEL_ID}/messages/${message.id}`, env, {
           method: "PATCH",
@@ -668,6 +888,8 @@ export default {
 
     if (request.method === "POST") {
       if (url.pathname === "/upload") return handleUploadSubmit(request, env, ctx);
+      if (url.pathname === "/track-download") return handleTrackDownload(request, env);
+      if (url.pathname === "/report") return handleReport(request, env);
 
       const signature = request.headers.get("x-signature-ed25519");
       const timestamp = request.headers.get("x-signature-timestamp");
