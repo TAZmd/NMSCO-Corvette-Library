@@ -394,21 +394,26 @@ async function putFile(path, contentB64, message, env) {
   }
 }
 
-async function stageSubmission({ name, submitter, patreonUrl, shipBytes, imageBuf }, env) {
+async function stageSubmission({ name, submitter, patreonUrl, shipBytes, imageBufs }, env) {
   const norm = await normalizeShipBytes(shipBytes);
   if (!norm.ok) return { ok: false, error: norm.error };
 
   const meta = computeShipMeta(norm.objectsText);
   const slug = `${slugify(name)}-${Math.random().toString(36).slice(2, 7)}`;
+  const images = (imageBufs || []).slice(0, 3);
 
   const info = {
     name, id: slug, submitter: submitter || "", patreonUrl: patreonUrl || "",
     objectCount: meta.objectCount, score: meta.score, utilities: meta.utilities,
+    imageCount: images.length,
     stagedAt: new Date().toISOString()
   };
 
   await putFile(`pending/${slug}/ship.json`, utf8ToBase64(norm.objectsText), `Pending: ${name}`, env);
-  await putFile(`pending/${slug}/preview.png`, arrayBufferToBase64(imageBuf), `Pending preview: ${name}`, env);
+  for (let i = 0; i < images.length; i++) {
+    const fname = i === 0 ? "preview.png" : `preview${i + 1}.png`;
+    await putFile(`pending/${slug}/${fname}`, arrayBufferToBase64(images[i]), `Pending preview ${i + 1}: ${name}`, env);
+  }
   await putFile(`pending/${slug}/info.json`, utf8ToBase64(JSON.stringify(info, null, 2)), `Pending info: ${name}`, env);
 
   return { ok: true, slug, meta };
@@ -426,24 +431,28 @@ async function deleteFile(path, message, env) {
 
 async function promotePendingToLibrary(slug, env) {
   const shipResp = await ghRequest(`/contents/pending/${slug}/ship.json`, env, { method: "GET" });
-  const imgResp = await ghRequest(`/contents/pending/${slug}/preview.png`, env, { method: "GET" });
   const infoResp = await ghRequest(`/contents/pending/${slug}/info.json`, env, { method: "GET" });
-  if (!shipResp.ok || !imgResp.ok || !infoResp.ok) throw new Error("pending files not found");
+  if (!shipResp.ok || !infoResp.ok) throw new Error("pending files not found");
 
   const shipData = await shipResp.json();
-  const imgData = await imgResp.json();
   const infoData = await infoResp.json();
 
   const shipContentB64 = shipData.content.replace(/\n/g, "");
-  const imgContentB64 = imgData.content.replace(/\n/g, "");
   const stagedInfo = JSON.parse(decodeBase64Utf8(infoData.content));
   const shipBytes = Uint8Array.from(atob(shipContentB64), (c) => c.charCodeAt(0));
   const shipHash = await sha256HexBytes(shipBytes);
+  const imageCount = Math.max(1, Math.min(3, stagedInfo.imageCount || 1));
 
   await putFile(`ships/${slug}/ship.json`, shipContentB64, `Add ${stagedInfo.name}`, env);
-  await putFile(`ships/${slug}/preview.png`, imgContentB64, `Add preview for ${stagedInfo.name}`, env);
+  for (let i = 0; i < imageCount; i++) {
+    const fname = i === 0 ? "preview.png" : `preview${i + 1}.png`;
+    const imgResp = await ghRequest(`/contents/pending/${slug}/${fname}`, env, { method: "GET" });
+    if (!imgResp.ok) continue;
+    const imgData = await imgResp.json();
+    await putFile(`ships/${slug}/${fname}`, imgData.content.replace(/\n/g, ""), `Add preview ${i + 1} for ${stagedInfo.name}`, env);
+  }
 
-  const info = { ...stagedInfo, sha256: shipHash, downloads: 0, approvedAt: new Date().toISOString() };
+  const info = { ...stagedInfo, imageCount, sha256: shipHash, downloads: 0, approvedAt: new Date().toISOString() };
   delete info.stagedAt;
   await putFile(`ships/${slug}/info.json`, utf8ToBase64(JSON.stringify(info, null, 2)), `Add info for ${stagedInfo.name}`, env);
 
@@ -459,7 +468,7 @@ async function promotePendingToLibrary(slug, env) {
   }
   list.push({
     id: slug, name: stagedInfo.name, sha256: shipHash, submitter: stagedInfo.submitter || "",
-    patreonUrl: stagedInfo.patreonUrl || "",
+    patreonUrl: stagedInfo.patreonUrl || "", imageCount,
     objectCount: stagedInfo.objectCount, score: stagedInfo.score, utilities: stagedInfo.utilities,
     downloads: 0, approvedAt: info.approvedAt
   });
@@ -474,7 +483,10 @@ async function promotePendingToLibrary(slug, env) {
   if (!updResp.ok) throw new Error(`index.json update failed: ${updResp.status} ${await updResp.text()}`);
 
   await deleteFile(`pending/${slug}/ship.json`, `Clean up pending ${stagedInfo.name}`, env);
-  await deleteFile(`pending/${slug}/preview.png`, `Clean up pending ${stagedInfo.name}`, env);
+  for (let i = 0; i < imageCount; i++) {
+    const fname = i === 0 ? "preview.png" : `preview${i + 1}.png`;
+    await deleteFile(`pending/${slug}/${fname}`, `Clean up pending ${stagedInfo.name}`, env);
+  }
   await deleteFile(`pending/${slug}/info.json`, `Clean up pending ${stagedInfo.name}`, env);
 
   return stagedInfo.name;
@@ -524,7 +536,9 @@ button:disabled{opacity:.5}
 <label>Ship name<input type="text" name="name" required maxlength="80"></label>
 <label>Patreon link (optional)<input type="text" name="patreon" placeholder="https://www.patreon.com/yourname" maxlength="200"></label>
 <label>Ship file (.nmsship, .json or .txt)<input type="file" name="ship" accept=".nmsship,.json,.txt" required></label>
-<label>Preview image<input type="file" name="image" accept="image/*" required></label>
+<label>Preview image<input type="file" name="image1" accept="image/*" required></label>
+<label>Extra image 2 (optional)<input type="file" name="image2" accept="image/*"></label>
+<label>Extra image 3 (optional)<input type="file" name="image3" accept="image/*"></label>
 <div class="cf-turnstile" data-sitekey="${siteKey}" style="margin-top:16px"></div>
 <button type="submit">Submit for approval</button>
 </form>
@@ -538,10 +552,14 @@ document.getElementById('f').addEventListener('submit', async (e) => {
   status.textContent = 'Uploading...';
   try {
     const form = new FormData(e.target);
-    const imageInput = e.target.querySelector('input[name="image"]');
-    if (imageInput.files && imageInput.files[0]) {
-      const compressed = await compressImage(imageInput.files[0]);
-      form.set('image', compressed, 'preview.jpg');
+    for (const name of ['image1', 'image2', 'image3']) {
+      const input = e.target.querySelector('input[name="' + name + '"]');
+      if (input.files && input.files[0]) {
+        const compressed = await compressImage(input.files[0]);
+        form.set(name, compressed, name + '.jpg');
+      } else {
+        form.delete(name);
+      }
     }
     const resp = await fetch('/upload', { method: 'POST', body: form });
     const text = await resp.text();
@@ -610,7 +628,7 @@ async function handleUploadSubmit(request, env, ctx) {
   const name = (form.get("name") || "Unnamed Corvette").toString().slice(0, 80);
   const builder = (form.get("builder") || "").toString().trim().slice(0, 80);
   const shipFile = form.get("ship");
-  const imageFile = form.get("image");
+  const imageFiles = [form.get("image1"), form.get("image2"), form.get("image3")].filter((f) => f instanceof File);
 
   if (!builder) {
     return new Response("Could not accept this submission: your name is required.", { status: 400 });
@@ -618,13 +636,15 @@ async function handleUploadSubmit(request, env, ctx) {
 
   const problems = [];
   if (!(shipFile instanceof File)) problems.push("no ship file attached");
-  if (!(imageFile instanceof File)) problems.push("no image attached");
+  if (imageFiles.length === 0) problems.push("no image attached");
   if (shipFile instanceof File && shipFile.size > 3 * 1024 * 1024) problems.push("ship file is larger than 3 MB");
   if (shipFile instanceof File && !/\.(nmsship|json|txt)$/i.test(shipFile.name)) {
     problems.push("ship file must be .nmsship, .json or .txt");
   }
-  if (imageFile instanceof File && imageFile.size > 10 * 1024 * 1024) problems.push("image is larger than 10 MB");
-  if (imageFile instanceof File && !/^image\//.test(imageFile.type || "")) problems.push("image attachment is not an image");
+  for (const f of imageFiles) {
+    if (f.size > 10 * 1024 * 1024) problems.push(`${f.name} is larger than 10 MB`);
+    if (!/^image\//.test(f.type || "")) problems.push(`${f.name} is not an image`);
+  }
 
   if (problems.length) {
     return new Response(`Could not accept this submission: ${problems.join(", ")}.`, { status: 400 });
@@ -636,10 +656,11 @@ async function handleUploadSubmit(request, env, ctx) {
   }
 
   const shipBytes = new Uint8Array(await shipFile.arrayBuffer());
-  const imageBuf = await imageFile.arrayBuffer();
+  const imageBufs = [];
+  for (const f of imageFiles) imageBufs.push(await f.arrayBuffer());
 
   const staged = await stageSubmission(
-    { name, submitter: builder, patreonUrl: patreonCheck.url, shipBytes, imageBuf },
+    { name, submitter: builder, patreonUrl: patreonCheck.url, shipBytes, imageBufs },
     env
   );
   if (!staged.ok) {
@@ -749,7 +770,11 @@ async function deleteShip(id, env) {
   if (!updResp.ok) throw new Error(`index.json update failed: ${updResp.status} ${await updResp.text()}`);
 
   await deleteFile(`ships/${id}/ship.json`, `Delete ${id}`, env);
-  await deleteFile(`ships/${id}/preview.png`, `Delete ${id}`, env);
+  const imageCount = Math.max(1, Math.min(3, (entry && entry.imageCount) || 1));
+  for (let i = 0; i < imageCount; i++) {
+    const fname = i === 0 ? "preview.png" : `preview${i + 1}.png`;
+    await deleteFile(`ships/${id}/${fname}`, `Delete ${id}`, env);
+  }
   await deleteFile(`ships/${id}/info.json`, `Delete ${id}`, env);
 
   return entry ? entry.name : id;
@@ -766,7 +791,9 @@ async function handleRegister(url, env) {
     options: [
       { name: "name", description: "Name for this Corvette", type: 3, required: true },
       { name: "ship", description: "The .nmsship or .json ship file", type: 11, required: true },
-      { name: "image", description: "A preview screenshot", type: 11, required: true },
+      { name: "image1", description: "A preview screenshot", type: 11, required: true },
+      { name: "image2", description: "Extra screenshot (optional)", type: 11, required: false },
+      { name: "image3", description: "Extra screenshot (optional)", type: 11, required: false },
       { name: "patreon", description: "Your Patreon link (optional)", type: 3, required: false }
     ]
   };
@@ -856,16 +883,18 @@ async function handleCommand(interaction, env, ctx) {
   for (const o of interaction.data.options || []) opts[o.name] = o.value;
   const attachments = interaction.data.resolved?.attachments || {};
   const shipAtt = attachments[opts.ship];
-  const imgAtt = attachments[opts.image];
+  const imgAtts = [attachments[opts.image1], attachments[opts.image2], attachments[opts.image3]].filter(Boolean);
   const name = (opts.name || "Unnamed Corvette").slice(0, 80);
 
   const problems = [];
   if (!shipAtt) problems.push("no ship file attached");
-  if (!imgAtt) problems.push("no image attached");
+  if (imgAtts.length === 0) problems.push("no image attached");
   if (shipAtt && shipAtt.size > 3 * 1024 * 1024) problems.push("ship file is larger than 3 MB");
   if (shipAtt && !/\.(nmsship|json|txt)$/i.test(shipAtt.filename)) problems.push("ship file must be .nmsship, .json or .txt");
-  if (imgAtt && imgAtt.size > 8 * 1024 * 1024) problems.push("image is larger than 8 MB");
-  if (imgAtt && !/^image\//.test(imgAtt.content_type || "")) problems.push("image attachment is not an image");
+  for (const a of imgAtts) {
+    if (a.size > 8 * 1024 * 1024) problems.push(`${a.filename} is larger than 8 MB`);
+    if (!/^image\//.test(a.content_type || "")) problems.push(`${a.filename} is not an image`);
+  }
 
   if (problems.length) {
     return json({
@@ -886,17 +915,18 @@ async function handleCommand(interaction, env, ctx) {
     (async () => {
       const submitter = interaction.member?.user || interaction.user;
 
-      let shipBytes, imageBuf;
+      let shipBytes, imageBufs;
       try {
         shipBytes = new Uint8Array(await (await fetch(shipAtt.url)).arrayBuffer());
-        imageBuf = await (await fetch(imgAtt.url)).arrayBuffer();
+        imageBufs = [];
+        for (const a of imgAtts) imageBufs.push(await (await fetch(a.url)).arrayBuffer());
       } catch (err) {
         console.error("could not fetch discord attachments: " + (err && err.message ? err.message : String(err)));
         return;
       }
 
       const staged = await stageSubmission(
-        { name, submitter: submitter.username || "", patreonUrl: patreonCheck.url, shipBytes, imageBuf },
+        { name, submitter: submitter.username || "", patreonUrl: patreonCheck.url, shipBytes, imageBufs },
         env
       );
 
