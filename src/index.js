@@ -602,7 +602,7 @@ button:disabled{opacity:.5}
 <label>Ship name<input type="text" name="name" required maxlength="80"></label>
 <label>Patreon link (optional)<input type="text" name="patreon" placeholder="https://www.patreon.com/yourname" maxlength="200"></label>
 <label>Fill in your delete code (optional)<input type="text" name="deletecode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="off" placeholder="6 digits, for example 482915"></label>
-<div class="hint">A delete code is what you supply to me when you want your ship to be removed from the Corvette library. Use a random 6-digit code made only for this. Do NOT use a code you use anywhere else (bank card, phone, door, accounts). I cannot see or recover it, so write it down. Without it I cannot check that a ship is yours.</div>
+<div class="hint">A delete code is what you supply to me when you want your ship to be removed from the Corvette library. Pick 6 random digits, only for this. Never use a code from anywhere else (bank, phone, accounts). You can use the same code for every upload. I cannot see or recover it, so write it down.</div>
 <label>Ship file (.nmsship, .json or .txt)<input type="file" name="ship" accept=".nmsship,.json,.txt" required></label>
 <label>Preview image<input type="file" name="image1" accept="image/*" required></label>
 <label>Extra image 2 (optional)<input type="file" name="image2" accept="image/*"></label>
@@ -618,24 +618,29 @@ document.getElementById('f').addEventListener('submit', async (e) => {
   const status = document.getElementById('status');
   btn.disabled = true;
   status.textContent = 'Uploading...';
+  let stage = 'preparing the form';
   try {
     const form = new FormData(e.target);
     for (const name of ['image1', 'image2', 'image3']) {
       const input = e.target.querySelector('input[name="' + name + '"]');
       if (input.files && input.files[0]) {
+        stage = 'reading image ' + input.files[0].name;
         const compressed = await compressImage(input.files[0]);
         form.set(name, compressed, name + '.jpg');
       } else {
         form.delete(name);
       }
     }
+    stage = 'sending to the server';
     const resp = await fetch('/upload', { method: 'POST', body: form });
+    stage = 'reading the server answer';
     const text = await resp.text();
     status.textContent = text;
     if (resp.ok) e.target.reset();
     if (typeof turnstile !== 'undefined') turnstile.reset();
   } catch (err) {
-    status.textContent = 'Something went wrong. Please try again.';
+    const why = err && err.message ? err.message : 'unknown error';
+    status.textContent = 'Something went wrong while ' + stage + ' (' + why + '). Try a smaller JPG image, or tell the admin this message.';
     if (typeof turnstile !== 'undefined') turnstile.reset();
   }
   btn.disabled = false;
@@ -655,9 +660,9 @@ function compressImage(file) {
       canvas.width = w;
       canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('compression failed')), 'image/jpeg', 0.85);
+      canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('image compression failed, the image may be too large')), 'image/jpeg', 0.85);
     };
-    img.onerror = reject;
+    img.onerror = () => reject(new Error('this image cannot be opened by the browser'));
     img.src = URL.createObjectURL(file);
   });
 }
@@ -673,6 +678,16 @@ async function handleUploadPage(env) {
 }
 
 async function handleUploadSubmit(request, env, ctx) {
+  try {
+    return await handleUploadSubmitInner(request, env, ctx);
+  } catch (err) {
+    const msg = err && err.message ? String(err.message) : String(err);
+    console.error("handleUploadSubmit failed: " + msg);
+    return new Response("Server error while saving your submission: " + msg.slice(0, 120), { status: 500 });
+  }
+}
+
+async function handleUploadSubmitInner(request, env, ctx) {
   const ip = request.headers.get("CF-Connecting-IP") || "unknown";
 
   let form;
