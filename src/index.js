@@ -875,7 +875,7 @@ async function handleRegister(url, env) {
       { name: "patreon", description: "Your Patreon link (optional)", type: 3, required: false },
       {
         name: "delete_code",
-        description: "Optional 6-digit code to remove your ship later. Random, made only for this. Never reuse a real code.",
+        description: "Optional 6-digit delete code. Random code, only for this. Never use a real code.",
         type: 3, required: false, min_length: 6, max_length: 6
       }
     ]
