@@ -432,6 +432,7 @@ async function normalizeShipBytes(bytes) {
 }
 
 function bytesToBase64(bytes) {
+  if (typeof bytes.toBase64 === "function") return bytes.toBase64();
   let binary = "";
   const chunk = 0x8000;
   for (let i = 0; i < bytes.length; i += chunk) {
@@ -631,9 +632,21 @@ async function postApprovalMessage(env, embed, slug, image) {
           body: form
         });
       } else {
+        let outEmbed = embed;
+        if (bytes) {
+          const fb = await pendingImageUrl(slug, env, 0);
+          outEmbed = {
+            ...embed,
+            ...(fb ? { image: { url: fb } } : {}),
+            fields: [
+              ...(embed.fields || []),
+              { name: "Image note", value: "The photo could not be attached. Use the Images links above to check it before you approve.", inline: false }
+            ]
+          };
+        }
         resp = await discordApi(`/channels/${env.APPROVAL_CHANNEL_ID}/messages`, env, {
           method: "POST",
-          body: JSON.stringify({ embeds: [embed], components: approvalComponents(slug, false) })
+          body: JSON.stringify({ embeds: [outEmbed], components: approvalComponents(slug, false) })
         });
       }
       if (resp.ok) return true;
@@ -886,6 +899,7 @@ const PENDING_CHUNK = 1000000;
 let workerOrigin = "";
 
 function base64ToBytes(b64) {
+  if (typeof Uint8Array.fromBase64 === "function") return Uint8Array.fromBase64(b64);
   const bin = atob(b64);
   const out = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
@@ -1097,8 +1111,16 @@ async function handlePendingShip(url, env) {
   });
 }
 
-async function approvalExtraFields(slug, env, check) {
+async function approvalExtraFields(slug, env, check, imageCount) {
   const fields = [];
+  if (imageCount > 0) {
+    const links = [];
+    for (let i = 0; i < Math.min(imageCount, 3); i++) {
+      const u = await pendingImageUrl(slug, env, i);
+      if (u) links.push(`[Image ${i + 1}](${u})`);
+    }
+    if (links.length) fields.push({ name: "Images (open to check)", value: links.join("  |  "), inline: false });
+  }
   if (check) fields.push({ name: "File check", value: String(check).slice(0, 300), inline: false });
   const link = await pendingShipUrl(slug, env);
   if (link) fields.push({ name: "Ship file", value: `[Open the JSON in your browser](${link})`, inline: false });
@@ -1112,14 +1134,20 @@ async function handlePendingImage(url, env) {
   const n = parseInt(m[2], 10);
   const sig = (await hashDeleteCode(`img:${slug}`, String(n), env)).slice(0, 24);
   if ((url.searchParams.get("s") || "") !== sig) return new Response("Not found", { status: 404 });
+  const cache = caches.default;
+  const cacheReq = new Request(url.toString());
+  const cached = await cache.match(cacheReq);
+  if (cached) return cached;
   const buf = await pendingGet(env, slug);
-  if (!buf) return new Response("Not found", { status: 404 });
+  if (!buf) return new Response("Not found. This submission was already approved or rejected.", { status: 404 });
   const { images } = unpackPending(buf);
   if (!images[n]) return new Response("Not found", { status: 404 });
-  return new Response(images[n], {
+  const res = new Response(images[n], {
     status: 200,
     headers: { "content-type": sniffImageType(images[n]), "cache-control": "public, max-age=86400" }
   });
+  await cache.put(cacheReq, res.clone());
+  return res;
 }
 
 async function stageSubmission({ name, submitter, patreonUrl, youtubeUrl, shipBytes, imageBufs, deleteCode, ipKey, userKey }, env) {
@@ -1586,7 +1614,7 @@ async function handleUploadSubmitInner(request, env, ctx) {
           { name: "Submitted by", value: `${builder} (via website)`, inline: true },
           ...linkFields(patreonCheck.youtubeUrl, patreonCheck.patreonUrl),
           { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true },
-          ...(await approvalExtraFields(slug, env, staged.check))
+          ...(await approvalExtraFields(slug, env, staged.check, imageBufs.length))
         ]
       };
       const posted = await postApprovalMessage(env, embed, slug, imageBufs[0]);
@@ -2079,22 +2107,27 @@ async function handlePendingCommand(interaction, env, ctx) {
           const slug = item.slug;
           const md = item.md || {};
           found++;
+          let firstImage = null;
+          let imageCount = 1;
+          try {
+            const buf = await pendingGet(env, slug);
+            if (buf) {
+              const imgs = unpackPending(buf).images;
+              firstImage = imgs[0] || null;
+              imageCount = imgs.length;
+            }
+          } catch (e) {
+            console.error("could not read image for " + slug);
+          }
           const embed = {
             title: md.n || slug,
             color: 0x5b9bd5,
             fields: [
               { name: "Submitted by", value: md.s || "unknown", inline: true },
               { name: "Objects", value: `${md.o} \u00b7 utility score ${md.sc}/10`, inline: true },
-              ...(await approvalExtraFields(slug, env, md.k))
+              ...(await approvalExtraFields(slug, env, md.k, imageCount))
             ]
           };
-          let firstImage = null;
-          try {
-            const buf = await pendingGet(env, slug);
-            if (buf) firstImage = unpackPending(buf).images[0] || null;
-          } catch (e) {
-            console.error("could not read image for " + slug);
-          }
           if (await postApprovalMessage(env, embed, slug, firstImage)) posted++;
         }
         const dirResp = await ghRequest(`/contents/pending`, env, { method: "GET" });
@@ -2252,7 +2285,7 @@ async function handleSubmitInner(interaction, env, ctx) {
           { name: "Submitted by", value: `<@${submitter.id}> (${submitter.username})`, inline: true },
           ...linkFields(patreonCheck.youtubeUrl, patreonCheck.patreonUrl),
           { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true },
-          ...(await approvalExtraFields(staged.slug, env, staged.check))
+          ...(await approvalExtraFields(staged.slug, env, staged.check, imageBufs.length))
         ]
       };
       const posted = await postApprovalMessage(env, embed, staged.slug, imageBufs[0]);
