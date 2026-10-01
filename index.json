@@ -425,5 +425,58 @@
     ],
     "downloads": 0,
     "approvedAt": "2026-10-01T10:10:34.400Z"
+  },
+  {
+    "id": "hexagonia-auux7",
+    "name": "Hexagonia",
+    "sha256": "cf2023e4928c39508851ebd75e438389f34918d2f3194fd5c06d3d96d782bed5",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 1,
+    "objectCount": 1157,
+    "score": 4.3,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-01T10:23:40.868Z"
   }
 ]
