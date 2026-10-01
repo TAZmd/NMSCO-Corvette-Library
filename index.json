@@ -1208,5 +1208,62 @@
     ],
     "downloads": 1,
     "approvedAt": "2026-10-01T11:59:46.557Z"
+  },
+  {
+    "id": "quadjumper-gekp7",
+    "name": "QuadJumper",
+    "sha256": "8327d410252723f573aad909d9d9e6d083c9420d5c50908032f1daa38acefc61",
+    "submitter": "Aresmar",
+    "patreonUrl": "https://www.patreon.com/aresmar",
+    "imageCount": 3,
+    "objectCount": 212,
+    "score": 7.3,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-01T12:51:36.503Z"
   }
 ]
