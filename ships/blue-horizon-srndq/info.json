@@ -1,0 +1,73 @@
+{
+  "name": "Blue Horizon",
+  "id": "blue-horizon-srndq",
+  "submitter": "TAZmd",
+  "patreonUrl": "https://www.youtube.com/watch?v=eskoC1yWmb8",
+  "objectCount": 467,
+  "score": 6.5,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Stellar Extractor Room",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    },
+    {
+      "label": "Nip Plant",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "b840bb4377cc1254c360785b103c5eeae32733859d14235552ce397a5b930e45",
+  "downloads": 0,
+  "approvedAt": "2026-10-01T06:31:57.699Z"
+}
