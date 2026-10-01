@@ -360,5 +360,70 @@
     ],
     "downloads": 1,
     "approvedAt": "2026-10-01T06:31:57.699Z"
+  },
+  {
+    "id": "starliner-rv-k3rf0",
+    "name": "Starliner RV",
+    "sha256": "6b7965183f60d3a4c77b60cb3be8d7ce755bffc958e03fb9ac7ca1afb83eb277",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 3,
+    "objectCount": 450,
+    "score": 6.2,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-01T10:10:34.400Z"
   }
 ]
