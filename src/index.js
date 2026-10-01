@@ -393,18 +393,21 @@ async function normalizeShipBytes(bytes) {
   return { ok: true, objectsText };
 }
 
-function utf8ToBase64(str) {
-  const bytes = new TextEncoder().encode(str);
+function bytesToBase64(bytes) {
   let binary = "";
-  for (const b of bytes) binary += String.fromCharCode(b);
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  }
   return btoa(binary);
 }
 
+function utf8ToBase64(str) {
+  return bytesToBase64(new TextEncoder().encode(str));
+}
+
 function arrayBufferToBase64(buf) {
-  let binary = "";
-  const bytes = new Uint8Array(buf);
-  for (const b of bytes) binary += String.fromCharCode(b);
-  return btoa(binary);
+  return bytesToBase64(new Uint8Array(buf));
 }
 
 function decodeBase64Utf8(b64) {
@@ -668,10 +671,20 @@ async function ghRequest(path, env, opts = {}) {
 }
 
 async function putFile(path, contentB64, message, env) {
-  const resp = await ghRequest(`/contents/${path}`, env, {
+  let resp = await ghRequest(`/contents/${path}`, env, {
     method: "PUT",
     body: JSON.stringify({ message, content: contentB64 })
   });
+  if (resp.status === 422 || resp.status === 409) {
+    const getResp = await ghRequest(`/contents/${path}`, env, { method: "GET" });
+    if (getResp.ok) {
+      const existing = await getResp.json();
+      resp = await ghRequest(`/contents/${path}`, env, {
+        method: "PUT",
+        body: JSON.stringify({ message, content: contentB64, sha: existing.sha })
+      });
+    }
+  }
   if (!resp.ok) {
     throw new Error(`GitHub PUT ${path} failed: ${resp.status} ${await resp.text()}`);
   }
@@ -739,6 +752,76 @@ async function removeDeleteCode(slug, env) {
   }
 }
 
+const MAX_PENDING_BYTES = 20 * 1024 * 1024;
+let workerOrigin = "";
+
+function packPending(info, shipText, images) {
+  const enc = new TextEncoder();
+  const shipBytes = enc.encode(shipText);
+  const head = { info, shipLen: shipBytes.length, imgLens: images.map((b) => b.byteLength) };
+  const headBytes = enc.encode(JSON.stringify(head));
+  let total = 4 + headBytes.length + shipBytes.length;
+  for (const b of images) total += b.byteLength;
+  const out = new Uint8Array(total);
+  new DataView(out.buffer).setUint32(0, headBytes.length);
+  let off = 4;
+  out.set(headBytes, off);
+  off += headBytes.length;
+  out.set(shipBytes, off);
+  off += shipBytes.length;
+  for (const b of images) {
+    out.set(new Uint8Array(b), off);
+    off += b.byteLength;
+  }
+  return out.buffer;
+}
+
+function unpackPending(buf) {
+  const view = new DataView(buf);
+  const headLen = view.getUint32(0);
+  const head = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 4, headLen)));
+  let off = 4 + headLen;
+  const shipBytes = new Uint8Array(buf, off, head.shipLen);
+  off += head.shipLen;
+  const images = [];
+  for (const len of head.imgLens) {
+    images.push(new Uint8Array(buf, off, len));
+    off += len;
+  }
+  return { info: head.info, shipBytes, images };
+}
+
+function sniffImageType(bytes) {
+  if (bytes[0] === 0xff && bytes[1] === 0xd8) return "image/jpeg";
+  if (bytes[0] === 0x89 && bytes[1] === 0x50) return "image/png";
+  if (bytes[0] === 0x47 && bytes[1] === 0x49) return "image/gif";
+  if (bytes[0] === 0x52 && bytes[1] === 0x49) return "image/webp";
+  return "application/octet-stream";
+}
+
+async function pendingImageUrl(slug, env, n = 0) {
+  if (!env.DELETE_PEPPER || !workerOrigin) return undefined;
+  const sig = (await hashDeleteCode(`img:${slug}`, String(n), env)).slice(0, 24);
+  return `${workerOrigin}/img/${slug}/${n}?s=${sig}`;
+}
+
+async function handlePendingImage(url, env) {
+  const m = url.pathname.match(/^\/img\/([a-z0-9-]{1,80})\/([0-2])$/);
+  if (!m || !env.DELETE_CODES || !env.DELETE_PEPPER) return new Response("Not found", { status: 404 });
+  const slug = m[1];
+  const n = parseInt(m[2], 10);
+  const sig = (await hashDeleteCode(`img:${slug}`, String(n), env)).slice(0, 24);
+  if ((url.searchParams.get("s") || "") !== sig) return new Response("Not found", { status: 404 });
+  const buf = await env.DELETE_CODES.get(`pend:${slug}`, "arrayBuffer");
+  if (!buf) return new Response("Not found", { status: 404 });
+  const { images } = unpackPending(buf);
+  if (!images[n]) return new Response("Not found", { status: 404 });
+  return new Response(images[n], {
+    status: 200,
+    headers: { "content-type": sniffImageType(images[n]), "cache-control": "private, max-age=300" }
+  });
+}
+
 async function stageSubmission({ name, submitter, patreonUrl, shipBytes, imageBufs, deleteCode, ipKey, userKey }, env) {
   const norm = await normalizeShipBytes(shipBytes);
   if (!norm.ok) return { ok: false, error: norm.error };
@@ -754,12 +837,20 @@ async function stageSubmission({ name, submitter, patreonUrl, shipBytes, imageBu
     stagedAt: new Date().toISOString()
   };
 
-  await putFile(`pending/${slug}/ship.json`, utf8ToBase64(norm.objectsText), `Pending: ${name}`, env);
-  for (let i = 0; i < images.length; i++) {
-    const fname = i === 0 ? "preview.png" : `preview${i + 1}.png`;
-    await putFile(`pending/${slug}/${fname}`, arrayBufferToBase64(images[i]), `Pending preview ${i + 1}: ${name}`, env);
+  if (!env.DELETE_CODES) return { ok: false, error: "storage is not available right now" };
+  const packed = packPending(info, norm.objectsText, images);
+  if (packed.byteLength > MAX_PENDING_BYTES) {
+    return { ok: false, error: "the submission is too large (maximum about 20 MB in total)" };
   }
-  await putFile(`pending/${slug}/info.json`, utf8ToBase64(JSON.stringify(info, null, 2)), `Pending info: ${name}`, env);
+  await env.DELETE_CODES.put(`pend:${slug}`, packed, {
+    metadata: {
+      n: (name || "").slice(0, 60),
+      s: (submitter || "").slice(0, 40),
+      o: meta.objectCount,
+      sc: meta.score,
+      c: deleteCode ? 1 : 0
+    }
+  });
 
   if (deleteCode) await storeDeleteCode(slug, deleteCode, env);
   await saveSubmissionOwner(slug, ipKey, userKey, `${name} by ${submitter || "unknown"}`, env);
@@ -778,6 +869,54 @@ async function deleteFile(path, message, env) {
 }
 
 async function promotePendingToLibrary(slug, env) {
+  const buf = env.DELETE_CODES ? await env.DELETE_CODES.get(`pend:${slug}`, "arrayBuffer") : null;
+  if (!buf) return promoteLegacyPending(slug, env);
+  const { info: stagedInfo, shipBytes, images } = unpackPending(buf);
+  const shipHash = await sha256HexBytes(shipBytes);
+  const imageCount = Math.max(1, Math.min(3, stagedInfo.imageCount || 1));
+
+  await putFile(`ships/${slug}/ship.json`, bytesToBase64(shipBytes), `Add ${stagedInfo.name}`, env);
+  for (let i = 0; i < Math.min(images.length, 3); i++) {
+    const fname = i === 0 ? "preview.png" : `preview${i + 1}.png`;
+    await putFile(`ships/${slug}/${fname}`, bytesToBase64(images[i]), `Add preview ${i + 1} for ${stagedInfo.name}`, env);
+  }
+
+  const info = { ...stagedInfo, imageCount, sha256: shipHash, downloads: 0, approvedAt: new Date().toISOString() };
+  delete info.stagedAt;
+  await putFile(`ships/${slug}/info.json`, utf8ToBase64(JSON.stringify(info, null, 2)), `Add info for ${stagedInfo.name}`, env);
+
+  const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
+  if (!idxResp.ok) throw new Error("Could not read index.json");
+  const idxData = await idxResp.json();
+  let list = [];
+  try {
+    list = JSON.parse(decodeBase64Utf8(idxData.content));
+    if (!Array.isArray(list)) list = [];
+  } catch (e) {
+    list = [];
+  }
+  list = list.filter((e) => e.id !== slug);
+  list.push({
+    id: slug, name: stagedInfo.name, sha256: shipHash, submitter: stagedInfo.submitter || "",
+    patreonUrl: stagedInfo.patreonUrl || "", imageCount,
+    objectCount: stagedInfo.objectCount, score: stagedInfo.score, utilities: stagedInfo.utilities,
+    downloads: 0, approvedAt: info.approvedAt
+  });
+  const updResp = await ghRequest(`/contents/index.json`, env, {
+    method: "PUT",
+    body: JSON.stringify({
+      message: `Add ${stagedInfo.name} to index`,
+      content: utf8ToBase64(JSON.stringify(list, null, 2)),
+      sha: idxData.sha
+    })
+  });
+  if (!updResp.ok) throw new Error(`index.json update failed: ${updResp.status} ${await updResp.text()}`);
+
+  await env.DELETE_CODES.delete(`pend:${slug}`);
+  return stagedInfo.name;
+}
+
+async function promoteLegacyPending(slug, env) {
   const shipResp = await ghRequest(`/contents/pending/${slug}/ship.json`, env, { method: "GET" });
   const infoResp = await ghRequest(`/contents/pending/${slug}/info.json`, env, { method: "GET" });
   if (!shipResp.ok || !infoResp.ok) throw new Error("pending files not found");
@@ -853,11 +992,16 @@ async function promotePendingToLibraryTry(slug, env) {
 
 async function rejectPending(slug, env) {
   try {
-    await deleteFile(`pending/${slug}/ship.json`, "Reject submission", env);
-    for (const fname of ["preview.png", "preview2.png", "preview3.png"]) {
-      await deleteFile(`pending/${slug}/${fname}`, "Reject submission", env);
+    const inKv = env.DELETE_CODES ? await env.DELETE_CODES.get(`pend:${slug}`, "arrayBuffer") : null;
+    if (inKv) {
+      await env.DELETE_CODES.delete(`pend:${slug}`);
+    } else {
+      await deleteFile(`pending/${slug}/ship.json`, "Reject submission", env);
+      for (const fname of ["preview.png", "preview2.png", "preview3.png"]) {
+        await deleteFile(`pending/${slug}/${fname}`, "Reject submission", env);
+      }
+      await deleteFile(`pending/${slug}/info.json`, "Reject submission", env);
     }
-    await deleteFile(`pending/${slug}/info.json`, "Reject submission", env);
     await removeDeleteCode(slug, env);
     if (env.DELETE_CODES) await env.DELETE_CODES.delete(`sub:${slug}`);
     return { ok: true };
@@ -1087,8 +1231,7 @@ async function handleUploadSubmitInner(request, env, ctx) {
   }
   const slug = staged.slug;
 
-  const branch = env.GITHUB_BRANCH || "main";
-  const imageRawUrl = `https://raw.githubusercontent.com/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/${branch}/pending/${slug}/preview.png`;
+  const imageRawUrl = await pendingImageUrl(slug, env);
 
   ctx.waitUntil(
     (async () => {
@@ -1522,20 +1665,37 @@ async function handlePendingCommand(interaction, env, ctx) {
     (async () => {
       let content;
       try {
+        let posted = 0;
+        let found = 0;
+        if (env.DELETE_CODES) {
+          const res = await env.DELETE_CODES.list({ prefix: "pend:" });
+          for (const k of res.keys.slice(0, 10)) {
+            const slug = k.name.slice(5);
+            const md = k.metadata || {};
+            found++;
+            const embed = {
+              title: md.n || slug,
+              color: 0x5b9bd5,
+              image: { url: await pendingImageUrl(slug, env) },
+              fields: [
+                { name: "Submitted by", value: md.s || "unknown", inline: true },
+                { name: "Objects", value: `${md.o} \u00b7 utility score ${md.sc}/10`, inline: true },
+                { name: "Delete code", value: md.c ? "set" : "not set", inline: true }
+              ]
+            };
+            if (await postApprovalMessage(env, embed, slug)) posted++;
+          }
+        }
         const dirResp = await ghRequest(`/contents/pending`, env, { method: "GET" });
-        if (dirResp.status === 404) {
-          content = "No pending submissions.";
-        } else if (!dirResp.ok) {
-          throw new Error("Could not read the pending folder: " + dirResp.status);
-        } else {
+        if (dirResp.ok) {
           const dirs = (await dirResp.json()).filter((e) => e.type === "dir").slice(0, 10);
-          let posted = 0;
           const branch = env.GITHUB_BRANCH || "main";
           for (const d of dirs) {
             const infoResp = await ghRequest(`/contents/pending/${d.name}/info.json`, env, { method: "GET" });
             if (!infoResp.ok) continue;
             const info = JSON.parse(decodeBase64Utf8((await infoResp.json()).content));
             const hasCode = env.DELETE_CODES ? !!(await env.DELETE_CODES.get(`code:${d.name}`)) : false;
+            found++;
             const embed = {
               title: info.name || d.name,
               color: 0x5b9bd5,
@@ -1548,10 +1708,10 @@ async function handlePendingCommand(interaction, env, ctx) {
             };
             if (await postApprovalMessage(env, embed, d.name)) posted++;
           }
-          content = dirs.length === 0
-            ? "No pending submissions."
-            : `Posted ${posted} of ${dirs.length} pending submission(s) again. If an older message for the same ship still has buttons, ignore it.`;
         }
+        content = found === 0
+          ? "No pending submissions."
+          : `Posted ${posted} of ${found} pending submission(s) again. If an older message for the same ship still has buttons, ignore it.`;
       } catch (err) {
         console.error("handlePendingCommand failed: " + (err && err.message ? err.message : String(err)));
         content = "Could not list pending submissions - check logs.";
@@ -1653,8 +1813,7 @@ async function handleCommand(interaction, env, ctx) {
         return;
       }
 
-      const branch = env.GITHUB_BRANCH || "main";
-      const imageRawUrl = `https://raw.githubusercontent.com/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/${branch}/pending/${staged.slug}/preview.png`;
+      const imageRawUrl = await pendingImageUrl(staged.slug, env);
 
       const embed = {
         title: name,
@@ -1754,7 +1913,10 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    workerOrigin = url.origin;
+
     if (request.method === "GET") {
+      if (url.pathname.startsWith("/img/")) return handlePendingImage(url, env);
       if (url.pathname === "/register") return handleRegister(url, env);
       if (url.pathname === "/upload") return handleUploadPage(env);
       return new Response("Corvette Library bot is running.", { status: 200 });
