@@ -882,7 +882,7 @@ async function pendingImageUrl(slug, env, n = 0) {
   return `${workerOrigin}/img/${slug}/${n}?s=${sig}`;
 }
 
-const SHIP_ENTRY_KEYS = new Set(["ObjectID", "UserData", "Position", "Up", "At", "Timestamp"]);
+const SHIP_ENTRY_KEYS = new Set(["ObjectID", "UserData", "Position", "Up", "At", "Timestamp", "Message"]);
 
 function inspectShipText(objectsText) {
   let arr;
@@ -895,6 +895,10 @@ function inspectShipText(objectsText) {
   const isVec = (v) => Array.isArray(v) && v.length === 3 && v.every((n) => typeof n === "number" && isFinite(n));
   let badShape = 0;
   let longText = 0;
+  let badMessage = 0;
+  let bigMessage = 0;
+  let maxMessage = 0;
+  let totalMessage = 0;
   const odd = new Set();
   for (const e of arr) {
     if (!e || typeof e !== "object" || Array.isArray(e)) {
@@ -903,17 +907,30 @@ function inspectShipText(objectsText) {
     }
     for (const k of Object.keys(e)) {
       if (!SHIP_ENTRY_KEYS.has(k)) odd.add(k.slice(0, 30));
-      else if (typeof e[k] === "string" && e[k].length > 80) longText++;
+      else if (k === "Message") {
+        if (typeof e[k] !== "string" || !/^[A-Za-z0-9+/=\s]*$/.test(e[k])) {
+          badMessage++;
+        } else {
+          totalMessage += e[k].length;
+          if (e[k].length > maxMessage) maxMessage = e[k].length;
+          if (e[k].length > 65536) bigMessage++;
+        }
+      } else if (typeof e[k] === "string" && e[k].length > 80) longText++;
     }
     if (typeof e.ObjectID !== "string" || !e.ObjectID || !isVec(e.Position) || !isVec(e.Up) || !isVec(e.At)) badShape++;
   }
-  if (badShape === 0 && odd.size === 0 && longText === 0) {
-    return `OK - all ${arr.length} objects have the normal fields`;
+  const bigTotal = totalMessage > 524288;
+  if (badShape === 0 && odd.size === 0 && longText === 0 && badMessage === 0 && bigMessage === 0 && !bigTotal) {
+    const extra = maxMessage > 0 ? ` (largest Message: ${Math.max(1, Math.round(maxMessage / 1024))} KB, all Messages: ${Math.max(1, Math.round(totalMessage / 1024))} KB)` : "";
+    return `OK - all ${arr.length} objects have the normal fields${extra}`;
   }
   const parts = [];
   if (badShape) parts.push(`${badShape} entries have a wrong shape`);
   if (odd.size) parts.push(`unexpected fields: ${[...odd].slice(0, 5).join(", ")}`);
   if (longText) parts.push(`${longText} very long text values`);
+  if (badMessage) parts.push(`${badMessage} Message values are not plain base64`);
+  if (bigMessage) parts.push(`${bigMessage} Message values are over 64 KB`);
+  if (bigTotal) parts.push(`all Messages together are over 512 KB`);
   return `WARNING - ${parts.join("; ")}. Open the JSON and check it.`;
 }
 
