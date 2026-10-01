@@ -14,3 +14,8 @@ APPROVAL_CHANNEL_ID = "1554536984255401994"
 [[kv_namespaces]]
 binding = "DELETE_CODES"
 id = "981225a2c74c468597591ddcc9fa0411"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "corvette-library-stats"
+database_id = "25281ebb-67bd-450e-b921-81984e6f1e73"
