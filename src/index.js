@@ -923,6 +923,74 @@ async function pendingImageUrl(slug, env, n = 0) {
   return `${workerOrigin}/img/${slug}/${n}?s=${sig}`;
 }
 
+const SHIP_ENTRY_KEYS = new Set(["ObjectID", "UserData", "Position", "Up", "At", "Timestamp"]);
+
+function inspectShipText(objectsText) {
+  let arr;
+  try {
+    arr = JSON.parse(objectsText);
+  } catch (e) {
+    return "WARNING - the file is not valid JSON";
+  }
+  if (!Array.isArray(arr)) return "WARNING - the file is not a list";
+  const isVec = (v) => Array.isArray(v) && v.length === 3 && v.every((n) => typeof n === "number" && isFinite(n));
+  let badShape = 0;
+  let longText = 0;
+  const odd = new Set();
+  for (const e of arr) {
+    if (!e || typeof e !== "object" || Array.isArray(e)) {
+      badShape++;
+      continue;
+    }
+    for (const k of Object.keys(e)) {
+      if (!SHIP_ENTRY_KEYS.has(k)) odd.add(k.slice(0, 30));
+      else if (typeof e[k] === "string" && e[k].length > 80) longText++;
+    }
+    if (typeof e.ObjectID !== "string" || !e.ObjectID || !isVec(e.Position) || !isVec(e.Up) || !isVec(e.At)) badShape++;
+  }
+  if (badShape === 0 && odd.size === 0 && longText === 0) {
+    return `OK - all ${arr.length} objects have the normal fields`;
+  }
+  const parts = [];
+  if (badShape) parts.push(`${badShape} entries have a wrong shape`);
+  if (odd.size) parts.push(`unexpected fields: ${[...odd].slice(0, 5).join(", ")}`);
+  if (longText) parts.push(`${longText} very long text values`);
+  return `WARNING - ${parts.join("; ")}. Open the JSON and check it.`;
+}
+
+async function pendingShipUrl(slug, env) {
+  if (!env.DELETE_PEPPER || !workerOrigin) return undefined;
+  const sig = (await hashDeleteCode(`ship:${slug}`, "0", env)).slice(0, 24);
+  return `${workerOrigin}/ship/${slug}?s=${sig}`;
+}
+
+async function handlePendingShip(url, env) {
+  const m = url.pathname.match(/^\/ship\/([a-z0-9-]{1,80})$/);
+  if (!m || (!env.DB && !env.DELETE_CODES) || !env.DELETE_PEPPER) return new Response("Not found", { status: 404 });
+  const slug = m[1];
+  const sig = (await hashDeleteCode(`ship:${slug}`, "0", env)).slice(0, 24);
+  if ((url.searchParams.get("s") || "") !== sig) return new Response("Not found", { status: 404 });
+  const buf = await pendingGet(env, slug);
+  if (!buf) return new Response("Not found. This submission was already approved or rejected.", { status: 404 });
+  const { shipBytes } = unpackPending(buf);
+  return new Response(shipBytes, {
+    status: 200,
+    headers: {
+      "content-type": "text/plain; charset=utf-8",
+      "cache-control": "no-store",
+      "x-content-type-options": "nosniff"
+    }
+  });
+}
+
+async function approvalExtraFields(slug, env, check) {
+  const fields = [];
+  if (check) fields.push({ name: "File check", value: String(check).slice(0, 300), inline: false });
+  const link = await pendingShipUrl(slug, env);
+  if (link) fields.push({ name: "Ship file", value: `[Open the JSON in your browser](${link})`, inline: false });
+  return fields;
+}
+
 async function handlePendingImage(url, env) {
   const m = url.pathname.match(/^\/img\/([a-z0-9-]{1,80})\/([0-2])$/);
   if (!m || (!env.DB && !env.DELETE_CODES) || !env.DELETE_PEPPER) return new Response("Not found", { status: 404 });
@@ -960,18 +1028,20 @@ async function stageSubmission({ name, submitter, patreonUrl, shipBytes, imageBu
   if (packed.byteLength > MAX_PENDING_BYTES) {
     return { ok: false, error: "the submission is too large (maximum about 12 MB in total)" };
   }
+  const check = inspectShipText(norm.objectsText);
   await pendingPut(env, slug, packed, {
     n: (name || "").slice(0, 60),
     s: (submitter || "").slice(0, 40),
     o: meta.objectCount,
     sc: meta.score,
-    c: deleteCode ? 1 : 0
+    c: deleteCode ? 1 : 0,
+    k: check.slice(0, 220)
   });
 
   if (deleteCode) await storeDeleteCode(slug, deleteCode, env);
   await saveSubmissionOwner(slug, ipKey, userKey, `${name} by ${submitter || "unknown"}`, env);
 
-  return { ok: true, slug, meta, hasDeleteCode: !!deleteCode };
+  return { ok: true, slug, meta, hasDeleteCode: !!deleteCode, check };
 }
 
 async function deleteFile(path, message, env) {
@@ -1418,7 +1488,8 @@ async function handleUploadSubmitInner(request, env, ctx) {
           { name: "Submitted by", value: `${builder} (via website)`, inline: true },
           ...(patreonCheck.url ? [{ name: "Link", value: patreonCheck.url.slice(0, 200), inline: false }] : []),
           { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true },
-          { name: "Delete code", value: staged.hasDeleteCode ? "set" : "not set", inline: true }
+          { name: "Delete code", value: staged.hasDeleteCode ? "set" : "not set", inline: true },
+          ...(await approvalExtraFields(slug, env, staged.check))
         ]
       };
       const posted = await postApprovalMessage(env, embed, slug);
@@ -1855,7 +1926,8 @@ async function handlePendingCommand(interaction, env, ctx) {
             fields: [
               { name: "Submitted by", value: md.s || "unknown", inline: true },
               { name: "Objects", value: `${md.o} \u00b7 utility score ${md.sc}/10`, inline: true },
-              { name: "Delete code", value: md.c ? "set" : "not set", inline: true }
+              { name: "Delete code", value: md.c ? "set" : "not set", inline: true },
+              ...(await approvalExtraFields(slug, env, md.k))
             ]
           };
           if (await postApprovalMessage(env, embed, slug)) posted++;
@@ -1997,7 +2069,8 @@ async function handleCommand(interaction, env, ctx) {
           { name: "Submitted by", value: `<@${submitter.id}> (${submitter.username})`, inline: true },
           ...(patreonCheck.url ? [{ name: "Link", value: patreonCheck.url.slice(0, 200), inline: false }] : []),
           { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true },
-          { name: "Delete code", value: staged.hasDeleteCode ? "set" : "not set", inline: true }
+          { name: "Delete code", value: staged.hasDeleteCode ? "set" : "not set", inline: true },
+          ...(await approvalExtraFields(staged.slug, env, staged.check))
         ]
       };
       const posted = await postApprovalMessage(env, embed, staged.slug);
@@ -2092,6 +2165,7 @@ export default {
 
     if (request.method === "GET") {
       if (url.pathname.startsWith("/img/")) return handlePendingImage(url, env);
+      if (url.pathname.startsWith("/ship/")) return handlePendingShip(url, env);
       if (url.pathname === "/register") return handleRegister(url, env);
       if (url.pathname === "/upload") return handleUploadPage(env);
       return new Response("Corvette Library bot is running.", { status: 200 });
