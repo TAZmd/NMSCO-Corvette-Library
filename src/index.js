@@ -139,6 +139,16 @@ const UTILITY_CATALOG = {
   }
 };
 
+const UTILITY_CATALOG_VERSION = 2;
+
+function idsFromShipText(text) {
+  const ids = [];
+  const re = /"ObjectID"\s*:\s*"([^"]*)"/g;
+  let m;
+  while ((m = re.exec(text))) ids.push(m[1]);
+  return ids;
+}
+
 function scoreShip(objectIds) {
   const normIds = objectIds.map(normalizeId);
   const present = new Set(normIds);
@@ -1222,7 +1232,7 @@ async function promotePendingToLibrary(slug, env) {
       id: slug, name: stagedInfo.name, sha256: shipHash, submitter: stagedInfo.submitter || "",
       patreonUrl: stagedInfo.patreonUrl || "", youtubeUrl: stagedInfo.youtubeUrl || "", imageCount,
       objectCount: stagedInfo.objectCount, score: stagedInfo.score, utilities: stagedInfo.utilities,
-      downloads: 0, approvedAt: info.approvedAt
+      downloads: 0, approvedAt: info.approvedAt, utilVersion: UTILITY_CATALOG_VERSION
     },
     `Add ${stagedInfo.name} to index`
   );
@@ -1264,7 +1274,7 @@ async function promoteLegacyPending(slug, env) {
       id: slug, name: stagedInfo.name, sha256: shipHash, submitter: stagedInfo.submitter || "",
       patreonUrl: stagedInfo.patreonUrl || "", youtubeUrl: stagedInfo.youtubeUrl || "", imageCount,
       objectCount: stagedInfo.objectCount, score: stagedInfo.score, utilities: stagedInfo.utilities,
-      downloads: 0, approvedAt: info.approvedAt
+      downloads: 0, approvedAt: info.approvedAt, utilVersion: UTILITY_CATALOG_VERSION
     },
     `Add ${stagedInfo.name} to index`
   );
@@ -1890,6 +1900,13 @@ async function handleRegister(url, env) {
       { name: "ban", description: "Pick the ban or lock to remove", type: 3, required: true, autocomplete: true }
     ]
   };
+  const recalcCommand = {
+    name: "recalc",
+    description: "Admin only: recalculate the utility lists of ships already in the library",
+    options: [
+      { name: "count", description: "How many ships per run (1 to 25, default 10)", type: 4, required: false, min_value: 1, max_value: 25 }
+    ]
+  };
   const pendingCommand = {
     name: "pending",
     description: "Admin only: post all waiting submissions again with Approve and Reject buttons",
@@ -1898,7 +1915,7 @@ async function handleRegister(url, env) {
   const resp = await discordApi(
     `/applications/${env.DISCORD_APPLICATION_ID}/guilds/${env.DISCORD_GUILD_ID}/commands`,
     env,
-    { method: "PUT", body: JSON.stringify([submitCommand, deleteCommand, banCommand, unbanCommand, pendingCommand]) }
+    { method: "PUT", body: JSON.stringify([submitCommand, deleteCommand, banCommand, unbanCommand, pendingCommand, recalcCommand]) }
   );
   const text = await resp.text();
   return new Response(`Status ${resp.status}\n${text}`, {
@@ -2169,7 +2186,73 @@ async function handlePendingCommand(interaction, env, ctx) {
   return json({ type: 5, data: { flags: 64 } });
 }
 
+async function recalcBatch(env, limit) {
+  const shards = await readIndexShards(env);
+  let done = 0;
+  let remaining = 0;
+  let failed = 0;
+  for (const sh of shards) {
+    let changed = false;
+    for (const e of sh.list) {
+      if ((e.utilVersion || 0) >= UTILITY_CATALOG_VERSION) continue;
+      if (done + failed >= limit) {
+        remaining++;
+        continue;
+      }
+      try {
+        const resp = await ghRequest(`/contents/ships/${e.id}/ship.json`, env, {
+          method: "GET",
+          headers: { Accept: "application/vnd.github.raw" }
+        });
+        if (!resp.ok) throw new Error("status " + resp.status);
+        const ids = idsFromShipText(await resp.text());
+        const result = scoreShip(ids);
+        e.score = result.score;
+        e.utilities = result.utilities;
+        e.utilVersion = UTILITY_CATALOG_VERSION;
+        changed = true;
+        done++;
+      } catch (err) {
+        failed++;
+        remaining++;
+        console.error("recalc failed for " + e.id + ": " + (err && err.message ? err.message : String(err)));
+      }
+    }
+    if (changed) await writeShard(env, sh, "Recalculate utilities");
+  }
+  return { done, remaining, failed };
+}
+
+async function handleRecalcCommand(interaction, env, ctx) {
+  const clicker = interaction.member?.user || interaction.user;
+  if (!clicker || clicker.id !== env.APPROVER_USER_ID) return ephemeral("Only the library admin can use this command.");
+  const opts = {};
+  for (const o of interaction.data.options || []) opts[o.name] = o.value;
+  const limit = Math.max(1, Math.min(25, parseInt(opts.count, 10) || 10));
+  ctx.waitUntil(
+    (async () => {
+      let content;
+      try {
+        const r = await recalcBatch(env, limit);
+        if (r.done === 0 && r.remaining === 0) content = "All ships are already up to date. Nothing to do.";
+        else if (r.remaining === 0) content = `Done. ${r.done} ship(s) updated. All ships are now up to date.`;
+        else content = `${r.done} ship(s) updated. ${r.remaining} still to do${r.failed ? ` (${r.failed} could not be read)` : ""}. Run /recalc again to continue.`;
+      } catch (err) {
+        console.error("handleRecalcCommand failed: " + (err && err.message ? err.message : String(err)));
+        content = "The recalculation failed. Check the logs.";
+      }
+      const resp = await discordApi(`/webhooks/${env.DISCORD_APPLICATION_ID}/${interaction.token}/messages/@original`, env, {
+        method: "PATCH",
+        body: JSON.stringify({ content })
+      });
+      if (!resp.ok) console.error("recalc reply failed: " + resp.status);
+    })()
+  );
+  return json({ type: 5, data: { flags: 64 } });
+}
+
 async function handleCommand(interaction, env, ctx) {
+  if (interaction.data.name === "recalc") return handleRecalcCommand(interaction, env, ctx);
   if (interaction.data.name === "ban") return handleBanCommand(interaction, env);
   if (interaction.data.name === "unban") return handleUnbanCommand(interaction, env);
   if (interaction.data.name === "pending") return handlePendingCommand(interaction, env, ctx);
