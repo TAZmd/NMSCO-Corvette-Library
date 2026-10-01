@@ -634,17 +634,43 @@ async function editApprovalMessage(env, messageId, payload) {
 }
 
 async function verifyTurnstile(token, ip, env) {
-  if (!env.TURNSTILE_SECRET_KEY) return true;
-  const form = new FormData();
-  form.append("secret", env.TURNSTILE_SECRET_KEY);
-  form.append("response", token || "");
-  if (ip) form.append("remoteip", ip);
-  const resp = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-    method: "POST",
-    body: form
-  });
-  const data = await resp.json();
-  return !!data.success;
+  if (!env.TURNSTILE_SECRET_KEY) return { ok: true, codes: [] };
+  if (!token) return { ok: false, codes: ["missing-token"] };
+  try {
+    const form = new FormData();
+    form.append("secret", env.TURNSTILE_SECRET_KEY);
+    form.append("response", token);
+    if (ip) form.append("remoteip", ip);
+    const resp = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      body: form
+    });
+    const data = await resp.json();
+    return { ok: !!data.success, codes: data["error-codes"] || [] };
+  } catch (e) {
+    return { ok: false, codes: ["verification-service-error"] };
+  }
+}
+
+function turnstileMessage(codes) {
+  const list = codes && codes.length ? codes : ["unknown"];
+  const tag = " [" + list.join(", ") + "]";
+  if (list.includes("missing-token") || list.includes("missing-input-response")) {
+    return "The verification check was not finished. Wait for the green check mark, then submit again." + tag;
+  }
+  if (list.includes("timeout-or-duplicate")) {
+    return "The verification expired or was already used. Wait a few seconds until the check renews, then submit again." + tag;
+  }
+  if (list.includes("invalid-input-response")) {
+    return "The verification was not accepted. Reload the page and try again." + tag;
+  }
+  if (list.includes("invalid-input-secret") || list.includes("missing-input-secret")) {
+    return "Server setting problem: the Turnstile secret key is wrong or missing. Tell the admin." + tag;
+  }
+  if (list.includes("verification-service-error") || list.includes("internal-error")) {
+    return "The verification service did not answer. Try again in a moment." + tag;
+  }
+  return "Verification failed. Reload the page and try again." + tag;
 }
 
 async function discordApi(path, env, opts = {}) {
@@ -1080,6 +1106,11 @@ document.getElementById('f').addEventListener('submit', async (e) => {
   let stage = 'preparing the form';
   try {
     const form = new FormData(e.target);
+    if (!form.get('cf-turnstile-response')) {
+      status.textContent = 'Wait for the verification check to finish (green check mark), then press Submit again.';
+      btn.disabled = false;
+      return;
+    }
     for (const name of ['image1', 'image2', 'image3']) {
       const input = e.target.querySelector('input[name="' + name + '"]');
       if (input.files && input.files[0]) {
@@ -1170,9 +1201,10 @@ async function handleUploadSubmitInner(request, env, ctx) {
   }
 
   const turnstileToken = form.get("cf-turnstile-response");
-  const turnstileOk = await verifyTurnstile(turnstileToken, ip, env);
-  if (!turnstileOk) {
-    return new Response("Verification failed - please try again.", { status: 400 });
+  const turnstile = await verifyTurnstile(turnstileToken, ip, env);
+  if (!turnstile.ok) {
+    console.error("turnstile failed: " + turnstile.codes.join(","));
+    return new Response(turnstileMessage(turnstile.codes), { status: 400 });
   }
 
   const allowed = await checkRateLimit(ip);
