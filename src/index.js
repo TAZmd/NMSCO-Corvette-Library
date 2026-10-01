@@ -486,8 +486,24 @@ async function checkRateLimit(ip) {
   return true;
 }
 
-// One download counts per (ship, visitor) per day - stops someone inflating a ship's
-// count, and therefore its place in "Most downloaded", by repeatedly clicking Import/Download.
+// One download counts per ship only when BOTH the visitor IP and the app install id are new
+// for that ship. Both are stored as keyed hashes, never raw. KV is used because the edge
+// cache is per data center and forgets.
+const DOWNLOADS_PER_HOUR_CAP = 20;
+const INSTALL_ID_RE = /^([0-9a-fA-F]{32}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/;
+
+async function downloadDedupKey(ip, id, env) {
+  if (!deleteCodesReady(env)) return null;
+  const h = await hashDeleteCode(`dl:${id}`, ip, env);
+  return `dl:${id}:${h.slice(0, 32)}`;
+}
+
+async function downloadInstallKey(installId, id, env) {
+  if (!installId || !deleteCodesReady(env)) return null;
+  const h = await hashDeleteCode(`dlid:${id}`, installId.toLowerCase(), env);
+  return `dl:${id}:i:${h.slice(0, 32)}`;
+}
+
 async function checkDownloadDedup(ip, id) {
   const cache = caches.default;
   const key = new Request(`https://downloadDedup.internal/${encodeURIComponent(id)}/${encodeURIComponent(ip)}`);
@@ -495,6 +511,123 @@ async function checkDownloadDedup(ip, id) {
   if (cached) return false;
   await cache.put(key, new Response("1", { headers: { "Cache-Control": "max-age=86400" } }));
   return true;
+}
+
+async function readHourlyCount(id) {
+  const cache = caches.default;
+  const bucket = Math.floor(Date.now() / 3600000);
+  const req = new Request(`https://hourlycap.internal/${encodeURIComponent(id)}/${bucket}`);
+  const hit = await cache.match(req);
+  const n = hit ? parseInt(await hit.text(), 10) || 0 : 0;
+  return { req, n };
+}
+
+async function writeHourlyCount(req, n) {
+  await caches.default.put(req, new Response(String(n), { headers: { "Cache-Control": "max-age=3600" } }));
+}
+
+const FLOOD_PER_HOUR = 60;
+
+function userBanKey(discordId) {
+  return `ban:user:${discordId}`;
+}
+
+async function ipBanKey(ip, env) {
+  if (!deleteCodesReady(env)) return null;
+  const h = await hashDeleteCode("ban:ip", ip, env);
+  return `ban:ip:${h.slice(0, 32)}`;
+}
+
+async function installBanKey(installId, env) {
+  if (!installId || !deleteCodesReady(env)) return null;
+  const h = await hashDeleteCode("ban:id", installId.toLowerCase(), env);
+  return `ban:id:${h.slice(0, 32)}`;
+}
+
+async function isBanned(env, keys) {
+  if (!env.DELETE_CODES) return false;
+  for (const k of keys) {
+    if (k && (await env.DELETE_CODES.get(k))) return true;
+  }
+  return false;
+}
+
+async function addBan(env, key, label, reason) {
+  if (!env.DELETE_CODES || !key) return;
+  await env.DELETE_CODES.put(key, JSON.stringify({ label, reason, at: new Date().toISOString() }));
+}
+
+async function bumpFlood(kind, value) {
+  const cache = caches.default;
+  const bucket = Math.floor(Date.now() / 3600000);
+  const req = new Request(`https://flood.internal/${kind}/${encodeURIComponent(value)}/${bucket}`);
+  const hit = await cache.match(req);
+  const n = (hit ? parseInt(await hit.text(), 10) || 0 : 0) + 1;
+  await cache.put(req, new Response(String(n), { headers: { "Cache-Control": "max-age=3600" } }));
+  return n;
+}
+
+async function saveSubmissionOwner(slug, ipKey, userKey, label, env) {
+  if (!env.DELETE_CODES || (!ipKey && !userKey)) return;
+  await env.DELETE_CODES.put(`sub:${slug}`, JSON.stringify({ ipKey: ipKey || null, userKey: userKey || null, label }));
+}
+
+async function getSubmissionOwner(slug, env) {
+  if (!env.DELETE_CODES) return null;
+  const raw = await env.DELETE_CODES.get(`sub:${slug}`);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+function approvalComponents(slug, disabled) {
+  return [
+    {
+      type: 1,
+      components: [
+        { type: 2, style: 3, label: "Approve", custom_id: `approve:${slug}`, disabled: !!disabled },
+        { type: 2, style: 4, label: "Reject", custom_id: `reject:${slug}`, disabled: !!disabled },
+        { type: 2, style: 4, label: "Reject & ban", custom_id: `rejban:${slug}`, disabled: !!disabled }
+      ]
+    }
+  ];
+}
+
+async function postApprovalMessage(env, embed, slug) {
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const resp = await discordApi(`/channels/${env.APPROVAL_CHANNEL_ID}/messages`, env, {
+        method: "POST",
+        body: JSON.stringify({ embeds: [embed], components: approvalComponents(slug, false) })
+      });
+      if (resp.ok) return true;
+      console.error("post to approval channel failed: " + resp.status + " " + (await resp.text()));
+    } catch (err) {
+      console.error("post to approval channel error: " + (err && err.message ? err.message : String(err)));
+    }
+    await new Promise((r) => setTimeout(r, 800 * attempt));
+  }
+  return false;
+}
+
+async function editApprovalMessage(env, messageId, payload) {
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const resp = await discordApi(`/channels/${env.APPROVAL_CHANNEL_ID}/messages/${messageId}`, env, {
+        method: "PATCH",
+        body: JSON.stringify(payload)
+      });
+      if (resp.ok) return true;
+      console.error("edit approval message failed: " + resp.status + " " + (await resp.text()));
+    } catch (err) {
+      console.error("edit approval message error: " + (err && err.message ? err.message : String(err)));
+    }
+    await new Promise((r) => setTimeout(r, 800 * attempt));
+  }
+  return false;
 }
 
 async function verifyTurnstile(token, ip, env) {
@@ -606,7 +739,7 @@ async function removeDeleteCode(slug, env) {
   }
 }
 
-async function stageSubmission({ name, submitter, patreonUrl, shipBytes, imageBufs, deleteCode }, env) {
+async function stageSubmission({ name, submitter, patreonUrl, shipBytes, imageBufs, deleteCode, ipKey, userKey }, env) {
   const norm = await normalizeShipBytes(shipBytes);
   if (!norm.ok) return { ok: false, error: norm.error };
 
@@ -629,6 +762,7 @@ async function stageSubmission({ name, submitter, patreonUrl, shipBytes, imageBu
   await putFile(`pending/${slug}/info.json`, utf8ToBase64(JSON.stringify(info, null, 2)), `Pending info: ${name}`, env);
 
   if (deleteCode) await storeDeleteCode(slug, deleteCode, env);
+  await saveSubmissionOwner(slug, ipKey, userKey, `${name} by ${submitter || "unknown"}`, env);
 
   return { ok: true, slug, meta, hasDeleteCode: !!deleteCode };
 }
@@ -711,19 +845,26 @@ async function promotePendingToLibraryTry(slug, env) {
     const name = await promotePendingToLibrary(slug, env);
     return { ok: true, name };
   } catch (err) {
-    console.error("promotePendingToLibrary failed: " + (err && err.message ? err.message : String(err)));
-    return { ok: false, name: null };
+    const msg = err && err.message ? String(err.message) : String(err);
+    console.error("promotePendingToLibrary failed: " + msg);
+    return { ok: false, name: null, error: msg.slice(0, 180) };
   }
 }
 
 async function rejectPending(slug, env) {
   try {
     await deleteFile(`pending/${slug}/ship.json`, "Reject submission", env);
-    await deleteFile(`pending/${slug}/preview.png`, "Reject submission", env);
+    for (const fname of ["preview.png", "preview2.png", "preview3.png"]) {
+      await deleteFile(`pending/${slug}/${fname}`, "Reject submission", env);
+    }
     await deleteFile(`pending/${slug}/info.json`, "Reject submission", env);
     await removeDeleteCode(slug, env);
+    if (env.DELETE_CODES) await env.DELETE_CODES.delete(`sub:${slug}`);
+    return { ok: true };
   } catch (err) {
-    console.error("rejectPending failed: " + (err && err.message ? err.message : String(err)));
+    const msg = err && err.message ? String(err.message) : String(err);
+    console.error("rejectPending failed: " + msg);
+    return { ok: false, error: msg.slice(0, 180) };
   }
 }
 
@@ -846,6 +987,10 @@ async function handleUploadSubmit(request, env, ctx) {
 
 async function handleUploadSubmitInner(request, env, ctx) {
   const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  const ownIpKey = await ipBanKey(ip, env);
+  if (await isBanned(env, [ownIpKey])) {
+    return new Response("Uploads from this connection are blocked.", { status: 403 });
+  }
 
   let form;
   try {
@@ -908,7 +1053,7 @@ async function handleUploadSubmitInner(request, env, ctx) {
   for (const f of imageFiles) imageBufs.push(await f.arrayBuffer());
 
   const staged = await stageSubmission(
-    { name, submitter: builder, patreonUrl: patreonCheck.url, shipBytes, imageBufs, deleteCode },
+    { name, submitter: builder, patreonUrl: patreonCheck.url, shipBytes, imageBufs, deleteCode, ipKey: ownIpKey },
     env
   );
   if (!staged.ok) {
@@ -931,22 +1076,8 @@ async function handleUploadSubmitInner(request, env, ctx) {
           { name: "Delete code", value: staged.hasDeleteCode ? "set" : "not set", inline: true }
         ]
       };
-      const components = [
-        {
-          type: 1,
-          components: [
-            { type: 2, style: 3, label: "Approve", custom_id: `approve:${slug}` },
-            { type: 2, style: 4, label: "Reject", custom_id: `reject:${slug}` }
-          ]
-        }
-      ];
-      const postResp = await discordApi(`/channels/${env.APPROVAL_CHANNEL_ID}/messages`, env, {
-        method: "POST",
-        body: JSON.stringify({ embeds: [embed], components })
-      });
-      if (!postResp.ok) {
-        console.error("post to approval channel failed (web): " + postResp.status + " " + (await postResp.text()));
-      }
+      const posted = await postApprovalMessage(env, embed, slug);
+      if (!posted) console.error("approval message could not be posted for " + slug + " - use /pending");
     })()
   );
 
@@ -962,12 +1093,43 @@ async function handleTrackDownload(request, env) {
   }
   const id = (body.id || "").toString();
   if (!id) return new Response("Missing id.", { status: 400 });
+  if (!/^[a-z0-9-]{1,60}$/.test(id)) return new Response("Unknown ship id.", { status: 404 });
+
+  const rawInstall = (body.installId || "").toString().trim();
+  const installId = INSTALL_ID_RE.test(rawInstall) ? rawInstall : "";
 
   const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-  const allowed = await checkDownloadDedup(ip, id);
-  if (!allowed) {
-    return json({ ok: true, deduped: true });
+
+  const banIp = await ipBanKey(ip, env);
+  const banId = await installBanKey(installId, env);
+  if (await isBanned(env, [banIp, banId])) return new Response("Blocked.", { status: 403 });
+
+  if (banIp || banId) {
+    const floodIp = await bumpFlood("ip", ip);
+    const floodId = installId ? await bumpFlood("id", installId.toLowerCase()) : 0;
+    if (floodIp > FLOOD_PER_HOUR || floodId > FLOOD_PER_HOUR) {
+      await addBan(env, banIp, "auto: download flood (IP)", "flood");
+      await addBan(env, banId, "auto: download flood (app id)", "flood");
+      await discordApi(`/channels/${env.APPROVAL_CHANNEL_ID}/messages`, env, {
+        method: "POST",
+        body: JSON.stringify({ content: "Auto-ban: a visitor sent more than " + FLOOD_PER_HOUR + " download requests in one hour. Use /unban if this was a mistake." })
+      });
+      return new Response("Blocked.", { status: 403 });
+    }
   }
+
+  const ipKey = await downloadDedupKey(ip, id, env);
+  const idKey = await downloadInstallKey(installId, id, env);
+  if (ipKey) {
+    if (await env.DELETE_CODES.get(ipKey)) return json({ ok: true, deduped: true });
+    if (idKey && (await env.DELETE_CODES.get(idKey))) return json({ ok: true, deduped: true });
+  } else {
+    const allowed = await checkDownloadDedup(ip, id);
+    if (!allowed) return json({ ok: true, deduped: true });
+  }
+
+  const hourly = await readHourlyCount(id);
+  if (hourly.n >= DOWNLOADS_PER_HOUR_CAP) return json({ ok: true, limited: true });
 
   try {
     const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
@@ -989,6 +1151,10 @@ async function handleTrackDownload(request, env) {
       })
     });
     if (!updResp.ok) throw new Error(`index.json update failed: ${updResp.status}`);
+
+    if (ipKey) await env.DELETE_CODES.put(ipKey, "1");
+    if (idKey) await env.DELETE_CODES.put(idKey, "1");
+    await writeHourlyCount(hourly.req, hourly.n + 1);
 
     return json({ ok: true, downloads: entry.downloads });
   } catch (err) {
@@ -1026,6 +1192,7 @@ async function deleteShip(id, env) {
   }
   await deleteFile(`ships/${id}/info.json`, `Delete ${id}`, env);
   await removeDeleteCode(id, env);
+  if (env.DELETE_CODES) await env.DELETE_CODES.delete(`sub:${id}`);
 
   return entry ? entry.name : id;
 }
@@ -1061,10 +1228,29 @@ async function handleRegister(url, env) {
       { name: "force", description: "Skip the code check (only if the code is lost or the builder cannot give it)", type: 5, required: false }
     ]
   };
+  const banCommand = {
+    name: "ban",
+    description: "Admin only: ban the submitter of a ship from uploading and counting downloads",
+    options: [
+      { name: "ship", description: "Start typing a ship name or builder and pick the ship", type: 3, required: true, autocomplete: true }
+    ]
+  };
+  const unbanCommand = {
+    name: "unban",
+    description: "Admin only: remove a ban",
+    options: [
+      { name: "ban", description: "Pick the ban to remove", type: 3, required: true, autocomplete: true }
+    ]
+  };
+  const pendingCommand = {
+    name: "pending",
+    description: "Admin only: post all waiting submissions again with Approve and Reject buttons",
+    options: []
+  };
   const resp = await discordApi(
     `/applications/${env.DISCORD_APPLICATION_ID}/guilds/${env.DISCORD_GUILD_ID}/commands`,
     env,
-    { method: "PUT", body: JSON.stringify([submitCommand, deleteCommand]) }
+    { method: "PUT", body: JSON.stringify([submitCommand, deleteCommand, banCommand, unbanCommand, pendingCommand]) }
   );
   const text = await resp.text();
   return new Response(`Status ${resp.status}\n${text}`, {
@@ -1098,11 +1284,36 @@ async function handleAutocomplete(interaction, env) {
   const empty = json({ type: 8, data: { choices: [] } });
   const clicker = interaction.member?.user || interaction.user;
   if (!clicker || clicker.id !== env.APPROVER_USER_ID) return empty;
-  if (interaction.data.name !== "delete") return empty;
+  const cmdName = interaction.data.name;
+  if (cmdName !== "delete" && cmdName !== "ban" && cmdName !== "unban") return empty;
 
   const focused = (interaction.data.options || []).find((o) => o.focused);
-  if (!focused || focused.name !== "ship") return empty;
+  if (!focused) return empty;
   const q = (focused.value || "").toString().trim().toLowerCase();
+
+  if (cmdName === "unban") {
+    if (focused.name !== "ban" || !env.DELETE_CODES) return empty;
+    try {
+      const res = await env.DELETE_CODES.list({ prefix: "ban:" });
+      const choices = [];
+      for (const k of res.keys.slice(0, 50)) {
+        const raw = await env.DELETE_CODES.get(k.name);
+        let label = k.name;
+        try {
+          const rec = JSON.parse(raw);
+          label = `${rec.label || "ban"} (${k.name.split(":")[1]})`;
+        } catch (e) {}
+        if (!q || label.toLowerCase().includes(q)) choices.push({ name: label.slice(0, 100), value: k.name });
+        if (choices.length >= 25) break;
+      }
+      return json({ type: 8, data: { choices } });
+    } catch (err) {
+      console.error("unban autocomplete failed: " + (err && err.message ? err.message : String(err)));
+      return empty;
+    }
+  }
+
+  if (focused.name !== "ship") return empty;
 
   try {
     const list = await readIndexList(env);
@@ -1197,7 +1408,89 @@ async function handleDeleteCommand(interaction, env, ctx) {
   return json({ type: 5, data: { flags: 64 } });
 }
 
+async function handleBanCommand(interaction, env) {
+  const clicker = interaction.member?.user || interaction.user;
+  if (!clicker || clicker.id !== env.APPROVER_USER_ID) return ephemeral("Only the library admin can use this command.");
+  const opts = {};
+  for (const o of interaction.data.options || []) opts[o.name] = o.value;
+  const id = (opts.ship || "").toString().trim();
+  if (!id) return ephemeral("Pick a ship first.");
+  const owner = await getSubmissionOwner(id, env);
+  if (!owner) return ephemeral("No submitter data is stored for this ship (older upload or not picked from the list). Nobody was banned.");
+  await addBan(env, owner.ipKey, owner.label, "banned by admin");
+  await addBan(env, owner.userKey, owner.label, "banned by admin");
+  const parts = [];
+  if (owner.ipKey) parts.push("website connection");
+  if (owner.userKey) parts.push("Discord user");
+  return ephemeral(`Banned the submitter of "${owner.label}" (${parts.join(" + ")}). They can no longer upload or count downloads. Use /unban to undo.`);
+}
+
+async function handleUnbanCommand(interaction, env) {
+  const clicker = interaction.member?.user || interaction.user;
+  if (!clicker || clicker.id !== env.APPROVER_USER_ID) return ephemeral("Only the library admin can use this command.");
+  const opts = {};
+  for (const o of interaction.data.options || []) opts[o.name] = o.value;
+  const key = (opts.ban || "").toString().trim();
+  if (!key.startsWith("ban:") || !env.DELETE_CODES) return ephemeral("Pick a ban from the list.");
+  await env.DELETE_CODES.delete(key);
+  return ephemeral("Ban removed.");
+}
+
+async function handlePendingCommand(interaction, env, ctx) {
+  const clicker = interaction.member?.user || interaction.user;
+  if (!clicker || clicker.id !== env.APPROVER_USER_ID) return ephemeral("Only the library admin can use this command.");
+  ctx.waitUntil(
+    (async () => {
+      let content;
+      try {
+        const dirResp = await ghRequest(`/contents/pending`, env, { method: "GET" });
+        if (dirResp.status === 404) {
+          content = "No pending submissions.";
+        } else if (!dirResp.ok) {
+          throw new Error("Could not read the pending folder: " + dirResp.status);
+        } else {
+          const dirs = (await dirResp.json()).filter((e) => e.type === "dir").slice(0, 10);
+          let posted = 0;
+          const branch = env.GITHUB_BRANCH || "main";
+          for (const d of dirs) {
+            const infoResp = await ghRequest(`/contents/pending/${d.name}/info.json`, env, { method: "GET" });
+            if (!infoResp.ok) continue;
+            const info = JSON.parse(decodeBase64Utf8((await infoResp.json()).content));
+            const hasCode = env.DELETE_CODES ? !!(await env.DELETE_CODES.get(`code:${d.name}`)) : false;
+            const embed = {
+              title: info.name || d.name,
+              color: 0x5b9bd5,
+              image: { url: `https://raw.githubusercontent.com/${env.GITHUB_OWNER}/${env.GITHUB_REPO}/${branch}/pending/${d.name}/preview.png` },
+              fields: [
+                { name: "Submitted by", value: info.submitter || "unknown", inline: true },
+                { name: "Objects", value: `${info.objectCount} \u00b7 utility score ${info.score}/10`, inline: true },
+                { name: "Delete code", value: hasCode ? "set" : "not set", inline: true }
+              ]
+            };
+            if (await postApprovalMessage(env, embed, d.name)) posted++;
+          }
+          content = dirs.length === 0
+            ? "No pending submissions."
+            : `Posted ${posted} of ${dirs.length} pending submission(s) again. If an older message for the same ship still has buttons, ignore it.`;
+        }
+      } catch (err) {
+        console.error("handlePendingCommand failed: " + (err && err.message ? err.message : String(err)));
+        content = "Could not list pending submissions - check logs.";
+      }
+      const resp = await discordApi(`/webhooks/${env.DISCORD_APPLICATION_ID}/${interaction.token}/messages/@original`, env, {
+        method: "PATCH",
+        body: JSON.stringify({ content })
+      });
+      if (!resp.ok) console.error("pending reply failed: " + resp.status + " " + (await resp.text()));
+    })()
+  );
+  return json({ type: 5, data: { flags: 64 } });
+}
+
 async function handleCommand(interaction, env, ctx) {
+  if (interaction.data.name === "ban") return handleBanCommand(interaction, env);
+  if (interaction.data.name === "unban") return handleUnbanCommand(interaction, env);
+  if (interaction.data.name === "pending") return handlePendingCommand(interaction, env, ctx);
   if (interaction.data.name === "delete") {
     return handleDeleteCommand(interaction, env, ctx);
   }
@@ -1245,6 +1538,11 @@ async function handleCommand(interaction, env, ctx) {
     return ephemeral("Delete codes are not available right now. Submit again without a delete code or try later.");
   }
 
+  const submitUser = interaction.member?.user || interaction.user;
+  if (submitUser && (await isBanned(env, [userBanKey(submitUser.id)]))) {
+    return ephemeral("You are not allowed to submit Corvettes to this library.");
+  }
+
   ctx.waitUntil(
     (async () => {
       const submitter = interaction.member?.user || interaction.user;
@@ -1256,11 +1554,15 @@ async function handleCommand(interaction, env, ctx) {
         for (const a of imgAtts) imageBufs.push(await (await fetch(a.url)).arrayBuffer());
       } catch (err) {
         console.error("could not fetch discord attachments: " + (err && err.message ? err.message : String(err)));
+        await discordApi(`/webhooks/${env.DISCORD_APPLICATION_ID}/${interaction.token}`, env, {
+          method: "POST",
+          body: JSON.stringify({ content: "Could not read your attachments. Please submit again.", flags: 64 })
+        });
         return;
       }
 
       const staged = await stageSubmission(
-        { name, submitter: submitter.username || "", patreonUrl: patreonCheck.url, shipBytes, imageBufs, deleteCode },
+        { name, submitter: submitter.username || "", patreonUrl: patreonCheck.url, shipBytes, imageBufs, deleteCode, userKey: userBanKey(submitter.id) },
         env
       );
 
@@ -1285,22 +1587,8 @@ async function handleCommand(interaction, env, ctx) {
           { name: "Delete code", value: staged.hasDeleteCode ? "set" : "not set", inline: true }
         ]
       };
-      const components = [
-        {
-          type: 1,
-          components: [
-            { type: 2, style: 3, label: "Approve", custom_id: `approve:${staged.slug}` },
-            { type: 2, style: 4, label: "Reject", custom_id: `reject:${staged.slug}` }
-          ]
-        }
-      ];
-      const postResp = await discordApi(`/channels/${env.APPROVAL_CHANNEL_ID}/messages`, env, {
-        method: "POST",
-        body: JSON.stringify({ embeds: [embed], components })
-      });
-      if (!postResp.ok) {
-        console.error("post to approval channel failed: " + postResp.status + " " + (await postResp.text()));
-      }
+      const posted = await postApprovalMessage(env, embed, staged.slug);
+      if (!posted) console.error("approval message could not be posted for " + staged.slug + " - use /pending");
     })()
   );
 
@@ -1332,31 +1620,51 @@ async function handleComponent(interaction, env, ctx) {
     return json({ type: InteractionResponseType.UPDATE_MESSAGE, data: {} });
   }
 
-  if (action === "reject") {
-    ctx.waitUntil(rejectPending(slug, env));
+  if (action === "reject" || action === "rejban") {
+    ctx.waitUntil(
+      (async () => {
+        let banNote = "";
+        if (action === "rejban") {
+          const owner = await getSubmissionOwner(slug, env);
+          if (owner) {
+            await addBan(env, owner.ipKey, owner.label, "rejected and banned");
+            await addBan(env, owner.userKey, owner.label, "rejected and banned");
+            banNote = " and banned";
+          } else {
+            banNote = " (no submitter data found, nobody banned)";
+          }
+        }
+        const result = await rejectPending(slug, env);
+        const payload = result.ok
+          ? { embeds: [{ ...embed, color: 0x8b2020, title: `Rejected${banNote} - ${embed.title}` }], components: [] }
+          : {
+              embeds: [{ ...embed, color: 0xe89a2f, title: `Reject failed - try again - ${embed.title}`, description: `Error: ${result.error}` }],
+              components: approvalComponents(slug, false)
+            };
+        await editApprovalMessage(env, message.id, payload);
+      })()
+    );
     return json({
       type: InteractionResponseType.UPDATE_MESSAGE,
-      data: { embeds: [{ ...embed, color: 0x8b2020, title: `Rejected - ${embed.title}` }], components: [] }
+      data: { embeds: [{ ...embed, title: `Rejecting - ${embed.title}` }], components: approvalComponents(slug, true) }
     });
   }
 
   if (action === "approve") {
     ctx.waitUntil(
       promotePendingToLibraryTry(slug, env).then(async (result) => {
-        const finalEmbed = {
-          ...embed,
-          color: result.ok ? 0x2d7a2d : 0xe05555,
-          title: `${result.ok ? "Approved" : "Approve failed - check logs"} - ${embed.title}`
-        };
-        await discordApi(`/channels/${env.APPROVAL_CHANNEL_ID}/messages/${message.id}`, env, {
-          method: "PATCH",
-          body: JSON.stringify({ embeds: [finalEmbed], components: [] })
-        });
+        const payload = result.ok
+          ? { embeds: [{ ...embed, color: 0x2d7a2d, title: `Approved - ${embed.title}` }], components: [] }
+          : {
+              embeds: [{ ...embed, color: 0xe05555, title: `Approve failed - try again - ${embed.title}`, description: `Error: ${result.error}` }],
+              components: approvalComponents(slug, false)
+            };
+        await editApprovalMessage(env, message.id, payload);
       })
     );
     return json({
       type: InteractionResponseType.UPDATE_MESSAGE,
-      data: { embeds: [{ ...embed, title: `Publishing - ${embed.title}` }], components: [] }
+      data: { embeds: [{ ...embed, title: `Publishing - ${embed.title}` }], components: approvalComponents(slug, true) }
     });
   }
 
