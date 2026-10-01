@@ -16,7 +16,7 @@ function slugify(s) {
   );
 }
 
-function validateLinkUrl(raw) {
+function validateLinkUrl(raw, kind) {
   const url = (raw || "").toString().trim();
   if (!url) return { ok: true, url: "" };
   let parsed;
@@ -29,6 +29,12 @@ function validateLinkUrl(raw) {
   const isPatreon = host === "patreon.com" || host === "www.patreon.com";
   const isYouTube = host === "youtube.com" || host === "www.youtube.com" || host === "m.youtube.com" ||
     host === "youtu.be" || host === "www.youtu.be";
+  if (kind === "youtube" && !isYouTube) {
+    return { ok: false, error: "the YouTube link must be a youtube.com or youtu.be link" };
+  }
+  if (kind === "patreon" && !isPatreon) {
+    return { ok: false, error: "the Patreon link must be a patreon.com link" };
+  }
   if (parsed.protocol !== "https:" || (!isPatreon && !isYouTube)) {
     return { ok: false, error: "the link must be a patreon.com or YouTube link" };
   }
@@ -36,6 +42,30 @@ function validateLinkUrl(raw) {
     return { ok: false, error: "the YouTube link must point to a video, playlist or channel" };
   }
   return { ok: true, url: parsed.toString() };
+}
+
+function classifyLinks(rawYoutube, rawPatreon, rawLegacy) {
+  const yt = validateLinkUrl(rawYoutube, "youtube");
+  if (!yt.ok) return yt;
+  const pt = validateLinkUrl(rawPatreon, "patreon");
+  if (!pt.ok) return pt;
+  let youtubeUrl = yt.url;
+  let patreonUrl = pt.url;
+  const legacy = validateLinkUrl(rawLegacy);
+  if (!legacy.ok) return legacy;
+  if (legacy.url) {
+    const host = new URL(legacy.url).hostname.toLowerCase();
+    if (host.includes("patreon")) patreonUrl = patreonUrl || legacy.url;
+    else youtubeUrl = youtubeUrl || legacy.url;
+  }
+  return { ok: true, youtubeUrl, patreonUrl };
+}
+
+function linkFields(youtubeUrl, patreonUrl) {
+  const f = [];
+  if (youtubeUrl) f.push({ name: "YouTube", value: youtubeUrl.slice(0, 200), inline: false });
+  if (patreonUrl) f.push({ name: "Patreon", value: patreonUrl.slice(0, 200), inline: false });
+  return f;
 }
 
 const TIER_RED = new Set([
@@ -236,7 +266,7 @@ function matchBracket(text, start) {
   return -1;
 }
 
-function extractObjectsArrayText(text) {
+function extractObjectsArrayText(text, key = "Objects") {
   let depth = 0;
   let i = 0;
   const n = text.length;
@@ -248,7 +278,7 @@ function extractObjectsArrayText(text) {
         if (text[j] === "\\") j++;
         j++;
       }
-      if (depth === 1 && text.slice(i + 1, j) === "Objects") {
+      if (depth === 1 && text.slice(i + 1, j) === key) {
         let k = j + 1;
         while (k < n && /\s/.test(text[k])) k++;
         if (text[k] === ":") {
@@ -355,8 +385,8 @@ function ensureLayout(objectsText) {
   return objectsText;
 }
 
-function objectsTextKeepingLayout(text, objects) {
-  const raw = extractObjectsArrayText(text);
+function objectsTextKeepingLayout(text, objects, key = "Objects") {
+  const raw = extractObjectsArrayText(text, key);
   if (raw) {
     if (raw.includes("\n") && sameJson(raw, objects)) return raw;
     const pretty = prettyPrintJsonText(raw);
@@ -365,7 +395,7 @@ function objectsTextKeepingLayout(text, objects) {
   return JSON.stringify(objects, null, 4);
 }
 
-// Whatever gets submitted - a real .nmsship zip, a plain .json, or a .txt paste of the
+// Whatever gets submitted - a real .nmsship zip, an .nmsbase or .nmsprefab, a plain .json, or a .txt paste of the
 // objects array - is reduced to just that plain objects.json text right away. Nothing
 // beyond that array is ever stored, and no zip container is ever written to the repo.
 async function normalizeShipBytes(bytes) {
@@ -389,7 +419,9 @@ async function normalizeShipBytes(bytes) {
     if (Array.isArray(parsed)) {
       objectsText = ensureLayout(text);
     } else if (parsed && typeof parsed === "object" && Array.isArray(parsed.Objects)) {
-      objectsText = objectsTextKeepingLayout(text, parsed.Objects);
+      objectsText = objectsTextKeepingLayout(text, parsed.Objects, "Objects");
+    } else if (parsed && typeof parsed === "object" && Array.isArray(parsed.Prefab)) {
+      objectsText = objectsTextKeepingLayout(text, parsed.Prefab, "Prefab");
     } else {
       return { ok: false, error: "file is not a list of objects" };
     }
@@ -564,13 +596,42 @@ function approvalComponents(slug, disabled) {
   ];
 }
 
-async function postApprovalMessage(env, embed, slug) {
+function imageExt(type) {
+  if (type === "image/png") return "png";
+  if (type === "image/gif") return "gif";
+  if (type === "image/webp") return "webp";
+  return "jpg";
+}
+
+async function postApprovalMessage(env, embed, slug, image) {
+  const bytes = image ? new Uint8Array(image) : null;
+  const type = bytes ? sniffImageType(bytes) : null;
+  const filename = bytes ? `preview.${imageExt(type)}` : null;
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
-      const resp = await discordApi(`/channels/${env.APPROVAL_CHANNEL_ID}/messages`, env, {
-        method: "POST",
-        body: JSON.stringify({ embeds: [embed], components: approvalComponents(slug, false) })
-      });
+      let resp;
+      if (bytes) {
+        const form = new FormData();
+        form.append(
+          "payload_json",
+          JSON.stringify({
+            embeds: [{ ...embed, image: { url: `attachment://${filename}` } }],
+            components: approvalComponents(slug, false),
+            attachments: [{ id: 0, filename }]
+          })
+        );
+        form.append("files[0]", new Blob([bytes], { type }), filename);
+        resp = await fetch(`https://discord.com/api/v10/channels/${env.APPROVAL_CHANNEL_ID}/messages`, {
+          method: "POST",
+          headers: { Authorization: `Bot ${env.DISCORD_TOKEN}` },
+          body: form
+        });
+      } else {
+        resp = await discordApi(`/channels/${env.APPROVAL_CHANNEL_ID}/messages`, env, {
+          method: "POST",
+          body: JSON.stringify({ embeds: [embed], components: approvalComponents(slug, false) })
+        });
+      }
       if (resp.ok) return true;
       console.error("post to approval channel failed: " + resp.status + " " + (await resp.text()));
     } catch (err) {
@@ -980,11 +1041,11 @@ async function handlePendingImage(url, env) {
   if (!images[n]) return new Response("Not found", { status: 404 });
   return new Response(images[n], {
     status: 200,
-    headers: { "content-type": sniffImageType(images[n]), "cache-control": "private, max-age=300" }
+    headers: { "content-type": sniffImageType(images[n]), "cache-control": "public, max-age=86400" }
   });
 }
 
-async function stageSubmission({ name, submitter, patreonUrl, shipBytes, imageBufs, deleteCode, ipKey, userKey }, env) {
+async function stageSubmission({ name, submitter, patreonUrl, youtubeUrl, shipBytes, imageBufs, deleteCode, ipKey, userKey }, env) {
   if ((await pendingCount(env)) >= MAX_PENDING_ITEMS) {
     return { ok: false, error: "the waiting list is full, please try again later" };
   }
@@ -996,7 +1057,7 @@ async function stageSubmission({ name, submitter, patreonUrl, shipBytes, imageBu
   const images = (imageBufs || []).slice(0, 3);
 
   const info = {
-    name, id: slug, submitter: submitter || "", patreonUrl: patreonUrl || "",
+    name, id: slug, submitter: submitter || "", patreonUrl: patreonUrl || "", youtubeUrl: youtubeUrl || "",
     objectCount: meta.objectCount, score: meta.score, utilities: meta.utilities,
     imageCount: images.length,
     stagedAt: new Date().toISOString()
@@ -1063,7 +1124,7 @@ async function promotePendingToLibrary(slug, env) {
   list = list.filter((e) => e.id !== slug);
   list.push({
     id: slug, name: stagedInfo.name, sha256: shipHash, submitter: stagedInfo.submitter || "",
-    patreonUrl: stagedInfo.patreonUrl || "", imageCount,
+    patreonUrl: stagedInfo.patreonUrl || "", youtubeUrl: stagedInfo.youtubeUrl || "", imageCount,
     objectCount: stagedInfo.objectCount, score: stagedInfo.score, utilities: stagedInfo.utilities,
     downloads: 0, approvedAt: info.approvedAt
   });
@@ -1120,7 +1181,7 @@ async function promoteLegacyPending(slug, env) {
   }
   list.push({
     id: slug, name: stagedInfo.name, sha256: shipHash, submitter: stagedInfo.submitter || "",
-    patreonUrl: stagedInfo.patreonUrl || "", imageCount,
+    patreonUrl: stagedInfo.patreonUrl || "", youtubeUrl: stagedInfo.youtubeUrl || "", imageCount,
     objectCount: stagedInfo.objectCount, score: stagedInfo.score, utilities: stagedInfo.utilities,
     downloads: 0, approvedAt: info.approvedAt
   });
@@ -1204,11 +1265,12 @@ button:disabled{opacity:.5}
 <form id="f">
 <label>Your name (builder)<input type="text" name="builder" required maxlength="80"></label>
 <label>Ship name<input type="text" name="name" required maxlength="80"></label>
-<label>Patreon or YouTube link (optional)<input type="text" name="link" placeholder="https://www.patreon.com/yourname or https://youtu.be/..." maxlength="200"></label>
-<div class="hint">Only Patreon and YouTube links are accepted (youtube.com, youtu.be, shorts, playlists and channels all work).</div>
+<label>YouTube link (optional)<input type="text" name="youtube" placeholder="https://youtu.be/..." maxlength="200"></label>
+<label>Patreon link (optional)<input type="text" name="patreon" placeholder="https://www.patreon.com/yourname" maxlength="200"></label>
+<div class="hint">You can fill in one, both or none. YouTube: youtube.com, youtu.be, shorts, playlists and channels all work. Patreon: patreon.com only.</div>
 <label>Fill in your delete code (optional)<input type="text" name="deletecode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="off" placeholder="6 digits, for example 482915"></label>
 <div class="hint">A delete code is what you supply to me when you want your ship to be removed from the Corvette library. Pick 6 random digits, only for this. Never use a code from anywhere else (bank, phone, accounts). You can use the same code for every upload. This browser remembers it for next time. I cannot see or recover it, so write it down.</div>
-<label>Ship file (.nmsship, .json or .txt)<div class="file"><input type="file" name="ship" accept=".nmsship,.json,.txt" required><span class="filebtn">Choose file</span></div></label>
+<label>Ship file (.nmsship, .nmsbase, .nmsprefab, .json or .txt)<div class="file"><input type="file" name="ship" accept=".nmsship,.nmsbase,.nmsprefab,.json,.txt" required><span class="filebtn">Choose file</span></div></label>
 <label>Preview image<div class="file"><input type="file" name="image1" accept="image/*" required><span class="filebtn">Choose file</span></div></label>
 <label>Extra image 2 (optional)<div class="file"><input type="file" name="image2" accept="image/*"><span class="filebtn">Choose file</span></div></label>
 <label>Extra image 3 (optional)<div class="file"><input type="file" name="image3" accept="image/*"><span class="filebtn">Choose file</span></div></label>
@@ -1443,7 +1505,7 @@ async function handleUploadSubmitInner(request, env, ctx) {
     return new Response(`Could not accept this submission: ${problems.join(", ")}.`, { status: 400 });
   }
 
-  const patreonCheck = validateLinkUrl(form.get("link") || form.get("patreon"));
+  const patreonCheck = classifyLinks(form.get("youtube"), form.get("patreon"), form.get("link"));
   if (!patreonCheck.ok) {
     return new Response(`Could not accept this submission: ${patreonCheck.error}.`, { status: 400 });
   }
@@ -1461,7 +1523,7 @@ async function handleUploadSubmitInner(request, env, ctx) {
   for (const f of imageFiles) imageBufs.push(await f.arrayBuffer());
 
   const staged = await stageSubmission(
-    { name, submitter: builder, patreonUrl: patreonCheck.url, shipBytes, imageBufs, deleteCode, ipKey: ownIpKey },
+    { name, submitter: builder, patreonUrl: patreonCheck.patreonUrl, youtubeUrl: patreonCheck.youtubeUrl, shipBytes, imageBufs, deleteCode, ipKey: ownIpKey },
     env
   );
   if (!staged.ok) {
@@ -1469,22 +1531,19 @@ async function handleUploadSubmitInner(request, env, ctx) {
   }
   const slug = staged.slug;
 
-  const imageRawUrl = await pendingImageUrl(slug, env);
-
   ctx.waitUntil(
     (async () => {
       const embed = {
         title: name,
         color: 0x5b9bd5,
-        image: { url: imageRawUrl },
         fields: [
           { name: "Submitted by", value: `${builder} (via website)`, inline: true },
-          ...(patreonCheck.url ? [{ name: "Link", value: patreonCheck.url.slice(0, 200), inline: false }] : []),
+          ...linkFields(patreonCheck.youtubeUrl, patreonCheck.patreonUrl),
           { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true },
           ...(await approvalExtraFields(slug, env, staged.check))
         ]
       };
-      const posted = await postApprovalMessage(env, embed, slug);
+      const posted = await postApprovalMessage(env, embed, slug, imageBufs[0]);
       if (!posted) console.error("approval message could not be posted for " + slug + " - use /pending");
     })()
   );
@@ -1752,7 +1811,8 @@ async function handleRegister(url, env) {
       { name: "image1", description: "A preview screenshot", type: 11, required: true },
       { name: "image2", description: "Extra screenshot (optional)", type: 11, required: false },
       { name: "image3", description: "Extra screenshot (optional)", type: 11, required: false },
-      { name: "link", description: "Your Patreon or YouTube link for this ship (optional)", type: 3, required: false },
+      { name: "youtube", description: "Your YouTube link for this ship (optional)", type: 3, required: false },
+      { name: "patreon", description: "Your Patreon link (optional)", type: 3, required: false },
       {
         name: "delete_code",
         description: "Optional 6-digit delete code. Random code, only for this. Never use a real code.",
@@ -2007,14 +2067,20 @@ async function handlePendingCommand(interaction, env, ctx) {
           const embed = {
             title: md.n || slug,
             color: 0x5b9bd5,
-            image: { url: await pendingImageUrl(slug, env) },
             fields: [
               { name: "Submitted by", value: md.s || "unknown", inline: true },
               { name: "Objects", value: `${md.o} \u00b7 utility score ${md.sc}/10`, inline: true },
               ...(await approvalExtraFields(slug, env, md.k))
             ]
           };
-          if (await postApprovalMessage(env, embed, slug)) posted++;
+          let firstImage = null;
+          try {
+            const buf = await pendingGet(env, slug);
+            if (buf) firstImage = unpackPending(buf).images[0] || null;
+          } catch (e) {
+            console.error("could not read image for " + slug);
+          }
+          if (await postApprovalMessage(env, embed, slug, firstImage)) posted++;
         }
         const dirResp = await ghRequest(`/contents/pending`, env, { method: "GET" });
         if (dirResp.ok) {
@@ -2105,7 +2171,7 @@ async function handleSubmitInner(interaction, env, ctx) {
     });
   }
 
-  const patreonCheck = validateLinkUrl(opts.link || opts.patreon);
+  const patreonCheck = classifyLinks(opts.youtube, opts.patreon, opts.link);
   if (!patreonCheck.ok) {
     return json({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -2151,7 +2217,7 @@ async function handleSubmitInner(interaction, env, ctx) {
       }
 
       const staged = await stageSubmission(
-        { name, submitter: submitter.username || "", patreonUrl: patreonCheck.url, shipBytes, imageBufs, deleteCode, userKey: userBanKey(submitter.id) },
+        { name, submitter: submitter.username || "", patreonUrl: patreonCheck.patreonUrl, youtubeUrl: patreonCheck.youtubeUrl, shipBytes, imageBufs, deleteCode, userKey: userBanKey(submitter.id) },
         env
       );
 
@@ -2163,20 +2229,17 @@ async function handleSubmitInner(interaction, env, ctx) {
         return;
       }
 
-      const imageRawUrl = await pendingImageUrl(staged.slug, env);
-
       const embed = {
         title: name,
         color: 0x5b9bd5,
-        image: { url: imageRawUrl },
         fields: [
           { name: "Submitted by", value: `<@${submitter.id}> (${submitter.username})`, inline: true },
-          ...(patreonCheck.url ? [{ name: "Link", value: patreonCheck.url.slice(0, 200), inline: false }] : []),
+          ...linkFields(patreonCheck.youtubeUrl, patreonCheck.patreonUrl),
           { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true },
           ...(await approvalExtraFields(staged.slug, env, staged.check))
         ]
       };
-      const posted = await postApprovalMessage(env, embed, staged.slug);
+      const posted = await postApprovalMessage(env, embed, staged.slug, imageBufs[0]);
       if (!posted) console.error("approval message could not be posted for " + staged.slug + " - use /pending");
     })()
   );
