@@ -196,5 +196,18 @@
     "utilities": [],
     "downloads": 0,
     "approvedAt": "2026-10-01T05:32:29.349Z"
+  },
+  {
+    "id": "flintstones-car-p0e7b",
+    "name": "Flintstones Car",
+    "sha256": "27cf6518ee3e736605ed35fed255c35af715bf56a117f85fc63eeb98c6fd8037",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 1,
+    "objectCount": 305,
+    "score": 0,
+    "utilities": [],
+    "downloads": 0,
+    "approvedAt": "2026-10-01T05:32:44.049Z"
   }
 ]
