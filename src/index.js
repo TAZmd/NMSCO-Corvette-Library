@@ -1068,7 +1068,7 @@ button:disabled{opacity:.5}
 <label>Preview image<input type="file" name="image1" accept="image/*" required></label>
 <label>Extra image 2 (optional)<input type="file" name="image2" accept="image/*"></label>
 <label>Extra image 3 (optional)<input type="file" name="image3" accept="image/*"></label>
-<div class="cf-turnstile" data-sitekey="${siteKey}" style="margin-top:16px"></div>
+<div class="cf-turnstile" data-sitekey="${siteKey}" data-callback="onTsOk" data-expired-callback="onTsExpired" data-error-callback="onTsError" style="margin-top:16px"></div>
 ${siteKey ? '' : '<div class="hint">Verification is not set up on the server (TURNSTILE_SITE_KEY is missing). Uploads will fail until the admin fixes this.</div>'}
 <button type="submit">Submit for approval</button>
 </form>
@@ -1088,6 +1088,32 @@ function saveField(key, value, valid) {
     else if (!value) localStorage.removeItem(key);
   } catch (e) {}
 }
+let tsToken = '';
+let tsIssued = 0;
+let tsWaiters = [];
+function onTsOk(token) {
+  tsToken = token;
+  tsIssued = Date.now();
+  const waiting = tsWaiters;
+  tsWaiters = [];
+  waiting.forEach((f) => f(token));
+}
+function onTsExpired() { tsToken = ''; }
+function onTsError() { tsToken = ''; }
+function waitForToken(ms) {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(''), ms);
+    tsWaiters.push((t) => { clearTimeout(timer); resolve(t); });
+  });
+}
+async function freshToken(status) {
+  const age = (Date.now() - tsIssued) / 1000;
+  if (tsToken && age < 120) return tsToken;
+  status.textContent = 'Verifying... (if a box appears, tick it)';
+  tsToken = '';
+  resetTurnstile();
+  return await waitForToken(25000);
+}
 loadSavedFields();
 document.querySelector('input[name="builder"]').addEventListener('input', (ev) => {
   const v = ev.target.value.trim();
@@ -1106,11 +1132,14 @@ document.getElementById('f').addEventListener('submit', async (e) => {
   let stage = 'preparing the form';
   try {
     const form = new FormData(e.target);
-    if (!form.get('cf-turnstile-response')) {
-      status.textContent = 'Wait for the verification check to finish (green check mark), then press Submit again.';
+    const token = await freshToken(status);
+    if (!token) {
+      status.textContent = 'The verification did not finish. Wait for the green check mark or reload the page, then press Submit again.';
       btn.disabled = false;
       return;
     }
+    form.set('cf-turnstile-response', token);
+    status.textContent = 'Uploading...';
     for (const name of ['image1', 'image2', 'image3']) {
       const input = e.target.querySelector('input[name="' + name + '"]');
       if (input.files && input.files[0]) {
@@ -1124,7 +1153,10 @@ document.getElementById('f').addEventListener('submit', async (e) => {
     stage = 'sending to the server';
     const resp = await fetch('/upload', { method: 'POST', body: form });
     stage = 'reading the server answer';
-    const text = await resp.text();
+    let text = await resp.text();
+    const tokenAge = Math.round((Date.now() - tsIssued) / 1000);
+    tsToken = '';
+    if (!resp.ok && text.indexOf('[') >= 0) text += ' (verification age ' + tokenAge + 's)';
     status.textContent = text;
     if (resp.ok) {
       e.target.reset();
