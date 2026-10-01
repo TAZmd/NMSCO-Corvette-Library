@@ -145,5 +145,43 @@
     ],
     "downloads": 0,
     "approvedAt": "2026-10-01T05:28:11.644Z"
+  },
+  {
+    "id": "the-niblet-qhrb9",
+    "name": "The Niblet",
+    "sha256": "6495285a75649cfdadae1a47c24e6bb76f0a1420176f8ab3ca312640eccee5f9",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 1,
+    "objectCount": 174,
+    "score": 5,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Nip Plant",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-01T05:28:24.250Z"
   }
 ]
