@@ -1488,7 +1488,6 @@ async function handleUploadSubmitInner(request, env, ctx) {
           { name: "Submitted by", value: `${builder} (via website)`, inline: true },
           ...(patreonCheck.url ? [{ name: "Link", value: patreonCheck.url.slice(0, 200), inline: false }] : []),
           { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true },
-          { name: "Delete code", value: staged.hasDeleteCode ? "set" : "not set", inline: true },
           ...(await approvalExtraFields(slug, env, staged.check))
         ]
       };
@@ -1926,7 +1925,6 @@ async function handlePendingCommand(interaction, env, ctx) {
             fields: [
               { name: "Submitted by", value: md.s || "unknown", inline: true },
               { name: "Objects", value: `${md.o} \u00b7 utility score ${md.sc}/10`, inline: true },
-              { name: "Delete code", value: md.c ? "set" : "not set", inline: true },
               ...(await approvalExtraFields(slug, env, md.k))
             ]
           };
@@ -1940,7 +1938,6 @@ async function handlePendingCommand(interaction, env, ctx) {
             const infoResp = await ghRequest(`/contents/pending/${d.name}/info.json`, env, { method: "GET" });
             if (!infoResp.ok) continue;
             const info = JSON.parse(decodeBase64Utf8((await infoResp.json()).content));
-            const hasCode = env.DELETE_CODES ? !!(await env.DELETE_CODES.get(`code:${d.name}`)) : false;
             found++;
             const embed = {
               title: info.name || d.name,
@@ -1949,7 +1946,6 @@ async function handlePendingCommand(interaction, env, ctx) {
               fields: [
                 { name: "Submitted by", value: info.submitter || "unknown", inline: true },
                 { name: "Objects", value: `${info.objectCount} \u00b7 utility score ${info.score}/10`, inline: true },
-                { name: "Delete code", value: hasCode ? "set" : "not set", inline: true }
               ]
             };
             if (await postApprovalMessage(env, embed, d.name)) posted++;
@@ -2069,7 +2065,6 @@ async function handleCommand(interaction, env, ctx) {
           { name: "Submitted by", value: `<@${submitter.id}> (${submitter.username})`, inline: true },
           ...(patreonCheck.url ? [{ name: "Link", value: patreonCheck.url.slice(0, 200), inline: false }] : []),
           { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true },
-          { name: "Delete code", value: staged.hasDeleteCode ? "set" : "not set", inline: true },
           ...(await approvalExtraFields(staged.slug, env, staged.check))
         ]
       };
