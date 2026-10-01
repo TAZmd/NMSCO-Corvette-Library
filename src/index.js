@@ -893,7 +893,7 @@ button:disabled{opacity:.5}
 <label>Ship name<input type="text" name="name" required maxlength="80"></label>
 <label>Patreon link (optional)<input type="text" name="patreon" placeholder="https://www.patreon.com/yourname" maxlength="200"></label>
 <label>Fill in your delete code (optional)<input type="text" name="deletecode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="off" placeholder="6 digits, for example 482915"></label>
-<div class="hint">A delete code is what you supply to me when you want your ship to be removed from the Corvette library. Pick 6 random digits, only for this. Never use a code from anywhere else (bank, phone, accounts). You can use the same code for every upload. I cannot see or recover it, so write it down.</div>
+<div class="hint">A delete code is what you supply to me when you want your ship to be removed from the Corvette library. Pick 6 random digits, only for this. Never use a code from anywhere else (bank, phone, accounts). You can use the same code for every upload. This browser remembers it for next time. I cannot see or recover it, so write it down.</div>
 <label>Ship file (.nmsship, .json or .txt)<input type="file" name="ship" accept=".nmsship,.json,.txt" required></label>
 <label>Preview image<input type="file" name="image1" accept="image/*" required></label>
 <label>Extra image 2 (optional)<input type="file" name="image2" accept="image/*"></label>
@@ -904,6 +904,29 @@ ${siteKey ? '' : '<div class="hint">Verification is not set up on the server (TU
 </form>
 <div id="status"></div>
 <script>
+function loadSavedFields() {
+  try {
+    const name = localStorage.getItem('builderName');
+    if (name) document.querySelector('input[name="builder"]').value = name;
+    const code = localStorage.getItem('deleteCode');
+    if (code) document.querySelector('input[name="deletecode"]').value = code;
+  } catch (e) {}
+}
+function saveField(key, value, valid) {
+  try {
+    if (value && valid) localStorage.setItem(key, value);
+    else if (!value) localStorage.removeItem(key);
+  } catch (e) {}
+}
+loadSavedFields();
+document.querySelector('input[name="builder"]').addEventListener('input', (ev) => {
+  const v = ev.target.value.trim();
+  saveField('builderName', v, true);
+});
+document.querySelector('input[name="deletecode"]').addEventListener('input', (ev) => {
+  const v = ev.target.value.trim();
+  saveField('deleteCode', v, /^[0-9]{6}$/.test(v));
+});
 document.getElementById('f').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = e.target.querySelector('button');
@@ -928,7 +951,10 @@ document.getElementById('f').addEventListener('submit', async (e) => {
     stage = 'reading the server answer';
     const text = await resp.text();
     status.textContent = text;
-    if (resp.ok) e.target.reset();
+    if (resp.ok) {
+      e.target.reset();
+      loadSavedFields();
+    }
     resetTurnstile();
   } catch (err) {
     const why = err && err.message ? err.message : 'unknown error';
@@ -1084,6 +1110,17 @@ async function handleUploadSubmitInner(request, env, ctx) {
   return new Response("Thanks! Your Corvette was submitted for approval.", { status: 200 });
 }
 
+let d1SchemaReady = false;
+
+async function ensureD1(env) {
+  if (d1SchemaReady) return;
+  await env.DB.batch([
+    env.DB.prepare("CREATE TABLE IF NOT EXISTS dl_seen (ship TEXT NOT NULL, kind TEXT NOT NULL, hash TEXT NOT NULL, PRIMARY KEY (ship, kind, hash)) WITHOUT ROWID"),
+    env.DB.prepare("CREATE TABLE IF NOT EXISTS counters (k TEXT PRIMARY KEY, n INTEGER NOT NULL) WITHOUT ROWID")
+  ]);
+  d1SchemaReady = true;
+}
+
 async function handleTrackDownload(request, env) {
   let body;
   try {
@@ -1118,18 +1155,43 @@ async function handleTrackDownload(request, env) {
     }
   }
 
-  const ipKey = await downloadDedupKey(ip, id, env);
-  const idKey = await downloadInstallKey(installId, id, env);
-  if (ipKey) {
-    if (await env.DELETE_CODES.get(ipKey)) return json({ ok: true, deduped: true });
-    if (idKey && (await env.DELETE_CODES.get(idKey))) return json({ ok: true, deduped: true });
-  } else {
-    const allowed = await checkDownloadDedup(ip, id);
-    if (!allowed) return json({ ok: true, deduped: true });
-  }
+  const useD1 = !!env.DB && !!env.DELETE_PEPPER;
+  let ipHash = null;
+  let idHash = null;
+  let capKey = null;
+  let ipKey = null;
+  let idKey = null;
+  let hourly = null;
 
-  const hourly = await readHourlyCount(id);
-  if (hourly.n >= DOWNLOADS_PER_HOUR_CAP) return json({ ok: true, limited: true });
+  if (useD1) {
+    ipHash = (await hashDeleteCode(`dl:${id}`, ip, env)).slice(0, 32);
+    idHash = installId ? (await hashDeleteCode(`dlid:${id}`, installId.toLowerCase(), env)).slice(0, 32) : null;
+    capKey = `cap:${id}:${Math.floor(Date.now() / 3600000)}`;
+    try {
+      await ensureD1(env);
+      const seen = await env.DB.prepare(
+        "SELECT 1 AS x FROM dl_seen WHERE ship = ? AND ((kind = 'ip' AND hash = ?) OR (kind = 'id' AND hash = ?)) LIMIT 1"
+      ).bind(id, ipHash, idHash || "-").first();
+      if (seen) return json({ ok: true, deduped: true });
+      const capRow = await env.DB.prepare("SELECT n FROM counters WHERE k = ?").bind(capKey).first();
+      if (capRow && capRow.n >= DOWNLOADS_PER_HOUR_CAP) return json({ ok: true, limited: true });
+    } catch (err) {
+      console.error("d1 check failed: " + (err && err.message ? err.message : String(err)));
+      return new Response("Could not record download.", { status: 500 });
+    }
+  } else {
+    ipKey = await downloadDedupKey(ip, id, env);
+    idKey = await downloadInstallKey(installId, id, env);
+    if (ipKey) {
+      if (await env.DELETE_CODES.get(ipKey)) return json({ ok: true, deduped: true });
+      if (idKey && (await env.DELETE_CODES.get(idKey))) return json({ ok: true, deduped: true });
+    } else {
+      const allowed = await checkDownloadDedup(ip, id);
+      if (!allowed) return json({ ok: true, deduped: true });
+    }
+    hourly = await readHourlyCount(id);
+    if (hourly.n >= DOWNLOADS_PER_HOUR_CAP) return json({ ok: true, limited: true });
+  }
 
   try {
     const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
@@ -1152,9 +1214,18 @@ async function handleTrackDownload(request, env) {
     });
     if (!updResp.ok) throw new Error(`index.json update failed: ${updResp.status}`);
 
-    if (ipKey) await env.DELETE_CODES.put(ipKey, "1");
-    if (idKey) await env.DELETE_CODES.put(idKey, "1");
-    await writeHourlyCount(hourly.req, hourly.n + 1);
+    if (useD1) {
+      const stmts = [
+        env.DB.prepare("INSERT OR IGNORE INTO dl_seen (ship, kind, hash) VALUES (?, 'ip', ?)").bind(id, ipHash),
+        env.DB.prepare("INSERT INTO counters (k, n) VALUES (?, 1) ON CONFLICT(k) DO UPDATE SET n = n + 1").bind(capKey)
+      ];
+      if (idHash) stmts.push(env.DB.prepare("INSERT OR IGNORE INTO dl_seen (ship, kind, hash) VALUES (?, 'id', ?)").bind(id, idHash));
+      await env.DB.batch(stmts);
+    } else {
+      if (ipKey) await env.DELETE_CODES.put(ipKey, "1");
+      if (idKey) await env.DELETE_CODES.put(idKey, "1");
+      await writeHourlyCount(hourly.req, hourly.n + 1);
+    }
 
     return json({ ok: true, downloads: entry.downloads });
   } catch (err) {
@@ -1193,6 +1264,14 @@ async function deleteShip(id, env) {
   await deleteFile(`ships/${id}/info.json`, `Delete ${id}`, env);
   await removeDeleteCode(id, env);
   if (env.DELETE_CODES) await env.DELETE_CODES.delete(`sub:${id}`);
+  if (env.DB) {
+    try {
+      await ensureD1(env);
+      await env.DB.prepare("DELETE FROM dl_seen WHERE ship = ?").bind(id).run();
+    } catch (err) {
+      console.error("d1 cleanup failed: " + (err && err.message ? err.message : String(err)));
+    }
+  }
 
   return entry ? entry.name : id;
 }
