@@ -1,0 +1,41 @@
+{
+  "name": "Aeronix",
+  "id": "aeronix-0n1h5",
+  "submitter": "TAZmd",
+  "patreonUrl": "",
+  "objectCount": 269,
+  "score": 5.3,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "2341cbfb474e226bce9f0005a2db2b3f850c7192037c8c3aa73f3cc16beed80e",
+  "downloads": 0,
+  "approvedAt": "2026-10-01T10:29:09.643Z"
+}
