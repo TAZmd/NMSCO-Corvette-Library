@@ -925,5 +925,102 @@
     ],
     "downloads": 0,
     "approvedAt": "2026-10-01T11:48:06.102Z"
+  },
+  {
+    "id": "obsidian-crown-v2-4lte3",
+    "name": "Obsidian Crown v2",
+    "sha256": "327d6e0df9dd35313bb4b40e80adcc6cf3ce9d0eea8454ad370bf3dd5036ebcd",
+    "submitter": "TAZmd",
+    "patreonUrl": "https://www.youtube.com/watch?v=d1I_ouItWe8",
+    "imageCount": 3,
+    "objectCount": 521,
+    "score": 7.6,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Holo-Arena Game Table",
+        "value": 1
+      },
+      {
+        "label": "Exocraft Research Station",
+        "value": 1
+      },
+      {
+        "label": "Ship Research Station",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-01T11:49:32.940Z"
   }
 ]
