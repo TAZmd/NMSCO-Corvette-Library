@@ -1,0 +1,22 @@
+{
+  "name": "Frosty The Snowman",
+  "id": "frosty-the-snowman-kxlz9",
+  "submitter": "TAZmd",
+  "patreonUrl": "",
+  "objectCount": 680,
+  "score": 3,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    }
+  ],
+  "imageCount": 1,
+  "sha256": "c4b4b6db644691ca36068c6d588ddab88b09bffab779ce95a845192438f3c7d4",
+  "downloads": 0,
+  "approvedAt": "2026-10-01T05:28:11.644Z"
+}
