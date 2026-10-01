@@ -603,14 +603,18 @@ function imageExt(type) {
   return "jpg";
 }
 
+let lastApprovalError = "";
+
 async function postApprovalMessage(env, embed, slug, image) {
+  lastApprovalError = "";
   const bytes = image ? new Uint8Array(image) : null;
   const type = bytes ? sniffImageType(bytes) : null;
   const filename = bytes ? `preview.${imageExt(type)}` : null;
   for (let attempt = 1; attempt <= 3; attempt++) {
+    const withImage = !!bytes && attempt < 3;
     try {
       let resp;
-      if (bytes) {
+      if (withImage) {
         const form = new FormData();
         form.append(
           "payload_json",
@@ -633,9 +637,12 @@ async function postApprovalMessage(env, embed, slug, image) {
         });
       }
       if (resp.ok) return true;
-      console.error("post to approval channel failed: " + resp.status + " " + (await resp.text()));
+      const text = await resp.text();
+      lastApprovalError = `${withImage ? "with image" : "without image"}: ${resp.status} ${text}`.slice(0, 350);
+      console.error("post to approval channel failed: " + lastApprovalError);
     } catch (err) {
-      console.error("post to approval channel error: " + (err && err.message ? err.message : String(err)));
+      lastApprovalError = `${withImage ? "with image" : "without image"}: ${err && err.message ? err.message : String(err)}`.slice(0, 350);
+      console.error("post to approval channel error: " + lastApprovalError);
     }
     await new Promise((r) => setTimeout(r, 800 * attempt));
   }
@@ -720,6 +727,76 @@ async function ghRequest(path, env, opts = {}) {
       ...(opts.headers || {})
     }
   });
+}
+
+const INDEX_SHARD_MAX = 300;
+const OBJECT_ACCEPT = "application/vnd.github.object+json";
+
+function shardPath(n) {
+  return n === 1 ? "index.json" : `index-${n}.json`;
+}
+
+async function readShard(env, n) {
+  const resp = await ghRequest(`/contents/${shardPath(n)}`, env, { method: "GET", headers: { Accept: OBJECT_ACCEPT } });
+  if (resp.status === 404) return null;
+  if (!resp.ok) throw new Error(`Could not read ${shardPath(n)}: ${resp.status}`);
+  const data = await resp.json();
+  let list = [];
+  try {
+    list = JSON.parse(decodeBase64Utf8(data.content));
+    if (!Array.isArray(list)) list = [];
+  } catch (e) {
+    list = [];
+  }
+  return { n, path: shardPath(n), sha: data.sha, list };
+}
+
+async function writeShard(env, sh, message) {
+  const body = { message, content: utf8ToBase64(JSON.stringify(sh.list, null, 2)) };
+  if (sh.sha) body.sha = sh.sha;
+  const resp = await ghRequest(`/contents/${sh.path}`, env, { method: "PUT", body: JSON.stringify(body) });
+  if (!resp.ok) throw new Error(`${sh.path} update failed: ${resp.status} ${await resp.text()}`);
+}
+
+async function readIndexShards(env) {
+  const shards = [];
+  for (let n = 1; n <= 200; n++) {
+    const sh = await readShard(env, n);
+    if (!sh) break;
+    shards.push(sh);
+  }
+  if (shards.length === 0) shards.push({ n: 1, path: "index.json", sha: undefined, list: [] });
+  return shards;
+}
+
+async function findInIndex(env, id) {
+  for (let n = 1; n <= 200; n++) {
+    const sh = await readShard(env, n);
+    if (!sh) return null;
+    const entry = sh.list.find((e) => e.id === id);
+    if (entry) return { shard: sh, entry };
+  }
+  return null;
+}
+
+async function addToIndex(env, entry, message) {
+  const max = parseInt(env.INDEX_SHARD_MAX, 10) || INDEX_SHARD_MAX;
+  const shards = await readIndexShards(env);
+  for (const sh of shards) {
+    const before = sh.list.length;
+    sh.list = sh.list.filter((e) => e.id !== entry.id);
+    sh.changed = sh.list.length !== before;
+  }
+  let last = shards[shards.length - 1];
+  if (last.list.length >= max) {
+    last = { n: last.n + 1, path: shardPath(last.n + 1), sha: undefined, list: [] };
+    shards.push(last);
+  }
+  last.list.push(entry);
+  last.changed = true;
+  for (const sh of shards) {
+    if (sh.changed) await writeShard(env, sh, message);
+  }
 }
 
 async function putFile(path, contentB64, message, env) {
@@ -1111,32 +1188,16 @@ async function promotePendingToLibrary(slug, env) {
   delete info.stagedAt;
   await putFile(`ships/${slug}/info.json`, utf8ToBase64(JSON.stringify(info, null, 2)), `Add info for ${stagedInfo.name}`, env);
 
-  const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
-  if (!idxResp.ok) throw new Error("Could not read index.json");
-  const idxData = await idxResp.json();
-  let list = [];
-  try {
-    list = JSON.parse(decodeBase64Utf8(idxData.content));
-    if (!Array.isArray(list)) list = [];
-  } catch (e) {
-    list = [];
-  }
-  list = list.filter((e) => e.id !== slug);
-  list.push({
-    id: slug, name: stagedInfo.name, sha256: shipHash, submitter: stagedInfo.submitter || "",
-    patreonUrl: stagedInfo.patreonUrl || "", youtubeUrl: stagedInfo.youtubeUrl || "", imageCount,
-    objectCount: stagedInfo.objectCount, score: stagedInfo.score, utilities: stagedInfo.utilities,
-    downloads: 0, approvedAt: info.approvedAt
-  });
-  const updResp = await ghRequest(`/contents/index.json`, env, {
-    method: "PUT",
-    body: JSON.stringify({
-      message: `Add ${stagedInfo.name} to index`,
-      content: utf8ToBase64(JSON.stringify(list, null, 2)),
-      sha: idxData.sha
-    })
-  });
-  if (!updResp.ok) throw new Error(`index.json update failed: ${updResp.status} ${await updResp.text()}`);
+  await addToIndex(
+    env,
+    {
+      id: slug, name: stagedInfo.name, sha256: shipHash, submitter: stagedInfo.submitter || "",
+      patreonUrl: stagedInfo.patreonUrl || "", youtubeUrl: stagedInfo.youtubeUrl || "", imageCount,
+      objectCount: stagedInfo.objectCount, score: stagedInfo.score, utilities: stagedInfo.utilities,
+      downloads: 0, approvedAt: info.approvedAt
+    },
+    `Add ${stagedInfo.name} to index`
+  );
 
   await pendingDelete(env, slug);
   return stagedInfo.name;
@@ -1169,31 +1230,16 @@ async function promoteLegacyPending(slug, env) {
   delete info.stagedAt;
   await putFile(`ships/${slug}/info.json`, utf8ToBase64(JSON.stringify(info, null, 2)), `Add info for ${stagedInfo.name}`, env);
 
-  const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
-  if (!idxResp.ok) throw new Error("Could not read index.json");
-  const idxData = await idxResp.json();
-  let list = [];
-  try {
-    list = JSON.parse(decodeBase64Utf8(idxData.content));
-    if (!Array.isArray(list)) list = [];
-  } catch (e) {
-    list = [];
-  }
-  list.push({
-    id: slug, name: stagedInfo.name, sha256: shipHash, submitter: stagedInfo.submitter || "",
-    patreonUrl: stagedInfo.patreonUrl || "", youtubeUrl: stagedInfo.youtubeUrl || "", imageCount,
-    objectCount: stagedInfo.objectCount, score: stagedInfo.score, utilities: stagedInfo.utilities,
-    downloads: 0, approvedAt: info.approvedAt
-  });
-  const updResp = await ghRequest(`/contents/index.json`, env, {
-    method: "PUT",
-    body: JSON.stringify({
-      message: `Add ${stagedInfo.name} to index`,
-      content: utf8ToBase64(JSON.stringify(list, null, 2)),
-      sha: idxData.sha
-    })
-  });
-  if (!updResp.ok) throw new Error(`index.json update failed: ${updResp.status} ${await updResp.text()}`);
+  await addToIndex(
+    env,
+    {
+      id: slug, name: stagedInfo.name, sha256: shipHash, submitter: stagedInfo.submitter || "",
+      patreonUrl: stagedInfo.patreonUrl || "", youtubeUrl: stagedInfo.youtubeUrl || "", imageCount,
+      objectCount: stagedInfo.objectCount, score: stagedInfo.score, utilities: stagedInfo.utilities,
+      downloads: 0, approvedAt: info.approvedAt
+    },
+    `Add ${stagedInfo.name} to index`
+  );
 
   await deleteFile(`pending/${slug}/ship.json`, `Clean up pending ${stagedInfo.name}`, env);
   for (let i = 0; i < imageCount; i++) {
@@ -1678,23 +1724,10 @@ async function recordDownloadStat(env, id, installId) {
   const capDay = await env.DB.prepare("SELECT n FROM counters WHERE k = ?").bind(dayKey).first();
   if ((capHour && capHour.n >= STAT_CAP_PER_HOUR) || (capDay && capDay.n >= STAT_CAP_PER_DAY)) return;
 
-  const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
-  if (!idxResp.ok) throw new Error("Could not read index.json");
-  const idxData = await idxResp.json();
-  let list = JSON.parse(decodeBase64Utf8(idxData.content));
-  if (!Array.isArray(list)) list = [];
-  const entry = list.find((e) => e.id === id);
-  if (!entry) return;
-  entry.downloads = (entry.downloads || 0) + 1;
-  const updResp = await ghRequest(`/contents/index.json`, env, {
-    method: "PUT",
-    body: JSON.stringify({
-      message: `Track download: ${id}`,
-      content: utf8ToBase64(JSON.stringify(list, null, 2)),
-      sha: idxData.sha
-    })
-  });
-  if (!updResp.ok) throw new Error(`index.json update failed: ${updResp.status}`);
+  const found = await findInIndex(env, id);
+  if (!found) return;
+  found.entry.downloads = (found.entry.downloads || 0) + 1;
+  await writeShard(env, found.shard, `Track download: ${id}`);
 
   await env.DB.batch([
     env.DB.prepare("INSERT OR IGNORE INTO dl_seen (ship, kind, hash) VALUES (?, 'id', ?)").bind(id, idHash),
@@ -1756,25 +1789,11 @@ async function handleDownloadRequest(request, env, ctx) {
 }
 
 async function deleteShip(id, env) {
-  const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
-  if (!idxResp.ok) throw new Error("Could not read index.json");
-  const idxData = await idxResp.json();
-  let list = JSON.parse(decodeBase64Utf8(idxData.content));
-  if (!Array.isArray(list)) list = [];
-
-  const entry = list.find((e) => e.id === id);
-  const newList = list.filter((e) => e.id !== id);
-  if (newList.length === list.length) throw new Error("ship id not found in index.json");
-
-  const updResp = await ghRequest(`/contents/index.json`, env, {
-    method: "PUT",
-    body: JSON.stringify({
-      message: `Remove ${id} from index`,
-      content: utf8ToBase64(JSON.stringify(newList, null, 2)),
-      sha: idxData.sha
-    })
-  });
-  if (!updResp.ok) throw new Error(`index.json update failed: ${updResp.status} ${await updResp.text()}`);
+  const found = await findInIndex(env, id);
+  if (!found) throw new Error("ship id not found in the index");
+  const entry = found.entry;
+  found.shard.list = found.shard.list.filter((e) => e.id !== id);
+  await writeShard(env, found.shard, `Remove ${id} from index`);
 
   await deleteFile(`ships/${id}/ship.json`, `Delete ${id}`, env);
   const imageCount = Math.max(1, Math.min(3, (entry && entry.imageCount) || 1));
@@ -1868,12 +1887,8 @@ function ephemeral(content) {
 }
 
 async function readIndexList(env) {
-  const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
-  if (!idxResp.ok) throw new Error("Could not read index.json");
-  const idxData = await idxResp.json();
-  let list = JSON.parse(decodeBase64Utf8(idxData.content));
-  if (!Array.isArray(list)) list = [];
-  return list;
+  const shards = await readIndexShards(env);
+  return shards.flatMap((sh) => sh.list);
 }
 
 function shipLabel(e) {
@@ -2105,7 +2120,8 @@ async function handlePendingCommand(interaction, env, ctx) {
         }
         content = found === 0
           ? "No pending submissions."
-          : `Posted ${posted} of ${found} pending submission(s) again. If an older message for the same ship still has buttons, ignore it.`;
+          : `Posted ${posted} of ${found} pending submission(s) again. If an older message for the same ship still has buttons, ignore it.` +
+            (lastApprovalError ? `\nProblem: ${lastApprovalError}` : "");
       } catch (err) {
         console.error("handlePendingCommand failed: " + (err && err.message ? err.message : String(err)));
         content = "Could not list pending submissions - check logs.";
