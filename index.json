@@ -880,5 +880,50 @@
     ],
     "downloads": 0,
     "approvedAt": "2026-10-01T11:41:48.249Z"
+  },
+  {
+    "id": "zainap-kf06l",
+    "name": "Zainap",
+    "sha256": "8d993ae730a3e4df9a90d79686880aeaab1fb744e07286c09f483e753f92fb5b",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 3,
+    "objectCount": 261,
+    "score": 5.4,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-01T11:48:06.102Z"
   }
 ]
