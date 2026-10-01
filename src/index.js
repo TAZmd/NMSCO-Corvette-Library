@@ -1142,6 +1142,12 @@ button{margin-top:20px;padding:10px 18px;background:#3a6ea5;color:#fff;border:no
 button:disabled{opacity:.5}
 #status{margin-top:16px;font-size:14px}
 .hint{font-size:12px;color:#9da5b4;margin-top:6px;line-height:1.45}
+.file{position:relative;margin-top:4px}
+.file input[type=file]{position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;padding:0;margin:0;border:0}
+.filebtn{display:block;padding:8px;background:#2a2a2e;border:1px solid #444;border-radius:4px;color:#ddd;cursor:pointer;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filebtn:hover{border-color:#3a6ea5}
+.filebtn.done{background:#1f5a2a;border-color:#2d7a2d;color:#fff}
+.file input:focus + .filebtn{outline:2px solid #3a6ea5}
 </style>
 </head>
 <body>
@@ -1153,10 +1159,10 @@ button:disabled{opacity:.5}
 <div class="hint">Only Patreon and YouTube links are accepted (youtube.com, youtu.be, shorts, playlists and channels all work).</div>
 <label>Fill in your delete code (optional)<input type="text" name="deletecode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="off" placeholder="6 digits, for example 482915"></label>
 <div class="hint">A delete code is what you supply to me when you want your ship to be removed from the Corvette library. Pick 6 random digits, only for this. Never use a code from anywhere else (bank, phone, accounts). You can use the same code for every upload. This browser remembers it for next time. I cannot see or recover it, so write it down.</div>
-<label>Ship file (.nmsship, .json or .txt)<input type="file" name="ship" accept=".nmsship,.json,.txt" required></label>
-<label>Preview image<input type="file" name="image1" accept="image/*" required></label>
-<label>Extra image 2 (optional)<input type="file" name="image2" accept="image/*"></label>
-<label>Extra image 3 (optional)<input type="file" name="image3" accept="image/*"></label>
+<label>Ship file (.nmsship, .json or .txt)<div class="file"><input type="file" name="ship" accept=".nmsship,.json,.txt" required><span class="filebtn">Choose file</span></div></label>
+<label>Preview image<div class="file"><input type="file" name="image1" accept="image/*" required><span class="filebtn">Choose file</span></div></label>
+<label>Extra image 2 (optional)<div class="file"><input type="file" name="image2" accept="image/*"><span class="filebtn">Choose file</span></div></label>
+<label>Extra image 3 (optional)<div class="file"><input type="file" name="image3" accept="image/*"><span class="filebtn">Choose file</span></div></label>
 <div class="cf-turnstile" data-sitekey="${siteKey}" data-callback="onTsOk" data-expired-callback="onTsExpired" data-error-callback="onTsError" style="margin-top:16px"></div>
 ${siteKey ? '' : '<div class="hint">Verification is not set up on the server (TURNSTILE_SITE_KEY is missing). Uploads will fail until the admin fixes this.</div>'}
 <button type="submit">Submit for approval</button>
@@ -1203,6 +1209,21 @@ async function freshToken(status) {
   resetTurnstile();
   return await waitForToken(25000);
 }
+function updateFileButtons() {
+  document.querySelectorAll('.file').forEach((box) => {
+    const input = box.querySelector('input[type="file"]');
+    const btn = box.querySelector('.filebtn');
+    if (input.files && input.files[0]) {
+      btn.textContent = '✓ ' + input.files[0].name + '   ✎ change';
+      btn.className = 'filebtn done';
+    } else {
+      btn.textContent = 'Choose file';
+      btn.className = 'filebtn';
+    }
+  });
+}
+document.querySelectorAll('.file input[type="file"]').forEach((i) => i.addEventListener('change', updateFileButtons));
+updateFileButtons();
 loadSavedFields();
 document.querySelector('input[name="builder"]').addEventListener('input', (ev) => {
   const v = ev.target.value.trim();
@@ -1250,6 +1271,7 @@ document.getElementById('f').addEventListener('submit', async (e) => {
     if (resp.ok) {
       e.target.reset();
       loadSavedFields();
+      updateFileButtons();
     }
     resetTurnstile();
   } catch (err) {
