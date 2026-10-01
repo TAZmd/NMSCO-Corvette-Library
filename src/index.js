@@ -16,18 +16,24 @@ function slugify(s) {
   );
 }
 
-function validatePatreonUrl(raw) {
+function validateLinkUrl(raw) {
   const url = (raw || "").toString().trim();
   if (!url) return { ok: true, url: "" };
   let parsed;
   try {
     parsed = new URL(url);
   } catch (e) {
-    return { ok: false, error: "Patreon link is not a valid URL" };
+    return { ok: false, error: "the link is not a valid URL" };
   }
   const host = parsed.hostname.toLowerCase();
-  if (parsed.protocol !== "https:" || (host !== "patreon.com" && host !== "www.patreon.com")) {
-    return { ok: false, error: "the link must be a patreon.com link" };
+  const isPatreon = host === "patreon.com" || host === "www.patreon.com";
+  const isYouTube = host === "youtube.com" || host === "www.youtube.com" || host === "m.youtube.com" ||
+    host === "youtu.be" || host === "www.youtu.be";
+  if (parsed.protocol !== "https:" || (!isPatreon && !isYouTube)) {
+    return { ok: false, error: "the link must be a patreon.com or YouTube link" };
+  }
+  if (isYouTube && (parsed.pathname === "/" || parsed.pathname === "")) {
+    return { ok: false, error: "the YouTube link must point to a video, playlist or channel" };
   }
   return { ok: true, url: parsed.toString() };
 }
@@ -778,8 +784,94 @@ async function removeDeleteCode(slug, env) {
   }
 }
 
-const MAX_PENDING_BYTES = 20 * 1024 * 1024;
+const MAX_PENDING_BYTES = 12 * 1024 * 1024;
+const PENDING_CHUNK = 1000000;
 let workerOrigin = "";
+
+function base64ToBytes(b64) {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+async function pendingPut(env, slug, packed, meta) {
+  if (env.DB) {
+    await ensureD1(env);
+    const bytes = new Uint8Array(packed);
+    const stmts = [env.DB.prepare("DELETE FROM pending WHERE slug = ?").bind(slug)];
+    for (let off = 0, part = 0; ; off += PENDING_CHUNK, part++) {
+      const slice = bytes.subarray(off, Math.min(off + PENDING_CHUNK, bytes.length));
+      stmts.push(
+        env.DB.prepare("INSERT INTO pending (slug, part, data, meta) VALUES (?, ?, ?, ?)")
+          .bind(slug, part, bytesToBase64(slice), part === 0 ? JSON.stringify(meta) : null)
+      );
+      if (off + PENDING_CHUNK >= bytes.length) break;
+    }
+    await env.DB.batch(stmts);
+    return;
+  }
+  await env.DELETE_CODES.put(`pend:${slug}`, packed, { metadata: meta });
+}
+
+async function pendingGet(env, slug) {
+  if (env.DB) {
+    await ensureD1(env);
+    const res = await env.DB.prepare("SELECT data FROM pending WHERE slug = ? ORDER BY part").bind(slug).all();
+    const rows = res.results || [];
+    if (rows.length) {
+      const parts = rows.map((r) => base64ToBytes(r.data));
+      let total = 0;
+      for (const p of parts) total += p.length;
+      const out = new Uint8Array(total);
+      let off = 0;
+      for (const p of parts) {
+        out.set(p, off);
+        off += p.length;
+      }
+      return out.buffer;
+    }
+  }
+  if (env.DELETE_CODES) return await env.DELETE_CODES.get(`pend:${slug}`, "arrayBuffer");
+  return null;
+}
+
+async function pendingDelete(env, slug) {
+  let removed = false;
+  if (env.DB) {
+    await ensureD1(env);
+    const r = await env.DB.prepare("DELETE FROM pending WHERE slug = ?").bind(slug).run();
+    if (r && r.meta && r.meta.changes > 0) removed = true;
+  }
+  if (env.DELETE_CODES) {
+    const had = await env.DELETE_CODES.get(`pend:${slug}`, "arrayBuffer");
+    if (had) {
+      await env.DELETE_CODES.delete(`pend:${slug}`);
+      removed = true;
+    }
+  }
+  return removed;
+}
+
+async function pendingList(env) {
+  const out = [];
+  if (env.DB) {
+    await ensureD1(env);
+    const res = await env.DB.prepare("SELECT slug, meta FROM pending WHERE part = 0 LIMIT 10").all();
+    for (const row of res.results || []) {
+      let md = {};
+      try {
+        md = JSON.parse(row.meta || "{}");
+      } catch (e) {}
+      out.push({ slug: row.slug, md });
+    }
+  }
+  if (env.DELETE_CODES) {
+    const res = await env.DELETE_CODES.list({ prefix: "pend:" });
+    for (const k of res.keys.slice(0, 10)) out.push({ slug: k.name.slice(5), md: k.metadata || {} });
+  }
+  return out.slice(0, 10);
+}
 
 function packPending(info, shipText, images) {
   const enc = new TextEncoder();
@@ -833,12 +925,12 @@ async function pendingImageUrl(slug, env, n = 0) {
 
 async function handlePendingImage(url, env) {
   const m = url.pathname.match(/^\/img\/([a-z0-9-]{1,80})\/([0-2])$/);
-  if (!m || !env.DELETE_CODES || !env.DELETE_PEPPER) return new Response("Not found", { status: 404 });
+  if (!m || (!env.DB && !env.DELETE_CODES) || !env.DELETE_PEPPER) return new Response("Not found", { status: 404 });
   const slug = m[1];
   const n = parseInt(m[2], 10);
   const sig = (await hashDeleteCode(`img:${slug}`, String(n), env)).slice(0, 24);
   if ((url.searchParams.get("s") || "") !== sig) return new Response("Not found", { status: 404 });
-  const buf = await env.DELETE_CODES.get(`pend:${slug}`, "arrayBuffer");
+  const buf = await pendingGet(env, slug);
   if (!buf) return new Response("Not found", { status: 404 });
   const { images } = unpackPending(buf);
   if (!images[n]) return new Response("Not found", { status: 404 });
@@ -863,19 +955,17 @@ async function stageSubmission({ name, submitter, patreonUrl, shipBytes, imageBu
     stagedAt: new Date().toISOString()
   };
 
-  if (!env.DELETE_CODES) return { ok: false, error: "storage is not available right now" };
+  if (!env.DB && !env.DELETE_CODES) return { ok: false, error: "storage is not available right now" };
   const packed = packPending(info, norm.objectsText, images);
   if (packed.byteLength > MAX_PENDING_BYTES) {
-    return { ok: false, error: "the submission is too large (maximum about 20 MB in total)" };
+    return { ok: false, error: "the submission is too large (maximum about 12 MB in total)" };
   }
-  await env.DELETE_CODES.put(`pend:${slug}`, packed, {
-    metadata: {
-      n: (name || "").slice(0, 60),
-      s: (submitter || "").slice(0, 40),
-      o: meta.objectCount,
-      sc: meta.score,
-      c: deleteCode ? 1 : 0
-    }
+  await pendingPut(env, slug, packed, {
+    n: (name || "").slice(0, 60),
+    s: (submitter || "").slice(0, 40),
+    o: meta.objectCount,
+    sc: meta.score,
+    c: deleteCode ? 1 : 0
   });
 
   if (deleteCode) await storeDeleteCode(slug, deleteCode, env);
@@ -895,7 +985,7 @@ async function deleteFile(path, message, env) {
 }
 
 async function promotePendingToLibrary(slug, env) {
-  const buf = env.DELETE_CODES ? await env.DELETE_CODES.get(`pend:${slug}`, "arrayBuffer") : null;
+  const buf = await pendingGet(env, slug);
   if (!buf) return promoteLegacyPending(slug, env);
   const { info: stagedInfo, shipBytes, images } = unpackPending(buf);
   const shipHash = await sha256HexBytes(shipBytes);
@@ -938,7 +1028,7 @@ async function promotePendingToLibrary(slug, env) {
   });
   if (!updResp.ok) throw new Error(`index.json update failed: ${updResp.status} ${await updResp.text()}`);
 
-  await env.DELETE_CODES.delete(`pend:${slug}`);
+  await pendingDelete(env, slug);
   return stagedInfo.name;
 }
 
@@ -1018,10 +1108,8 @@ async function promotePendingToLibraryTry(slug, env) {
 
 async function rejectPending(slug, env) {
   try {
-    const inKv = env.DELETE_CODES ? await env.DELETE_CODES.get(`pend:${slug}`, "arrayBuffer") : null;
-    if (inKv) {
-      await env.DELETE_CODES.delete(`pend:${slug}`);
-    } else {
+    const removed = await pendingDelete(env, slug);
+    if (!removed) {
       await deleteFile(`pending/${slug}/ship.json`, "Reject submission", env);
       for (const fname of ["preview.png", "preview2.png", "preview3.png"]) {
         await deleteFile(`pending/${slug}/${fname}`, "Reject submission", env);
@@ -1061,7 +1149,8 @@ button:disabled{opacity:.5}
 <form id="f">
 <label>Your name (builder)<input type="text" name="builder" required maxlength="80"></label>
 <label>Ship name<input type="text" name="name" required maxlength="80"></label>
-<label>Patreon link (optional)<input type="text" name="patreon" placeholder="https://www.patreon.com/yourname" maxlength="200"></label>
+<label>Patreon or YouTube link (optional)<input type="text" name="link" placeholder="https://www.patreon.com/yourname or https://youtu.be/..." maxlength="200"></label>
+<div class="hint">Only Patreon and YouTube links are accepted (youtube.com, youtu.be, shorts, playlists and channels all work).</div>
 <label>Fill in your delete code (optional)<input type="text" name="deletecode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="off" placeholder="6 digits, for example 482915"></label>
 <div class="hint">A delete code is what you supply to me when you want your ship to be removed from the Corvette library. Pick 6 random digits, only for this. Never use a code from anywhere else (bank, phone, accounts). You can use the same code for every upload. This browser remembers it for next time. I cannot see or recover it, so write it down.</div>
 <label>Ship file (.nmsship, .json or .txt)<input type="file" name="ship" accept=".nmsship,.json,.txt" required></label>
@@ -1269,7 +1358,7 @@ async function handleUploadSubmitInner(request, env, ctx) {
     return new Response(`Could not accept this submission: ${problems.join(", ")}.`, { status: 400 });
   }
 
-  const patreonCheck = validatePatreonUrl(form.get("patreon"));
+  const patreonCheck = validateLinkUrl(form.get("link") || form.get("patreon"));
   if (!patreonCheck.ok) {
     return new Response(`Could not accept this submission: ${patreonCheck.error}.`, { status: 400 });
   }
@@ -1305,6 +1394,7 @@ async function handleUploadSubmitInner(request, env, ctx) {
         image: { url: imageRawUrl },
         fields: [
           { name: "Submitted by", value: `${builder} (via website)`, inline: true },
+          ...(patreonCheck.url ? [{ name: "Link", value: patreonCheck.url.slice(0, 200), inline: false }] : []),
           { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true },
           { name: "Delete code", value: staged.hasDeleteCode ? "set" : "not set", inline: true }
         ]
@@ -1322,6 +1412,7 @@ let d1SchemaReady = false;
 async function ensureD1(env) {
   if (d1SchemaReady) return;
   await env.DB.batch([
+    env.DB.prepare("CREATE TABLE IF NOT EXISTS pending (slug TEXT NOT NULL, part INTEGER NOT NULL, data TEXT NOT NULL, meta TEXT, PRIMARY KEY (slug, part)) WITHOUT ROWID"),
     env.DB.prepare("CREATE TABLE IF NOT EXISTS dl_seen (ship TEXT NOT NULL, kind TEXT NOT NULL, hash TEXT NOT NULL, PRIMARY KEY (ship, kind, hash)) WITHOUT ROWID"),
     env.DB.prepare("CREATE TABLE IF NOT EXISTS counters (k TEXT PRIMARY KEY, n INTEGER NOT NULL) WITHOUT ROWID")
   ]);
@@ -1497,7 +1588,7 @@ async function handleRegister(url, env) {
       { name: "image1", description: "A preview screenshot", type: 11, required: true },
       { name: "image2", description: "Extra screenshot (optional)", type: 11, required: false },
       { name: "image3", description: "Extra screenshot (optional)", type: 11, required: false },
-      { name: "patreon", description: "Your Patreon link (optional)", type: 3, required: false },
+      { name: "link", description: "Your Patreon or YouTube link for this ship (optional)", type: 3, required: false },
       {
         name: "delete_code",
         description: "Optional 6-digit delete code. Random code, only for this. Never use a real code.",
@@ -1731,24 +1822,21 @@ async function handlePendingCommand(interaction, env, ctx) {
       try {
         let posted = 0;
         let found = 0;
-        if (env.DELETE_CODES) {
-          const res = await env.DELETE_CODES.list({ prefix: "pend:" });
-          for (const k of res.keys.slice(0, 10)) {
-            const slug = k.name.slice(5);
-            const md = k.metadata || {};
-            found++;
-            const embed = {
-              title: md.n || slug,
-              color: 0x5b9bd5,
-              image: { url: await pendingImageUrl(slug, env) },
-              fields: [
-                { name: "Submitted by", value: md.s || "unknown", inline: true },
-                { name: "Objects", value: `${md.o} \u00b7 utility score ${md.sc}/10`, inline: true },
-                { name: "Delete code", value: md.c ? "set" : "not set", inline: true }
-              ]
-            };
-            if (await postApprovalMessage(env, embed, slug)) posted++;
-          }
+        for (const item of await pendingList(env)) {
+          const slug = item.slug;
+          const md = item.md || {};
+          found++;
+          const embed = {
+            title: md.n || slug,
+            color: 0x5b9bd5,
+            image: { url: await pendingImageUrl(slug, env) },
+            fields: [
+              { name: "Submitted by", value: md.s || "unknown", inline: true },
+              { name: "Objects", value: `${md.o} \u00b7 utility score ${md.sc}/10`, inline: true },
+              { name: "Delete code", value: md.c ? "set" : "not set", inline: true }
+            ]
+          };
+          if (await postApprovalMessage(env, embed, slug)) posted++;
         }
         const dirResp = await ghRequest(`/contents/pending`, env, { method: "GET" });
         if (dirResp.ok) {
@@ -1825,7 +1913,7 @@ async function handleCommand(interaction, env, ctx) {
     });
   }
 
-  const patreonCheck = validatePatreonUrl(opts.patreon);
+  const patreonCheck = validateLinkUrl(opts.link || opts.patreon);
   if (!patreonCheck.ok) {
     return json({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -1885,6 +1973,7 @@ async function handleCommand(interaction, env, ctx) {
         image: { url: imageRawUrl },
         fields: [
           { name: "Submitted by", value: `<@${submitter.id}> (${submitter.username})`, inline: true },
+          ...(patreonCheck.url ? [{ name: "Link", value: patreonCheck.url.slice(0, 200), inline: false }] : []),
           { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true },
           { name: "Delete code", value: staged.hasDeleteCode ? "set" : "not set", inline: true }
         ]
