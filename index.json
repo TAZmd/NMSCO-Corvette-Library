@@ -123,5 +123,27 @@
     ],
     "downloads": 4,
     "approvedAt": "2026-09-30T19:23:43.430Z"
+  },
+  {
+    "id": "frosty-the-snowman-kxlz9",
+    "name": "Frosty The Snowman",
+    "sha256": "c4b4b6db644691ca36068c6d588ddab88b09bffab779ce95a845192438f3c7d4",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 1,
+    "objectCount": 680,
+    "score": 3,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-01T05:28:11.644Z"
   }
 ]
