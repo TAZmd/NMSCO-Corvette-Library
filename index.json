@@ -222,5 +222,70 @@
     "utilities": [],
     "downloads": 0,
     "approvedAt": "2026-10-01T05:37:33.740Z"
+  },
+  {
+    "id": "black-ark-ntzf8",
+    "name": "Black Ark",
+    "sha256": "ff1b947f293f7c7b57eb0bff355ecd8a8f3de76e86a8ad347f549bb461ca246d",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 2,
+    "objectCount": 182,
+    "score": 6.2,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Nip Plant",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-01T06:09:02.771Z"
   }
 ]
