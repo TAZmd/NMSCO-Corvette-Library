@@ -495,47 +495,16 @@ async function checkRateLimit(ip) {
   return true;
 }
 
-// One download counts per ship only when BOTH the visitor IP and the app install id are new
-// for that ship. Both are stored as keyed hashes, never raw. KV is used because the edge
-// cache is per data center and forgets.
-const DOWNLOADS_PER_HOUR_CAP = 20;
 const INSTALL_ID_RE = /^([0-9a-fA-F]{32}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/;
-
-async function downloadDedupKey(ip, id, env) {
-  if (!deleteCodesReady(env)) return null;
-  const h = await hashDeleteCode(`dl:${id}`, ip, env);
-  return `dl:${id}:${h.slice(0, 32)}`;
-}
-
-async function downloadInstallKey(installId, id, env) {
-  if (!installId || !deleteCodesReady(env)) return null;
-  const h = await hashDeleteCode(`dlid:${id}`, installId.toLowerCase(), env);
-  return `dl:${id}:i:${h.slice(0, 32)}`;
-}
-
-async function checkDownloadDedup(ip, id) {
-  const cache = caches.default;
-  const key = new Request(`https://downloadDedup.internal/${encodeURIComponent(id)}/${encodeURIComponent(ip)}`);
-  const cached = await cache.match(key);
-  if (cached) return false;
-  await cache.put(key, new Response("1", { headers: { "Cache-Control": "max-age=86400" } }));
-  return true;
-}
-
-async function readHourlyCount(id) {
-  const cache = caches.default;
-  const bucket = Math.floor(Date.now() / 3600000);
-  const req = new Request(`https://hourlycap.internal/${encodeURIComponent(id)}/${bucket}`);
-  const hit = await cache.match(req);
-  const n = hit ? parseInt(await hit.text(), 10) || 0 : 0;
-  return { req, n };
-}
-
-async function writeHourlyCount(req, n) {
-  await caches.default.put(req, new Response(String(n), { headers: { "Cache-Control": "max-age=3600" } }));
-}
-
-const FLOOD_PER_HOUR = 60;
+const STAT_CAP_PER_HOUR = 10;
+const STAT_CAP_PER_DAY = 25;
+const SHIP_WINDOW_MS = 30 * 60 * 1000;
+const SHIP_LIMIT = 10;
+const ALL_WINDOW_MS = 60 * 60 * 1000;
+const ALL_LIMIT = 60;
+const REJECT_WINDOW_MS = 30 * 60 * 1000;
+const REJECT_LIMIT = 10;
+const MAX_PENDING_ITEMS = 50;
 
 function userBanKey(discordId) {
   return `ban:user:${discordId}`;
@@ -561,19 +530,9 @@ async function isBanned(env, keys) {
   return false;
 }
 
-async function addBan(env, key, label, reason) {
+async function addBan(env, key, label, reason, strikes) {
   if (!env.DELETE_CODES || !key) return;
-  await env.DELETE_CODES.put(key, JSON.stringify({ label, reason, at: new Date().toISOString() }));
-}
-
-async function bumpFlood(kind, value) {
-  const cache = caches.default;
-  const bucket = Math.floor(Date.now() / 3600000);
-  const req = new Request(`https://flood.internal/${kind}/${encodeURIComponent(value)}/${bucket}`);
-  const hit = await cache.match(req);
-  const n = (hit ? parseInt(await hit.text(), 10) || 0 : 0) + 1;
-  await cache.put(req, new Response(String(n), { headers: { "Cache-Control": "max-age=3600" } }));
-  return n;
+  await env.DELETE_CODES.put(key, JSON.stringify({ label, reason, at: new Date().toISOString(), strikes: strikes || [] }));
 }
 
 async function saveSubmissionOwner(slug, ipKey, userKey, label, env) {
@@ -1009,6 +968,9 @@ async function handlePendingImage(url, env) {
 }
 
 async function stageSubmission({ name, submitter, patreonUrl, shipBytes, imageBufs, deleteCode, ipKey, userKey }, env) {
+  if ((await pendingCount(env)) >= MAX_PENDING_ITEMS) {
+    return { ok: false, error: "the waiting list is full, please try again later" };
+  }
   const norm = await normalizeShipBytes(shipBytes);
   if (!norm.ok) return { ok: false, error: norm.error };
 
@@ -1391,7 +1353,12 @@ async function handleUploadPage(env) {
 
 async function handleUploadSubmit(request, env, ctx) {
   try {
-    return await handleUploadSubmitInner(request, env, ctx);
+    const res = await handleUploadSubmitInner(request, env, ctx);
+    if (res.status === 400 || (res.status === 429 && res.headers.get("x-blocked") !== "1")) {
+      const key = await ipBanKey(request.headers.get("CF-Connecting-IP") || "unknown", env);
+      if (key) await recordRejection(env, "ip", key.slice(7), key.slice(7, 11));
+    }
+    return res;
   } catch (err) {
     const msg = err && err.message ? String(err.message) : String(err);
     console.error("handleUploadSubmit failed: " + msg);
@@ -1404,6 +1371,15 @@ async function handleUploadSubmitInner(request, env, ctx) {
   const ownIpKey = await ipBanKey(ip, env);
   if (await isBanned(env, [ownIpKey])) {
     return new Response("Uploads from this connection are blocked.", { status: 403 });
+  }
+  if (ownIpKey) {
+    const left = await lockSecondsLeft(env, `lock:ip:${ownIpKey.slice(7)}`);
+    if (left > 0) {
+      return new Response(`Too many rejected uploads. Please try again in ${Math.max(1, Math.ceil(left / 60))} minutes.`, {
+        status: 429,
+        headers: { "x-blocked": "1" }
+      });
+    }
   }
 
   let form;
@@ -1511,117 +1487,196 @@ async function ensureD1(env) {
   d1SchemaReady = true;
 }
 
-async function handleTrackDownload(request, env) {
+async function rateWindowPush(cacheKey, windowMs) {
+  const cache = caches.default;
+  const req = new Request(`https://rate.internal/${cacheKey}`);
+  const hit = await cache.match(req);
+  const now = Date.now();
+  let times = [];
+  if (hit) {
+    try {
+      times = JSON.parse(await hit.text());
+    } catch (e) {
+      times = [];
+    }
+  }
+  times = times.filter((t) => now - t < windowMs);
+  times.push(now);
+  await cache.put(req, new Response(JSON.stringify(times), { headers: { "Cache-Control": `max-age=${Math.ceil(windowMs / 1000)}` } }));
+  return times.length;
+}
+
+async function rateWindowClear(cacheKey) {
+  await caches.default.put(
+    new Request(`https://rate.internal/${cacheKey}`),
+    new Response("[]", { headers: { "Cache-Control": "max-age=60" } })
+  );
+}
+
+async function notifyAdmin(env, content) {
+  try {
+    await discordApi(`/channels/${env.APPROVAL_CHANNEL_ID}/messages`, env, {
+      method: "POST",
+      body: JSON.stringify({ content })
+    });
+  } catch (err) {
+    console.error("notifyAdmin failed: " + (err && err.message ? err.message : String(err)));
+  }
+}
+
+async function lockSecondsLeft(env, lockKey) {
+  if (!env.DELETE_CODES) return 0;
+  const raw = await env.DELETE_CODES.get(lockKey);
+  if (!raw) return 0;
+  try {
+    const left = Math.ceil((JSON.parse(raw).until - Date.now()) / 1000);
+    return left > 0 ? left : 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
+async function applyStrike(env, t) {
+  const { rule, kind, hash, code, shipId } = t;
+  const strikeKey = `strike:${kind}:${hash}:${rule}`;
+  const lockKey = `lock:${kind}:${hash}`;
+  const banKey = `ban:${kind}:${hash}`;
+  let n = 1;
+  const prev = await env.DELETE_CODES.get(strikeKey);
+  if (prev) n = (parseInt(prev, 10) || 0) + 1;
+  await env.DELETE_CODES.put(strikeKey, String(n));
+  const ruleText =
+    rule === "ship" ? `same ship (${shipId}) ${SHIP_LIMIT}x in 30 minutes`
+    : rule === "all" ? `more than ${ALL_LIMIT} requests in 1 hour`
+    : `${REJECT_LIMIT} rejected uploads in 30 minutes`;
+  const who = kind === "id" ? "visitor" : kind === "ip" ? "website visitor" : "Discord user";
+  const strikes = ["ship", "all", "upload"].map((r) => `strike:${kind}:${hash}:${r}`);
+
+  let seconds = 0;
+  if (rule === "all") seconds = n === 1 ? 3600 : 0;
+  else seconds = n === 1 ? 3600 : n === 2 ? 86400 : 0;
+
+  if (seconds === 0) {
+    await addBan(env, banKey, `${who} ${code} - auto-ban: ${ruleText}`, "auto-ban", strikes);
+    await env.DELETE_CODES.delete(lockKey);
+    console.log(JSON.stringify({ event: "ban", kind, code, rule, ship: shipId || null, strike: n }));
+    await notifyAdmin(env, `Ban: ${who} **${code}** is banned (${ruleText}, strike ${n}). Use /unban to lift it.`);
+    return { banned: true, seconds: 0 };
+  }
+  const until = Date.now() + seconds * 1000;
+  await env.DELETE_CODES.put(
+    lockKey,
+    JSON.stringify({ label: `${who} ${code} - ${ruleText}`, until, strikes }),
+    { expirationTtl: seconds + 3600 }
+  );
+  console.log(JSON.stringify({ event: "lock", kind, code, rule, ship: shipId || null, strike: n, seconds }));
+  await notifyAdmin(env, `Lock: ${who} **${code}** is locked for ${seconds >= 86400 ? "24 hours" : "1 hour"} (${ruleText}, strike ${n}).`);
+  return { banned: false, seconds };
+}
+
+async function recordRejection(env, kind, hash, code) {
+  if (!env.DELETE_CODES || !hash) return;
+  const n = await rateWindowPush(`rej/${kind}/${hash}`, REJECT_WINDOW_MS);
+  if (n >= REJECT_LIMIT) {
+    await applyStrike(env, { rule: "upload", kind, hash, code });
+    await rateWindowClear(`rej/${kind}/${hash}`);
+  }
+}
+
+async function pendingCount(env) {
+  if (!env.DB) return 0;
+  await ensureD1(env);
+  const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM pending WHERE part = 0").first();
+  return row ? row.n : 0;
+}
+
+async function recordDownloadStat(env, id, installId) {
+  if (!env.DB || !env.DELETE_PEPPER) return;
+  const idHash = (await hashDeleteCode(`dlid:${id}`, installId.toLowerCase(), env)).slice(0, 32);
+  await ensureD1(env);
+  const seen = await env.DB.prepare("SELECT 1 AS x FROM dl_seen WHERE ship = ? AND kind = 'id' AND hash = ?").bind(id, idHash).first();
+  if (seen) return;
+  const hourKey = `cap:${id}:${Math.floor(Date.now() / 3600000)}`;
+  const dayKey = `capd:${id}:${Math.floor(Date.now() / 86400000)}`;
+  const capHour = await env.DB.prepare("SELECT n FROM counters WHERE k = ?").bind(hourKey).first();
+  const capDay = await env.DB.prepare("SELECT n FROM counters WHERE k = ?").bind(dayKey).first();
+  if ((capHour && capHour.n >= STAT_CAP_PER_HOUR) || (capDay && capDay.n >= STAT_CAP_PER_DAY)) return;
+
+  const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
+  if (!idxResp.ok) throw new Error("Could not read index.json");
+  const idxData = await idxResp.json();
+  let list = JSON.parse(decodeBase64Utf8(idxData.content));
+  if (!Array.isArray(list)) list = [];
+  const entry = list.find((e) => e.id === id);
+  if (!entry) return;
+  entry.downloads = (entry.downloads || 0) + 1;
+  const updResp = await ghRequest(`/contents/index.json`, env, {
+    method: "PUT",
+    body: JSON.stringify({
+      message: `Track download: ${id}`,
+      content: utf8ToBase64(JSON.stringify(list, null, 2)),
+      sha: idxData.sha
+    })
+  });
+  if (!updResp.ok) throw new Error(`index.json update failed: ${updResp.status}`);
+
+  await env.DB.batch([
+    env.DB.prepare("INSERT OR IGNORE INTO dl_seen (ship, kind, hash) VALUES (?, 'id', ?)").bind(id, idHash),
+    env.DB.prepare("INSERT INTO counters (k, n) VALUES (?, 1) ON CONFLICT(k) DO UPDATE SET n = n + 1").bind(hourKey),
+    env.DB.prepare("INSERT INTO counters (k, n) VALUES (?, 1) ON CONFLICT(k) DO UPDATE SET n = n + 1").bind(dayKey)
+  ]);
+}
+
+async function handleDownloadRequest(request, env, ctx) {
   let body;
   try {
     body = await request.json();
   } catch (e) {
-    return new Response("Invalid request.", { status: 400 });
+    return json({ allowed: true });
   }
   const id = (body.id || "").toString();
-  if (!id) return new Response("Missing id.", { status: 400 });
-  if (!/^[a-z0-9-]{1,60}$/.test(id)) return new Response("Unknown ship id.", { status: 404 });
-
   const rawInstall = (body.installId || "").toString().trim();
-  const installId = INSTALL_ID_RE.test(rawInstall) ? rawInstall : "";
-
-  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-
-  const banIp = await ipBanKey(ip, env);
-  const banId = await installBanKey(installId, env);
-  if (await isBanned(env, [banIp, banId])) return new Response("Blocked.", { status: 403 });
-
-  if (banIp || banId) {
-    const floodIp = await bumpFlood("ip", ip);
-    const floodId = installId ? await bumpFlood("id", installId.toLowerCase()) : 0;
-    if (floodIp > FLOOD_PER_HOUR || floodId > FLOOD_PER_HOUR) {
-      await addBan(env, banIp, "auto: download flood (IP)", "flood");
-      await addBan(env, banId, "auto: download flood (app id)", "flood");
-      await discordApi(`/channels/${env.APPROVAL_CHANNEL_ID}/messages`, env, {
-        method: "POST",
-        body: JSON.stringify({ content: "Auto-ban: a visitor sent more than " + FLOOD_PER_HOUR + " download requests in one hour. Use /unban if this was a mistake." })
-      });
-      return new Response("Blocked.", { status: 403 });
-    }
+  if (!/^[a-z0-9-]{1,60}$/.test(id) || !INSTALL_ID_RE.test(rawInstall) || !deleteCodesReady(env)) {
+    return json({ allowed: true });
   }
+  const installId = rawInstall.toLowerCase();
+  const idHash = (await hashDeleteCode("ban:id", installId, env)).slice(0, 32);
+  const code = idHash.slice(0, 4);
 
-  const useD1 = !!env.DB && !!env.DELETE_PEPPER;
-  let ipHash = null;
-  let idHash = null;
-  let capKey = null;
-  let ipKey = null;
-  let idKey = null;
-  let hourly = null;
-
-  if (useD1) {
-    ipHash = (await hashDeleteCode(`dl:${id}`, ip, env)).slice(0, 32);
-    idHash = installId ? (await hashDeleteCode(`dlid:${id}`, installId.toLowerCase(), env)).slice(0, 32) : null;
-    capKey = `cap:${id}:${Math.floor(Date.now() / 3600000)}`;
+  if (await env.DELETE_CODES.get(`ban:id:${idHash}`)) {
+    console.log(JSON.stringify({ event: "denied-ban", code, ship: id }));
+    return json({ allowed: false, banned: true });
+  }
+  const lockRaw = await env.DELETE_CODES.get(`lock:id:${idHash}`);
+  if (lockRaw) {
     try {
-      await ensureD1(env);
-      const seen = await env.DB.prepare(
-        "SELECT 1 AS x FROM dl_seen WHERE ship = ? AND ((kind = 'ip' AND hash = ?) OR (kind = 'id' AND hash = ?)) LIMIT 1"
-      ).bind(id, ipHash, idHash || "-").first();
-      if (seen) return json({ ok: true, deduped: true });
-      const capRow = await env.DB.prepare("SELECT n FROM counters WHERE k = ?").bind(capKey).first();
-      if (capRow && capRow.n >= DOWNLOADS_PER_HOUR_CAP) return json({ ok: true, limited: true });
-    } catch (err) {
-      console.error("d1 check failed: " + (err && err.message ? err.message : String(err)));
-      return new Response("Could not record download.", { status: 500 });
-    }
-  } else {
-    ipKey = await downloadDedupKey(ip, id, env);
-    idKey = await downloadInstallKey(installId, id, env);
-    if (ipKey) {
-      if (await env.DELETE_CODES.get(ipKey)) return json({ ok: true, deduped: true });
-      if (idKey && (await env.DELETE_CODES.get(idKey))) return json({ ok: true, deduped: true });
-    } else {
-      const allowed = await checkDownloadDedup(ip, id);
-      if (!allowed) return json({ ok: true, deduped: true });
-    }
-    hourly = await readHourlyCount(id);
-    if (hourly.n >= DOWNLOADS_PER_HOUR_CAP) return json({ ok: true, limited: true });
+      const lock = JSON.parse(lockRaw);
+      const left = Math.ceil((lock.until - Date.now()) / 1000);
+      if (left > 0) {
+        console.log(JSON.stringify({ event: "denied-lock", code, ship: id, seconds: left }));
+        return json({ allowed: false, banned: false, seconds: left });
+      }
+    } catch (e) {}
   }
 
-  try {
-    const idxResp = await ghRequest(`/contents/index.json`, env, { method: "GET" });
-    if (!idxResp.ok) throw new Error("Could not read index.json");
-    const idxData = await idxResp.json();
-    let list = JSON.parse(decodeBase64Utf8(idxData.content));
-    if (!Array.isArray(list)) list = [];
-
-    const entry = list.find((e) => e.id === id);
-    if (!entry) return new Response("Unknown ship id.", { status: 404 });
-    entry.downloads = (entry.downloads || 0) + 1;
-
-    const updResp = await ghRequest(`/contents/index.json`, env, {
-      method: "PUT",
-      body: JSON.stringify({
-        message: `Track download: ${id}`,
-        content: utf8ToBase64(JSON.stringify(list, null, 2)),
-        sha: idxData.sha
-      })
-    });
-    if (!updResp.ok) throw new Error(`index.json update failed: ${updResp.status}`);
-
-    if (useD1) {
-      const stmts = [
-        env.DB.prepare("INSERT OR IGNORE INTO dl_seen (ship, kind, hash) VALUES (?, 'ip', ?)").bind(id, ipHash),
-        env.DB.prepare("INSERT INTO counters (k, n) VALUES (?, 1) ON CONFLICT(k) DO UPDATE SET n = n + 1").bind(capKey)
-      ];
-      if (idHash) stmts.push(env.DB.prepare("INSERT OR IGNORE INTO dl_seen (ship, kind, hash) VALUES (?, 'id', ?)").bind(id, idHash));
-      await env.DB.batch(stmts);
-    } else {
-      if (ipKey) await env.DELETE_CODES.put(ipKey, "1");
-      if (idKey) await env.DELETE_CODES.put(idKey, "1");
-      await writeHourlyCount(hourly.req, hourly.n + 1);
-    }
-
-    return json({ ok: true, downloads: entry.downloads });
-  } catch (err) {
-    console.error("handleTrackDownload failed: " + (err && err.message ? err.message : String(err)));
-    return new Response("Could not record download.", { status: 500 });
+  const shipCount = await rateWindowPush(`ship/${idHash}/${id}`, SHIP_WINDOW_MS);
+  const allCount = await rateWindowPush(`all/${idHash}`, ALL_WINDOW_MS);
+  let strike = null;
+  if (shipCount >= SHIP_LIMIT) {
+    strike = await applyStrike(env, { rule: "ship", kind: "id", hash: idHash, code, shipId: id });
+    await rateWindowClear(`ship/${idHash}/${id}`);
+  } else if (allCount > ALL_LIMIT) {
+    strike = await applyStrike(env, { rule: "all", kind: "id", hash: idHash, code });
+    await rateWindowClear(`all/${idHash}`);
   }
+  if (strike) return json({ allowed: false, banned: strike.banned, seconds: strike.seconds });
+
+  ctx.waitUntil(
+    recordDownloadStat(env, id, installId).catch((err) => {
+      console.error("recordDownloadStat failed: " + (err && err.message ? err.message : String(err)));
+    })
+  );
+  return json({ allowed: true });
 }
 
 async function deleteShip(id, env) {
@@ -1706,9 +1761,9 @@ async function handleRegister(url, env) {
   };
   const unbanCommand = {
     name: "unban",
-    description: "Admin only: remove a ban",
+    description: "Admin only: remove a ban or lock",
     options: [
-      { name: "ban", description: "Pick the ban to remove", type: 3, required: true, autocomplete: true }
+      { name: "ban", description: "Pick the ban or lock to remove", type: 3, required: true, autocomplete: true }
     ]
   };
   const pendingCommand = {
@@ -1763,16 +1818,23 @@ async function handleAutocomplete(interaction, env) {
   if (cmdName === "unban") {
     if (focused.name !== "ban" || !env.DELETE_CODES) return empty;
     try {
-      const res = await env.DELETE_CODES.list({ prefix: "ban:" });
+      const banRes = await env.DELETE_CODES.list({ prefix: "ban:" });
+      const lockRes = await env.DELETE_CODES.list({ prefix: "lock:" });
+      const keys = [...banRes.keys.map((k) => k.name), ...lockRes.keys.map((k) => k.name)].slice(0, 50);
       const choices = [];
-      for (const k of res.keys.slice(0, 50)) {
-        const raw = await env.DELETE_CODES.get(k.name);
-        let label = k.name;
+      for (const name of keys) {
+        const raw = await env.DELETE_CODES.get(name);
+        let label = name;
         try {
           const rec = JSON.parse(raw);
-          label = `${rec.label || "ban"} (${k.name.split(":")[1]})`;
+          if (name.startsWith("lock:")) {
+            const left = Math.max(0, Math.ceil((rec.until - Date.now()) / 60000));
+            label = `LOCK ${left} min - ${rec.label || name}`;
+          } else {
+            label = `BAN - ${rec.label || "ban"} (${name.split(":")[1]})`;
+          }
         } catch (e) {}
-        if (!q || label.toLowerCase().includes(q)) choices.push({ name: label.slice(0, 100), value: k.name });
+        if (!q || label.toLowerCase().includes(q)) choices.push({ name: label.slice(0, 100), value: name });
         if (choices.length >= 25) break;
       }
       return json({ type: 8, data: { choices } });
@@ -1900,9 +1962,16 @@ async function handleUnbanCommand(interaction, env) {
   const opts = {};
   for (const o of interaction.data.options || []) opts[o.name] = o.value;
   const key = (opts.ban || "").toString().trim();
-  if (!key.startsWith("ban:") || !env.DELETE_CODES) return ephemeral("Pick a ban from the list.");
+  if (!(key.startsWith("ban:") || key.startsWith("lock:")) || !env.DELETE_CODES) return ephemeral("Pick a ban or lock from the list.");
+  const raw = await env.DELETE_CODES.get(key);
+  if (raw) {
+    try {
+      const rec = JSON.parse(raw);
+      for (const sk of rec.strikes || []) await env.DELETE_CODES.delete(sk);
+    } catch (e) {}
+  }
   await env.DELETE_CODES.delete(key);
-  return ephemeral("Ban removed.");
+  return ephemeral(key.startsWith("lock:") ? "Lock removed. The visitor starts fresh." : "Ban removed. The visitor starts fresh.");
 }
 
 async function handlePendingCommand(interaction, env, ctx) {
@@ -1978,7 +2047,23 @@ async function handleCommand(interaction, env, ctx) {
   if (interaction.data.name !== "submit") {
     return json({ type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, data: { content: "Unknown command.", flags: 64 } });
   }
+  return handleSubmitCommand(interaction, env, ctx);
+}
 
+async function handleSubmitCommand(interaction, env, ctx) {
+  const res = await handleSubmitInner(interaction, env, ctx);
+  try {
+    const data = await res.clone().json();
+    const content = (data && data.data && data.data.content) || "";
+    const user = interaction.member?.user || interaction.user;
+    if (user && content.startsWith("Could not accept")) {
+      await recordRejection(env, "user", user.id, user.id.slice(-4));
+    }
+  } catch (e) {}
+  return res;
+}
+
+async function handleSubmitInner(interaction, env, ctx) {
   const opts = {};
   for (const o of interaction.data.options || []) opts[o.name] = o.value;
   const attachments = interaction.data.resolved?.attachments || {};
@@ -2022,6 +2107,12 @@ async function handleCommand(interaction, env, ctx) {
   const submitUser = interaction.member?.user || interaction.user;
   if (submitUser && (await isBanned(env, [userBanKey(submitUser.id)]))) {
     return ephemeral("You are not allowed to submit Corvettes to this library.");
+  }
+  if (submitUser) {
+    const left = await lockSecondsLeft(env, `lock:user:${submitUser.id}`);
+    if (left > 0) {
+      return ephemeral(`Too many rejected submissions. Please try again in ${Math.max(1, Math.ceil(left / 60))} minutes.`);
+    }
   }
 
   ctx.waitUntil(
@@ -2168,7 +2259,7 @@ export default {
 
     if (request.method === "POST") {
       if (url.pathname === "/upload") return handleUploadSubmit(request, env, ctx);
-      if (url.pathname === "/track-download") return handleTrackDownload(request, env);
+      if (url.pathname === "/download-request") return handleDownloadRequest(request, env, ctx);
 
       const signature = request.headers.get("x-signature-ed25519");
       const timestamp = request.headers.get("x-signature-timestamp");
