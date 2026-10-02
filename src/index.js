@@ -1396,6 +1396,7 @@ function loadSavedFields() {
     if (name) document.querySelector('input[name="builder"]').value = name;
     const code = localStorage.getItem('deleteCode');
     if (code) document.querySelector('input[name="deletecode"]').value = code;
+    if (localStorage.getItem('agreeRules') === 'yes') document.getElementById('agree').checked = true;
   } catch (e) {}
 }
 function saveField(key, value, valid) {
@@ -1448,9 +1449,16 @@ updateFileButtons();
 const agreeBox = document.getElementById('agree');
 const submitBtn = document.querySelector('#f button[type="submit"]');
 function updateSubmitState() { submitBtn.disabled = !agreeBox.checked; }
-agreeBox.addEventListener('change', updateSubmitState);
+agreeBox.addEventListener('change', () => {
+  updateSubmitState();
+  try {
+    if (agreeBox.checked) localStorage.setItem('agreeRules', 'yes');
+    else localStorage.removeItem('agreeRules');
+  } catch (e) {}
+});
 updateSubmitState();
 loadSavedFields();
+updateSubmitState();
 document.querySelector('input[name="builder"]').addEventListener('input', (ev) => {
   const v = ev.target.value.trim();
   saveField('builderName', v, true);
