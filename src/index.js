@@ -2489,7 +2489,7 @@ async function pendingList(env) {
   const out = [];
   if (env.DB) {
     await ensureD1(env);
-    const res = await env.DB.prepare("SELECT slug, meta FROM pending WHERE part = 0 AND slug NOT IN (SELECT slug FROM drafts) LIMIT 10").all();
+    const res = await env.DB.prepare("SELECT slug, meta FROM pending WHERE part = 0 LIMIT 10").all();
     for (const row of res.results || []) {
       let md = {};
       try {
@@ -2831,9 +2831,10 @@ async function rejectPending(slug, env) {
   }
 }
 
-const MAX_DRAFTS = 30;
-const DRAFT_TTL_MS = 60 * 60 * 1000;
-const DRAFT_TOKEN_RE = /^[a-f0-9]{32}$/;
+const HUMAN_TTL_MS = 30 * 60 * 1000;
+const HUMAN_TOKEN_RE = /^[a-f0-9]{32}$/;
+const HUMAN_START_LIMIT = 12;
+const HUMAN_START_WINDOW_MS = 10 * 60 * 1000;
 
 function randomHex(bytes) {
   const arr = new Uint8Array(bytes);
@@ -2841,23 +2842,11 @@ function randomHex(bytes) {
   return Array.from(arr, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-async function purgeExpiredDrafts(env) {
-  if (!env.DB) return;
-  await ensureD1(env);
-  const res = await env.DB.prepare("SELECT token, slug FROM drafts WHERE created < ? LIMIT 20")
-    .bind(Date.now() - DRAFT_TTL_MS)
-    .all();
-  for (const row of res.results || []) {
-    await rejectPending(row.slug, env);
-    await env.DB.prepare("DELETE FROM drafts WHERE token = ?").bind(row.token).run();
-  }
-}
-
-function verifyPageHtml(siteKey, token, expired) {
+function humanPageHtml(siteKey, token, expired) {
   const body = expired
-    ? '<h2>This upload has expired</h2><p>Please go back to the app and upload your Corvette again.</p>'
-    : `<h2>One last step</h2>
-<p>Please confirm you are not a robot. Your Corvette is sent for approval right after this check.</p>
+    ? '<h2>This check has expired</h2><p>Please go back to the app and press the verify button again.</p>'
+    : `<h2>Are you human?</h2>
+<p>Please confirm you are not a robot. When it is done, go back to the Optimizer app.</p>
 <div class="cf-turnstile" data-sitekey="${siteKey}" data-callback="onTsOk" style="margin-top:16px"></div>
 ${siteKey ? "" : '<p class="err">Verification is not set up on the server (TURNSTILE_SITE_KEY is missing).</p>'}
 <div id="status"></div>`;
@@ -2866,7 +2855,7 @@ ${siteKey ? "" : '<p class="err">Verification is not set up on the server (TURNS
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Verify your upload</title>
+<title>Human check</title>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
 body{font-family:sans-serif;background:#1e1e1e;color:#ddd;max-width:480px;margin:40px auto;padding:0 16px}
@@ -2878,16 +2867,16 @@ body{font-family:sans-serif;background:#1e1e1e;color:#ddd;max-width:480px;margin
 <body>
 ${body}
 <script>
-const uploadToken = ${JSON.stringify(token)};
+const humanToken = ${JSON.stringify(token)};
 async function onTsOk(tsToken) {
   const status = document.getElementById('status');
   status.className = '';
-  status.textContent = 'Sending...';
+  status.textContent = 'Checking...';
   try {
     const form = new FormData();
-    form.set('t', uploadToken);
+    form.set('t', humanToken);
     form.set('cf-turnstile-response', tsToken);
-    const resp = await fetch('/verify', { method: 'POST', body: form });
+    const resp = await fetch('/human', { method: 'POST', body: form });
     const text = await resp.text();
     status.className = resp.ok ? 'ok' : 'err';
     status.textContent = text;
@@ -2904,25 +2893,69 @@ async function onTsOk(tsToken) {
 </html>`;
 }
 
-async function handleVerifyPage(url, env) {
+async function handleHumanPage(url, env) {
   const token = url.searchParams.get("t") || "";
   let expired = true;
-  if (DRAFT_TOKEN_RE.test(token) && env.DB) {
+  if (HUMAN_TOKEN_RE.test(token) && env.DB) {
     await ensureD1(env);
-    const row = await env.DB.prepare("SELECT created FROM drafts WHERE token = ?").bind(token).first();
-    expired = !row || Date.now() - row.created > DRAFT_TTL_MS;
+    const row = await env.DB.prepare("SELECT created, verified FROM humans WHERE token = ?").bind(token).first();
+    expired = !row || Date.now() - row.created > HUMAN_TTL_MS;
   }
-  return new Response(verifyPageHtml(env.TURNSTILE_SITE_KEY || "", expired ? "" : token, expired), {
+  return new Response(humanPageHtml(env.TURNSTILE_SITE_KEY || "", expired ? "" : token, expired), {
     headers: { "content-type": "text/html; charset=utf-8" }
   });
 }
 
-async function handleVerifySubmit(request, env, ctx) {
+async function handleHumanStart(request, env) {
+  try {
+    if (!env.DB || !deleteCodesReady(env)) {
+      return new Response("Uploading is not available right now. Please try again later.", { status: 503 });
+    }
+    await ensureD1(env);
+    const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+    const ipKey = await ipBanKey(ip, env);
+    if (await isBanned(env, [ipKey])) {
+      return new Response("Uploads from this connection are blocked.", { status: 403 });
+    }
+    let body;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return new Response("Invalid request.", { status: 400 });
+    }
+    const rawInstall = ((body && body.installId) || "").toString().trim();
+    if (!INSTALL_ID_RE.test(rawInstall)) {
+      return new Response("Please update the Optimizer app and try again.", { status: 400 });
+    }
+    const idKey = await installBanKey(rawInstall.toLowerCase(), env);
+    const idHash = idKey.slice(7);
+    if (await isBanned(env, [idKey])) {
+      return new Response("This app installation is blocked from uploading.", { status: 403 });
+    }
+    if ((await lockSecondsLeft(env, `lock:id:${idHash}`)) > 0) {
+      return new Response("Too many rejected uploads. Please try again later.", { status: 429 });
+    }
+    if (ipKey && (await rateWindowPush(`hs/${ipKey.slice(7)}`, HUMAN_START_WINDOW_MS)) > HUMAN_START_LIMIT) {
+      return new Response("Too many checks started. Please wait a few minutes.", { status: 429 });
+    }
+    await env.DB.prepare("DELETE FROM humans WHERE created < ?").bind(Date.now() - 2 * 60 * 60 * 1000).run();
+    const token = randomHex(16);
+    await env.DB.prepare("INSERT INTO humans (token, id_hash, created, verified, used) VALUES (?, ?, ?, 0, 0)")
+      .bind(token, idHash, Date.now())
+      .run();
+    return json({ token, url: `${workerOrigin}/human?t=${token}` });
+  } catch (err) {
+    const msg = err && err.message ? String(err.message) : String(err);
+    console.error("handleHumanStart failed: " + msg);
+    return new Response("Server error: " + msg.slice(0, 120), { status: 500 });
+  }
+}
+
+async function handleHumanVerify(request, env) {
   try {
     if (!env.DB) return new Response("Not available right now.", { status: 503 });
     const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-    const ownIpKey = await ipBanKey(ip, env);
-    if (await isBanned(env, [ownIpKey])) {
+    if (await isBanned(env, [await ipBanKey(ip, env)])) {
       return new Response("Uploads from this connection are blocked.", { status: 403 });
     }
     let form;
@@ -2932,65 +2965,34 @@ async function handleVerifySubmit(request, env, ctx) {
       return new Response("Invalid request.", { status: 400 });
     }
     const token = (form.get("t") || "").toString();
-    if (!DRAFT_TOKEN_RE.test(token)) return new Response("Invalid link.", { status: 400 });
-
+    if (!HUMAN_TOKEN_RE.test(token)) return new Response("Invalid link.", { status: 400 });
     const turnstile = await verifyTurnstile(form.get("cf-turnstile-response"), ip, env);
     if (!turnstile.ok) {
       console.error("turnstile failed: " + turnstile.codes.join(","));
       return new Response(turnstileMessage(turnstile.codes), { status: 400 });
     }
-
     await ensureD1(env);
-    await purgeExpiredDrafts(env);
-    const row = await env.DB.prepare("SELECT slug, created, info FROM drafts WHERE token = ?").bind(token).first();
-    if (!row) return new Response("This upload has expired or was already sent. Please upload again from the app.", { status: 410 });
-
-    const del = await env.DB.prepare("DELETE FROM drafts WHERE token = ?").bind(token).run();
-    if (!del || !del.meta || del.meta.changes < 1) {
-      return new Response("This upload was already sent.", { status: 410 });
+    const res = await env.DB.prepare("UPDATE humans SET verified = 1 WHERE token = ? AND verified = 0 AND used = 0 AND created > ?")
+      .bind(token, Date.now() - HUMAN_TTL_MS)
+      .run();
+    if (!res || !res.meta || res.meta.changes < 1) {
+      return new Response("This check has expired or was already done. Press the verify button in the app again.", { status: 410 });
     }
-
-    let info = {};
-    try {
-      info = JSON.parse(row.info);
-    } catch (e) {}
-    const slug = row.slug;
-
-    if (info.userKey && (await isBanned(env, [info.userKey]))) {
-      await rejectPending(slug, env);
-      await env.DB.prepare("DELETE FROM drafts WHERE token = ?").bind(token).run();
-      return new Response("This app installation is blocked from uploading.", { status: 403 });
-    }
-
-    ctx.waitUntil(
-      (async () => {
-        let firstImage = null;
-        const buf = await pendingGet(env, slug);
-        if (buf) {
-          const unpacked = unpackPending(buf);
-          if (unpacked.images && unpacked.images.length) firstImage = unpacked.images[0];
-        }
-        const embed = {
-          title: info.name,
-          color: 0x5b9bd5,
-          fields: [
-            { name: "Submitted by", value: `${info.builder} (via app)`, inline: true },
-            ...linkFields(info.youtubeUrl, info.patreonUrl),
-            { name: "Objects", value: `${info.objectCount} \u00b7 utility score ${info.score}/10`, inline: true },
-            ...(await approvalExtraFields(slug, env, info.check, info.imageCount || 0))
-          ]
-        };
-        const posted = await postApprovalMessage(env, embed, slug, firstImage);
-        if (!posted) console.error("approval message could not be posted for " + slug + " - use /pending");
-      })()
-    );
-
-    return new Response("Thanks! Your Corvette was submitted for approval. You can close this page.", { status: 200 });
+    return new Response("Verified! You can go back to the Optimizer app now.", { status: 200 });
   } catch (err) {
     const msg = err && err.message ? String(err.message) : String(err);
-    console.error("handleVerifySubmit failed: " + msg);
+    console.error("handleHumanVerify failed: " + msg);
     return new Response("Server error: " + msg.slice(0, 120), { status: 500 });
   }
+}
+
+async function handleHumanStatus(url, env) {
+  const token = url.searchParams.get("t") || "";
+  if (!HUMAN_TOKEN_RE.test(token) || !env.DB) return json({ verified: false, expired: true });
+  await ensureD1(env);
+  const row = await env.DB.prepare("SELECT created, verified, used FROM humans WHERE token = ?").bind(token).first();
+  if (!row || Date.now() - row.created > HUMAN_TTL_MS) return json({ verified: false, expired: true });
+  return json({ verified: row.verified === 1 && row.used === 0, expired: false });
 }
 
 const UPLOAD_PER_ID_PER_DAY = 3;
@@ -3012,7 +3014,7 @@ async function uploadQuotaAdd(env, keys) {
   await env.DB.batch(stmts);
 }
 
-async function handleAppUpload(request, env) {
+async function handleAppUpload(request, env, ctx) {
   let idHash = "";
   const refuse = async (status, text, blocked) => {
     if (status === 400 && idHash && env.DELETE_CODES) {
@@ -3081,10 +3083,17 @@ async function handleAppUpload(request, env) {
       });
     }
 
-    await purgeExpiredDrafts(env);
-    const open = await env.DB.prepare("SELECT COUNT(*) AS n FROM drafts").first();
-    if (open && open.n >= MAX_DRAFTS) {
-      return new Response("Too many uploads are waiting for verification. Please try again in a few minutes.", { status: 503 });
+    const humanToken = (form.get("humanToken") || "").toString();
+    let humanOk = false;
+    if (HUMAN_TOKEN_RE.test(humanToken)) {
+      const row = await env.DB.prepare("SELECT id_hash, verified, used, created FROM humans WHERE token = ?").bind(humanToken).first();
+      humanOk = !!row && row.verified === 1 && row.used === 0 && row.id_hash === idHash && Date.now() - row.created < HUMAN_TTL_MS;
+    }
+    if (!humanOk) {
+      return new Response("Could not accept this submission: please complete the human check first.", {
+        status: 403,
+        headers: { "x-blocked": "1" }
+      });
     }
 
     const name = (form.get("name") || "").toString().trim().slice(0, 80);
@@ -3131,27 +3140,35 @@ async function handleAppUpload(request, env) {
     );
     if (!staged.ok) return refuse(400, `Could not accept this ship file: ${staged.error}.`);
 
-    const token = randomHex(16);
-    const draftInfo = {
-      name,
-      builder,
-      youtubeUrl: linkCheck.youtubeUrl,
-      patreonUrl: linkCheck.patreonUrl,
-      objectCount: staged.meta.objectCount,
-      score: staged.meta.score,
-      check: staged.check,
-      imageCount: imageBufs.length,
-      userKey: idKey
-    };
-    await env.DB.prepare("INSERT INTO drafts (token, slug, created, info) VALUES (?, ?, ?, ?)")
-      .bind(token, staged.slug, Date.now(), JSON.stringify(draftInfo))
-      .run();
+    const used = await env.DB.prepare("UPDATE humans SET used = 1 WHERE token = ? AND used = 0").bind(humanToken).run();
+    if (!used || !used.meta || used.meta.changes < 1) {
+      await rejectPending(staged.slug, env);
+      return new Response("Could not accept this submission: please complete the human check first.", {
+        status: 403,
+        headers: { "x-blocked": "1" }
+      });
+    }
     await uploadQuotaAdd(env, [`id:${idHash}`, ipQuotaKey]);
 
-    return new Response(JSON.stringify({ ok: true, verifyUrl: `${workerOrigin}/verify?t=${token}` }), {
-      status: 200,
-      headers: { "content-type": "application/json" }
-    });
+    const slug = staged.slug;
+    ctx.waitUntil(
+      (async () => {
+        const embed = {
+          title: name,
+          color: 0x5b9bd5,
+          fields: [
+            { name: "Submitted by", value: `${builder} (via app)`, inline: true },
+            ...linkFields(linkCheck.youtubeUrl, linkCheck.patreonUrl),
+            { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true },
+            ...(await approvalExtraFields(slug, env, staged.check, imageBufs.length))
+          ]
+        };
+        const posted = await postApprovalMessage(env, embed, slug, imageBufs[0]);
+        if (!posted) console.error("approval message could not be posted for " + slug + " - use /pending");
+      })()
+    );
+
+    return new Response("Thanks! Your Corvette was submitted for approval.", { status: 200 });
   } catch (err) {
     const msg = err && err.message ? String(err.message) : String(err);
     console.error("handleAppUpload failed: " + msg);
@@ -3167,7 +3184,7 @@ async function ensureD1(env) {
     env.DB.prepare("CREATE TABLE IF NOT EXISTS pending (slug TEXT NOT NULL, part INTEGER NOT NULL, data TEXT NOT NULL, meta TEXT, PRIMARY KEY (slug, part)) WITHOUT ROWID"),
     env.DB.prepare("CREATE TABLE IF NOT EXISTS dl_seen (ship TEXT NOT NULL, kind TEXT NOT NULL, hash TEXT NOT NULL, PRIMARY KEY (ship, kind, hash)) WITHOUT ROWID"),
     env.DB.prepare("CREATE TABLE IF NOT EXISTS counters (k TEXT PRIMARY KEY, n INTEGER NOT NULL) WITHOUT ROWID"),
-    env.DB.prepare("CREATE TABLE IF NOT EXISTS drafts (token TEXT PRIMARY KEY, slug TEXT NOT NULL, created INTEGER NOT NULL, info TEXT NOT NULL) WITHOUT ROWID"),
+    env.DB.prepare("CREATE TABLE IF NOT EXISTS humans (token TEXT PRIMARY KEY, id_hash TEXT NOT NULL, created INTEGER NOT NULL, verified INTEGER NOT NULL DEFAULT 0, used INTEGER NOT NULL DEFAULT 0) WITHOUT ROWID"),
     env.DB.prepare("CREATE TABLE IF NOT EXISTS upload_log (k TEXT NOT NULL, at INTEGER NOT NULL)"),
     env.DB.prepare("CREATE INDEX IF NOT EXISTS upload_log_k ON upload_log (k, at)")
   ]);
@@ -3273,7 +3290,7 @@ async function recordRejection(env, kind, hash, code) {
 async function pendingCount(env) {
   if (!env.DB) return 0;
   await ensureD1(env);
-  const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM pending WHERE part = 0 AND slug NOT IN (SELECT slug FROM drafts)").first();
+  const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM pending WHERE part = 0").first();
   return row ? row.n : 0;
 }
 
@@ -3873,13 +3890,15 @@ export default {
       if (url.pathname.startsWith("/img/")) return handlePendingImage(url, env);
       if (url.pathname.startsWith("/ship/")) return handlePendingShip(url, env);
       if (url.pathname === "/register") return handleRegister(url, env);
-      if (url.pathname === "/verify") return handleVerifyPage(url, env);
+      if (url.pathname === "/human") return handleHumanPage(url, env);
+      if (url.pathname === "/human-status") return handleHumanStatus(url, env);
       return new Response("Corvette Library bot is running.", { status: 200 });
     }
 
     if (request.method === "POST") {
-      if (url.pathname === "/upload-app") return handleAppUpload(request, env);
-      if (url.pathname === "/verify") return handleVerifySubmit(request, env, ctx);
+      if (url.pathname === "/upload-app") return handleAppUpload(request, env, ctx);
+      if (url.pathname === "/human-start") return handleHumanStart(request, env);
+      if (url.pathname === "/human") return handleHumanVerify(request, env);
       if (url.pathname === "/download-request") return handleDownloadRequest(request, env, ctx);
 
       const signature = request.headers.get("x-signature-ed25519");
