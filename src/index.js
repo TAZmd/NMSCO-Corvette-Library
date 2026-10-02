@@ -90,7 +90,6 @@ function tierPenalty(id) {
   return 1.0;
 }
 
-// Weight per category sums to 10 - a ship with every utility present scores exactly 10.
 const UTILITY_CATALOG = {
   mostRequired: {
     weight: 6.0,
@@ -405,9 +404,6 @@ function objectsTextKeepingLayout(text, objects, key = "Objects") {
   return JSON.stringify(objects, null, 4);
 }
 
-// Whatever gets submitted - a real .nmsship zip, an .nmsbase or .nmsprefab, a plain .json, or a .txt paste of the
-// objects array - is reduced to just that plain objects.json text right away. Nothing
-// beyond that array is ever stored, and no zip container is ever written to the repo.
 async function normalizeShipBytes(bytes) {
   if (bytes.length > 2 && bytes[0] === 0x50 && bytes[1] === 0x4b) {
     const zipCheck = validateZipEntries(bytes);
@@ -1333,7 +1329,13 @@ body{font-family:sans-serif;background:#1e1e1e;color:#ddd;max-width:480px;margin
 label{display:block;margin-top:14px;font-size:14px}
 input[type=text],input[type=file]{width:100%;padding:8px;margin-top:4px;background:#2a2a2e;border:1px solid #444;color:#ddd;border-radius:4px;box-sizing:border-box}
 button{margin-top:20px;padding:10px 18px;background:#3a6ea5;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:15px}
-button:disabled{opacity:.5}
+button:disabled{opacity:.5;cursor:not-allowed}
+.rules{background:#1f1f23;border:1px solid #3f3f46;border-radius:6px;padding:12px 16px;margin-top:22px;font-size:13px;line-height:1.5;color:#d4d4d4}
+.rules h3{margin:0 0 6px 0;font-size:15px}
+.rules ol{margin:0;padding-left:20px}
+.rules li{margin-top:5px}
+.agree{display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:14px;color:#ddd;cursor:pointer}
+.agree input{width:auto;margin:3px 0 0 0}
 #status{margin-top:16px;font-size:14px}
 .hint{font-size:12px;color:#9da5b4;margin-top:6px;line-height:1.45}
 .file{position:relative;margin-top:4px}
@@ -1358,6 +1360,22 @@ button:disabled{opacity:.5}
 <label>Preview image<div class="file"><input type="file" name="image1" accept="image/*" required><span class="filebtn">Choose file</span></div></label>
 <label>Extra image 2 (optional)<div class="file"><input type="file" name="image2" accept="image/*"><span class="filebtn">Choose file</span></div></label>
 <label>Extra image 3 (optional)<div class="file"><input type="file" name="image3" accept="image/*"><span class="filebtn">Choose file</span></div></label>
+<div class="rules">
+<h3>Upload rules</h3>
+<ol>
+<li>Only upload Corvettes you built yourself. Do not upload someone else's Corvette, even if you only changed the color or made a few small changes.</li>
+<li>No sexual, racist, hateful, discriminatory or otherwise offensive content. This applies to the Corvette, its name, photos and links.</li>
+<li>Use your own builder name. Do not use someone else's name or pretend to be another builder.</li>
+<li>Only use photos of the Corvette you are uploading.</li>
+<li>Only link to your own Patreon or YouTube.</li>
+<li>Do not upload the same Corvette more than once. Spam uploads are not allowed.</li>
+<li>Only upload normal, unmodified Corvette files. Modified or tampered files will be rejected.</li>
+<li>By uploading a Corvette, you allow other users to download and use it for free in their own game.</li>
+<li>Every Corvette is checked before it is published. I can reject or remove a Corvette if needed.</li>
+<li>Breaking these rules can result in a permanent ban.</li>
+</ol>
+</div>
+<label class="agree"><input type="checkbox" id="agree" name="agree" value="yes" required><span>I have read the rules and I agree to them.</span></label>
 <div class="cf-turnstile" data-sitekey="${siteKey}" data-callback="onTsOk" data-expired-callback="onTsExpired" data-error-callback="onTsError" style="margin-top:16px"></div>
 ${siteKey ? '' : '<div class="hint">Verification is not set up on the server (TURNSTILE_SITE_KEY is missing). Uploads will fail until the admin fixes this.</div>'}
 <button type="submit">Submit for approval</button>
@@ -1419,6 +1437,11 @@ function updateFileButtons() {
 }
 document.querySelectorAll('.file input[type="file"]').forEach((i) => i.addEventListener('change', updateFileButtons));
 updateFileButtons();
+const agreeBox = document.getElementById('agree');
+const submitBtn = document.querySelector('#f button[type="submit"]');
+function updateSubmitState() { submitBtn.disabled = !agreeBox.checked; }
+agreeBox.addEventListener('change', updateSubmitState);
+updateSubmitState();
 loadSavedFields();
 document.querySelector('input[name="builder"]').addEventListener('input', (ev) => {
   const v = ev.target.value.trim();
@@ -1440,7 +1463,7 @@ document.getElementById('f').addEventListener('submit', async (e) => {
     const token = await freshToken(status);
     if (!token) {
       status.textContent = 'The verification did not finish. Wait for the green check mark or reload the page, then press Submit again.';
-      btn.disabled = false;
+      updateSubmitState();
       return;
     }
     form.set('cf-turnstile-response', token);
@@ -1467,6 +1490,7 @@ document.getElementById('f').addEventListener('submit', async (e) => {
       e.target.reset();
       loadSavedFields();
       updateFileButtons();
+      updateSubmitState();
     }
     resetTurnstile();
   } catch (err) {
@@ -1474,7 +1498,7 @@ document.getElementById('f').addEventListener('submit', async (e) => {
     status.textContent = 'Something went wrong while ' + stage + ' (' + why + '). Try a smaller JPG image, or tell the admin this message.';
     resetTurnstile();
   }
-  btn.disabled = false;
+  updateSubmitState();
 });
 
 function resetTurnstile() {
@@ -1550,6 +1574,10 @@ async function handleUploadSubmitInner(request, env, ctx) {
     form = await request.formData();
   } catch (e) {
     return new Response("Invalid form submission.", { status: 400 });
+  }
+
+  if (form.get("agree") !== "yes") {
+    return new Response("Could not accept this submission: you must agree to the upload rules first.", { status: 400 });
   }
 
   const turnstileToken = form.get("cf-turnstile-response");
@@ -1866,6 +1894,7 @@ async function handleRegister(url, env) {
       { name: "name", description: "Name for this Corvette", type: 3, required: true },
       { name: "ship", description: "The .nmsship or .json ship file", type: 11, required: true },
       { name: "image1", description: "A preview screenshot", type: 11, required: true },
+      { name: "agree", description: "Set to True: I built this myself and I agree to the upload rules.", type: 5, required: true },
       { name: "image2", description: "Extra screenshot (optional)", type: 11, required: false },
       { name: "image3", description: "Extra screenshot (optional)", type: 11, required: false },
       { name: "youtube", description: "Your YouTube link for this ship (optional)", type: 3, required: false },
@@ -2286,11 +2315,15 @@ async function handleSubmitInner(interaction, env, ctx) {
   const imgAtts = [attachments[opts.image1], attachments[opts.image2], attachments[opts.image3]].filter(Boolean);
   const name = (opts.name || "Unnamed Corvette").slice(0, 80);
 
+  if (opts.agree !== true) {
+    return ephemeral(`Could not accept this submission: you must agree to the upload rules. Read them here: ${workerOrigin}/upload`);
+  }
+
   const problems = [];
   if (!shipAtt) problems.push("no ship file attached");
   if (imgAtts.length === 0) problems.push("no image attached");
   if (shipAtt && shipAtt.size > 3 * 1024 * 1024) problems.push("ship file is larger than 3 MB");
-  if (shipAtt && !/\.(nmsship|json|txt)$/i.test(shipAtt.filename)) problems.push("ship file must be .nmsship, .json or .txt");
+  if (shipAtt && !/\.(nmsship|nmsbase|nmsprefab|json|txt)$/i.test(shipAtt.filename)) problems.push("ship file must be .nmsship, .nmsbase, .nmsprefab, .json or .txt");
   for (const a of imgAtts) {
     if (a.size > 8 * 1024 * 1024) problems.push(`${a.filename} is larger than 8 MB`);
     if (!/^image\//.test(a.content_type || "")) problems.push(`${a.filename} is not an image`);
