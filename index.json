@@ -1413,5 +1413,21 @@
     "downloads": 1,
     "approvedAt": "2026-10-02T18:18:39.025Z",
     "utilVersion": 2
+  },
+  {
+    "id": "the-hawking-0s1u3",
+    "name": "The Hawking",
+    "sha256": "a3fdd68e95496564fcd581eb91c1225612adf0884db1165edacc0c54211ffecd",
+    "submitter": "MilLf&CoOkIeS",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 2,
+    "objectCount": 79,
+    "score": 0,
+    "utilities": [],
+    "downloads": 0,
+    "approvedAt": "2026-10-02T19:12:48.234Z",
+    "utilVersion": 2
   }
 ]
