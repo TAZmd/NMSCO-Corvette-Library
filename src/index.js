@@ -68,77 +68,1624 @@ function linkFields(youtubeUrl, patreonUrl) {
   return f;
 }
 
-const TIER_RED = new Set([
-  "BUILD_REFINER1", "BUILD_REFINER2", "BUILD_REFINER3", "FRE_ROOM_REFINE",
-  "BASE_FLAG", "SET_B_MONU", "SET_MONUMENT", "SET_T_MONU", "SET_F_MONU",
-  "SET_INT_SHIPSAL", "SET_CONSTRUCT", "SET_INT_SUMMARY", "SET_MAYORTERM"
-]);
-const TIER_ORANGE = new Set([
-  "BUILDBEACON", "MESSAGEMODULE", "NPCBUILDERTERM", "NPCFARMTERM", "NPCSCIENCETERM",
-  "NPCVEHICLETERM", "NPCWEAPONTERM", "SUMMON_GARAGE", "GARAGE_B", "GARAGE_FLOAT",
-  "GARAGE_FREIGHT", "GARAGE_L", "GARAGE_M", "GARAGE_MECH", "GARAGE_S", "GARAGE_SUB"
+const ENGINE_SUPPORTED = 1;
+const CATALOG_URL = "https://raw.githubusercontent.com/TAZmd/TAZmd-NMS-Corvette-Optimizer-version-check/main/utility-catalog.json";
+const CATALOG_TTL_MS = 12 * 60 * 60 * 1000;
+const ENGINE_OPS = new Set([
+  "const", "has", "count", "chain", "add", "sub", "mul", "div", "min", "max", "clamp", "if",
+  "gt", "gte", "lt", "lte", "eq", "ref", "mean", "sumGroup", "size", "weight"
 ]);
 
 function normalizeId(id) {
   return (id || "").toString().replace(/^\^/, "").toUpperCase();
 }
 
-function tierPenalty(id) {
-  const n = normalizeId(id);
-  if (TIER_RED.has(n)) return 0.5;
-  if (TIER_ORANGE.has(n)) return 0.75;
-  return 1.0;
-}
-
-const UTILITY_CATALOG = {
-  mostRequired: {
-    weight: 6.0,
-    items: [
-      { label: "Base Teleport Module", chain: [["TELEPORTER"]] },
-      { label: "Scanner Room", chain: [["FRE_ROOM_SCAN"]] },
-      { label: "Galactic Trade Terminal", chain: [["BUILDTERMINAL"]] },
-      { label: "Tractor Beam", chain: [["B_MAG_1X1"]] }
+const DEFAULT_CATALOG = {
+  "engine": 1,
+  "catalogVersion": 2,
+  "tiers": {
+    "redFactor": 0.5,
+    "orangeFactor": 0.75,
+    "red": [
+      "BUILD_REFINER1",
+      "BUILD_REFINER2",
+      "BUILD_REFINER3",
+      "FRE_ROOM_REFINE",
+      "BASE_FLAG",
+      "SET_B_MONU",
+      "SET_MONUMENT",
+      "SET_T_MONU",
+      "SET_F_MONU",
+      "SET_INT_SHIPSAL",
+      "SET_CONSTRUCT",
+      "SET_INT_SUMMARY",
+      "SET_MAYORTERM"
+    ],
+    "orange": [
+      "BUILDBEACON",
+      "MESSAGEMODULE",
+      "NPCBUILDERTERM",
+      "NPCFARMTERM",
+      "NPCSCIENCETERM",
+      "NPCVEHICLETERM",
+      "NPCWEAPONTERM",
+      "SUMMON_GARAGE",
+      "GARAGE_B",
+      "GARAGE_FLOAT",
+      "GARAGE_FREIGHT",
+      "GARAGE_L",
+      "GARAGE_M",
+      "GARAGE_MECH",
+      "GARAGE_S",
+      "GARAGE_SUB"
     ]
   },
-  goodToHave: {
-    weight: 3.0,
-    items: [
-      { label: "Storage containers", countPrefixes: ["B_WALL_CARG", "CONTAINER"] },
-      { label: "Mission Radar", chain: [["B_WALL_TECH1"]] },
-      { label: "Refiner", chain: [["FRE_ROOM_REFINE", "BUILD_REFINER3", "B_WALL_TECH0"], ["BUILD_REFINER2"], ["BUILD_REFINER1"]] },
-      { label: "Weapon Case", chain: [["SET_WEAPONBOX"]] },
-      { label: "Nutrition Unit", chain: [["B_WALL_KITC0"], ["COOKER"]] },
-      { label: "Weapon Rack", chain: [["WEAPONRACK"]] },
-      { label: "Staff Builder", chain: [["SET_STAFFBUILD"]] },
-      { label: "Hazard Protection Unit", chain: [["SHIELDSTATION"]] },
-      { label: "Health Station", chain: [["HEALTHSTATION"]] },
-      { label: "Signal Booster", chain: [["BUILDSIGNAL"]] },
-      { label: "Holo-Arena Game Table", chain: [["GAMETABLE"]] },
-      { label: "Exocraft Research Station", chain: [["AM_EXOCRAFTTREE"]] },
-      { label: "Ship Research Station", chain: [["AM_SHIPTREE"]] },
-      { label: "Exosuit Research Station", chain: [["AM_SUITTREE"]] },
-      { label: "Multi-Tool Research Station", chain: [["AM_WEAPONTREE"]] },
-      { label: "Utopia Build Station", chain: [["S9_BUILDERTREE"]] }
+  "groups": [
+    {
+      "key": "mostRequired",
+      "weight": 6
+    },
+    {
+      "key": "goodToHave",
+      "weight": 3
+    },
+    {
+      "key": "overboard",
+      "weight": 1
+    }
+  ],
+  "items": [
+    {
+      "key": "base_teleport_module",
+      "label": "Base Teleport Module",
+      "group": "mostRequired",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "TELEPORTER"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "scanner_room",
+      "label": "Scanner Room",
+      "group": "mostRequired",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "FRE_ROOM_SCAN"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "galactic_trade_terminal",
+      "label": "Galactic Trade Terminal",
+      "group": "mostRequired",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "BUILDTERMINAL"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "tractor_beam",
+      "label": "Tractor Beam",
+      "group": "mostRequired",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "B_MAG_1X1"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "storage_containers",
+      "label": "Storage containers",
+      "group": "goodToHave",
+      "value": {
+        "op": "min",
+        "args": [
+          1,
+          {
+            "op": "count",
+            "prefixes": [
+              "B_WALL_CARG",
+              "CONTAINER"
+            ]
+          }
+        ]
+      },
+      "badge": {
+        "op": "count",
+        "prefixes": [
+          "B_WALL_CARG",
+          "CONTAINER"
+        ]
+      }
+    },
+    {
+      "key": "mission_radar",
+      "label": "Mission Radar",
+      "group": "goodToHave",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "B_WALL_TECH1"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "refiner",
+      "label": "Refiner",
+      "group": "goodToHave",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "FRE_ROOM_REFINE",
+            "BUILD_REFINER3",
+            "B_WALL_TECH0"
+          ],
+          [
+            "BUILD_REFINER2"
+          ],
+          [
+            "BUILD_REFINER1"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "weapon_case",
+      "label": "Weapon Case",
+      "group": "goodToHave",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "SET_WEAPONBOX"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "nutrition_unit",
+      "label": "Nutrition Unit",
+      "group": "goodToHave",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "B_WALL_KITC0"
+          ],
+          [
+            "COOKER"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "weapon_rack",
+      "label": "Weapon Rack",
+      "group": "goodToHave",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "WEAPONRACK"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "staff_builder",
+      "label": "Staff Builder",
+      "group": "goodToHave",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "SET_STAFFBUILD"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "hazard_protection_unit",
+      "label": "Hazard Protection Unit",
+      "group": "goodToHave",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "SHIELDSTATION"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "health_station",
+      "label": "Health Station",
+      "group": "goodToHave",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "HEALTHSTATION"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "signal_booster",
+      "label": "Signal Booster",
+      "group": "goodToHave",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "BUILDSIGNAL"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "holo_arena_game_table",
+      "label": "Holo-Arena Game Table",
+      "group": "goodToHave",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "GAMETABLE"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "exocraft_research_station",
+      "label": "Exocraft Research Station",
+      "group": "goodToHave",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "AM_EXOCRAFTTREE"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "ship_research_station",
+      "label": "Ship Research Station",
+      "group": "goodToHave",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "AM_SHIPTREE"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "exosuit_research_station",
+      "label": "Exosuit Research Station",
+      "group": "goodToHave",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "AM_SUITTREE"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "multi_tool_research_station",
+      "label": "Multi-Tool Research Station",
+      "group": "goodToHave",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "AM_WEAPONTREE"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "utopia_build_station",
+      "label": "Utopia Build Station",
+      "group": "goodToHave",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "S9_BUILDERTREE"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "stellar_extractor_room",
+      "label": "Stellar Extractor Room",
+      "group": "overboard",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "FRE_ROOM_EXTR"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "autonomous_mining_unit",
+      "label": "Autonomous Mining Unit",
+      "group": "overboard",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "BUILDHARVESTER"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "gas_harvester",
+      "label": "Gas Harvester",
+      "group": "overboard",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "BUILDGASHARVEST"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "oxygen_harvester",
+      "label": "Oxygen Harvester",
+      "group": "overboard",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "O2_HARVESTER"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "antimatter_reactor",
+      "label": "Antimatter Reactor",
+      "group": "overboard",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "BUILDANTIMATTER"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "appearance_modifier",
+      "label": "Appearance Modifier",
+      "group": "overboard",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "DRESSING_TABLE"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "livestock_unit",
+      "label": "Livestock Unit",
+      "group": "overboard",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "CREATURE_FARM"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "automated_feeder",
+      "label": "Automated Feeder",
+      "group": "overboard",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "CREATURE_FEED"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "nip_plant",
+      "label": "Nip Plant",
+      "group": "overboard",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "NIPPLANT"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "fishpond",
+      "label": "Fishpond",
+      "group": "overboard",
+      "value": {
+        "op": "chain",
+        "levels": [
+          [
+            "SET_FISHPOND"
+          ]
+        ]
+      }
+    }
+  ],
+  "score": {
+    "op": "add",
+    "args": [
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "base_teleport_module"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "mostRequired"
+              },
+              {
+                "op": "size",
+                "group": "mostRequired"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "scanner_room"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "mostRequired"
+              },
+              {
+                "op": "size",
+                "group": "mostRequired"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "galactic_trade_terminal"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "mostRequired"
+              },
+              {
+                "op": "size",
+                "group": "mostRequired"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "tractor_beam"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "mostRequired"
+              },
+              {
+                "op": "size",
+                "group": "mostRequired"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "storage_containers"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "goodToHave"
+              },
+              {
+                "op": "size",
+                "group": "goodToHave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "mission_radar"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "goodToHave"
+              },
+              {
+                "op": "size",
+                "group": "goodToHave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "refiner"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "goodToHave"
+              },
+              {
+                "op": "size",
+                "group": "goodToHave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "weapon_case"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "goodToHave"
+              },
+              {
+                "op": "size",
+                "group": "goodToHave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "nutrition_unit"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "goodToHave"
+              },
+              {
+                "op": "size",
+                "group": "goodToHave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "weapon_rack"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "goodToHave"
+              },
+              {
+                "op": "size",
+                "group": "goodToHave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "staff_builder"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "goodToHave"
+              },
+              {
+                "op": "size",
+                "group": "goodToHave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "hazard_protection_unit"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "goodToHave"
+              },
+              {
+                "op": "size",
+                "group": "goodToHave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "health_station"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "goodToHave"
+              },
+              {
+                "op": "size",
+                "group": "goodToHave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "signal_booster"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "goodToHave"
+              },
+              {
+                "op": "size",
+                "group": "goodToHave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "holo_arena_game_table"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "goodToHave"
+              },
+              {
+                "op": "size",
+                "group": "goodToHave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "exocraft_research_station"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "goodToHave"
+              },
+              {
+                "op": "size",
+                "group": "goodToHave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "ship_research_station"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "goodToHave"
+              },
+              {
+                "op": "size",
+                "group": "goodToHave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "exosuit_research_station"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "goodToHave"
+              },
+              {
+                "op": "size",
+                "group": "goodToHave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "multi_tool_research_station"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "goodToHave"
+              },
+              {
+                "op": "size",
+                "group": "goodToHave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "utopia_build_station"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "goodToHave"
+              },
+              {
+                "op": "size",
+                "group": "goodToHave"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "stellar_extractor_room"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "overboard"
+              },
+              {
+                "op": "size",
+                "group": "overboard"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "autonomous_mining_unit"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "overboard"
+              },
+              {
+                "op": "size",
+                "group": "overboard"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "gas_harvester"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "overboard"
+              },
+              {
+                "op": "size",
+                "group": "overboard"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "oxygen_harvester"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "overboard"
+              },
+              {
+                "op": "size",
+                "group": "overboard"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "antimatter_reactor"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "overboard"
+              },
+              {
+                "op": "size",
+                "group": "overboard"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "appearance_modifier"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "overboard"
+              },
+              {
+                "op": "size",
+                "group": "overboard"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "livestock_unit"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "overboard"
+              },
+              {
+                "op": "size",
+                "group": "overboard"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "automated_feeder"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "overboard"
+              },
+              {
+                "op": "size",
+                "group": "overboard"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "nip_plant"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "overboard"
+              },
+              {
+                "op": "size",
+                "group": "overboard"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "op": "mul",
+        "args": [
+          {
+            "op": "ref",
+            "key": "fishpond"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "op": "weight",
+                "group": "overboard"
+              },
+              {
+                "op": "size",
+                "group": "overboard"
+              }
+            ]
+          }
+        ]
+      }
     ]
   },
-  overboard: {
-    weight: 1.0,
-    items: [
-      { label: "Stellar Extractor Room", chain: [["FRE_ROOM_EXTR"]] },
-      { label: "Autonomous Mining Unit", chain: [["BUILDHARVESTER"]] },
-      { label: "Gas Harvester", chain: [["BUILDGASHARVEST"]] },
-      { label: "Oxygen Harvester", chain: [["O2_HARVESTER"]] },
-      { label: "Antimatter Reactor", chain: [["BUILDANTIMATTER"]] },
-      { label: "Appearance Modifier", chain: [["DRESSING_TABLE"]] },
-      { label: "Livestock Unit", chain: [["CREATURE_FARM"]] },
-      { label: "Automated Feeder", chain: [["CREATURE_FEED"]] },
-      { label: "Nip Plant", chain: [["NIPPLANT"]] },
-      { label: "Fishpond", chain: [["SET_FISHPOND"]] }
-    ]
-  }
+  "output": {
+    "min": 0,
+    "max": 10,
+    "decimals": 1
+  },
+  "tests": [
+    {
+      "ids": [],
+      "score": 0
+    },
+    {
+      "ids": [
+        "^JUNK"
+      ],
+      "score": 0
+    },
+    {
+      "ids": [
+        "^TELEPORTER",
+        "^FRE_ROOM_SCAN",
+        "^BUILDTERMINAL",
+        "^B_MAG_1X1"
+      ],
+      "score": 6
+    },
+    {
+      "ids": [
+        "^TELEPORTER",
+        "^TELEPORTER",
+        "^TELEPORTER"
+      ],
+      "score": 1.5
+    },
+    {
+      "ids": [
+        "^BUILD_REFINER1",
+        "^CONTAINER_1",
+        "^CONTAINER_2",
+        "^NIPPLANT",
+        "^NIPPLANT"
+      ],
+      "score": 0.3
+    },
+    {
+      "ids": [
+        "^FRE_ROOM_REFINE",
+        "^BUILDBEACON",
+        "^GARAGE_S",
+        "^SET_MONUMENT"
+      ],
+      "score": 0.1
+    },
+    {
+      "ids": [
+        "^BUILDTERMINAL",
+        "^B_MAG_1X1",
+        "^CONTAINER_X",
+        "^B_WALL_TECH1",
+        "^BUILD_REFINER3",
+        "^B_WALL_TECH0",
+        "^SET_WEAPONBOX",
+        "^B_WALL_KITC0",
+        "^SET_STAFFBUILD",
+        "^SHIELDSTATION",
+        "^BUILDSIGNAL",
+        "^AM_EXOCRAFTTREE",
+        "^AM_SUITTREE",
+        "^SET_FISHPOND",
+        "^WALL1",
+        "^BASE_FLAG",
+        "^BUILDBEACON"
+      ],
+      "score": 4.9
+    },
+    {
+      "ids": [
+        "^FRE_ROOM_SCAN",
+        "^BUILDTERMINAL",
+        "^B_WALL_TECH0",
+        "^BUILD_REFINER2",
+        "^B_WALL_KITC0",
+        "^COOKER",
+        "^WEAPONRACK",
+        "^AM_EXOCRAFTTREE",
+        "^FRE_ROOM_EXTR",
+        "^BUILDHARVESTER",
+        "^BUILDGASHARVEST",
+        "^O2_HARVESTER",
+        "^BUILDANTIMATTER",
+        "^DRESSING_TABLE",
+        "^JUNK",
+        "^WALL1",
+        "^BASE_FLAG"
+      ],
+      "score": 4.3
+    },
+    {
+      "ids": [
+        "^TELEPORTER",
+        "^B_MAG_1X1",
+        "^BUILD_REFINER3",
+        "^B_WALL_TECH0",
+        "^SHIELDSTATION",
+        "^AM_EXOCRAFTTREE",
+        "^CREATURE_FEED",
+        "^JUNK",
+        "^BUILDBEACON"
+      ],
+      "score": 3.6
+    },
+    {
+      "ids": [
+        "^B_WALL_CARG_X",
+        "^FRE_ROOM_REFINE",
+        "^BUILD_REFINER2",
+        "^COOKER",
+        "^WEAPONRACK",
+        "^SET_STAFFBUILD",
+        "^SHIELDSTATION",
+        "^HEALTHSTATION",
+        "^BUILDSIGNAL",
+        "^AM_EXOCRAFTTREE",
+        "^AM_SHIPTREE",
+        "^AM_SUITTREE",
+        "^S9_BUILDERTREE",
+        "^BUILDHARVESTER",
+        "^BUILDGASHARVEST",
+        "^BUILDANTIMATTER",
+        "^DRESSING_TABLE",
+        "^CREATURE_FARM",
+        "^CREATURE_FEED",
+        "^JUNK",
+        "^WALL1",
+        "^BASE_FLAG",
+        "^BUILDBEACON"
+      ],
+      "score": 2.7
+    },
+    {
+      "ids": [
+        "^B_WALL_TECH1",
+        "^BUILD_REFINER3",
+        "^COOKER",
+        "^HEALTHSTATION",
+        "^GAMETABLE",
+        "^AM_SHIPTREE",
+        "^FRE_ROOM_EXTR",
+        "^O2_HARVESTER",
+        "^CREATURE_FARM",
+        "^NIPPLANT",
+        "^BASE_FLAG",
+        "^BUILDBEACON"
+      ],
+      "score": 1.3
+    },
+    {
+      "ids": [
+        "^FRE_ROOM_SCAN",
+        "^BUILDTERMINAL",
+        "^B_WALL_CARG_X",
+        "^CONTAINER_X",
+        "^B_WALL_TECH1",
+        "^FRE_ROOM_REFINE",
+        "^BUILD_REFINER3",
+        "^B_WALL_TECH0",
+        "^BUILD_REFINER2",
+        "^BUILD_REFINER1",
+        "^SET_WEAPONBOX",
+        "^B_WALL_KITC0",
+        "^COOKER",
+        "^WEAPONRACK",
+        "^SET_STAFFBUILD",
+        "^SHIELDSTATION",
+        "^BUILDSIGNAL",
+        "^GAMETABLE",
+        "^AM_EXOCRAFTTREE",
+        "^AM_SHIPTREE",
+        "^AM_SUITTREE",
+        "^S9_BUILDERTREE",
+        "^FRE_ROOM_EXTR",
+        "^BUILDHARVESTER",
+        "^BUILDGASHARVEST",
+        "^O2_HARVESTER",
+        "^BUILDANTIMATTER",
+        "^DRESSING_TABLE",
+        "^CREATURE_FARM",
+        "^CREATURE_FEED",
+        "^NIPPLANT",
+        "^SET_FISHPOND",
+        "^JUNK",
+        "^WALL1",
+        "^BASE_FLAG",
+        "^BUILDBEACON"
+      ],
+      "score": 6.5
+    },
+    {
+      "ids": [
+        "^B_WALL_CARG_X",
+        "^CONTAINER_X",
+        "^FRE_ROOM_REFINE",
+        "^BUILD_REFINER3",
+        "^SET_WEAPONBOX",
+        "^COOKER",
+        "^HEALTHSTATION",
+        "^BUILDSIGNAL",
+        "^GAMETABLE",
+        "^AM_SUITTREE",
+        "^BUILDHARVESTER",
+        "^BUILDGASHARVEST",
+        "^BUILDANTIMATTER",
+        "^DRESSING_TABLE",
+        "^SET_FISHPOND"
+      ],
+      "score": 1.8
+    },
+    {
+      "ids": [
+        "^CONTAINER_X",
+        "^FRE_ROOM_REFINE",
+        "^BUILD_REFINER3",
+        "^B_WALL_TECH0",
+        "^BUILD_REFINER1",
+        "^COOKER",
+        "^WEAPONRACK",
+        "^HEALTHSTATION",
+        "^AM_WEAPONTREE",
+        "^S9_BUILDERTREE",
+        "^FRE_ROOM_EXTR",
+        "^BUILDHARVESTER",
+        "^BUILDANTIMATTER",
+        "^DRESSING_TABLE",
+        "^CREATURE_FARM",
+        "^CREATURE_FEED",
+        "^NIPPLANT",
+        "^SET_FISHPOND",
+        "^JUNK",
+        "^BUILDBEACON"
+      ],
+      "score": 1.9
+    },
+    {
+      "ids": [
+        "^FRE_ROOM_SCAN",
+        "^BUILDTERMINAL",
+        "^B_WALL_CARG_X",
+        "^CONTAINER_X",
+        "^FRE_ROOM_REFINE",
+        "^B_WALL_TECH0",
+        "^BUILD_REFINER2",
+        "^BUILD_REFINER1",
+        "^SET_WEAPONBOX",
+        "^B_WALL_KITC0",
+        "^COOKER",
+        "^WEAPONRACK",
+        "^SET_STAFFBUILD",
+        "^SHIELDSTATION",
+        "^HEALTHSTATION",
+        "^BUILDSIGNAL",
+        "^GAMETABLE",
+        "^AM_WEAPONTREE",
+        "^S9_BUILDERTREE",
+        "^BUILDHARVESTER",
+        "^DRESSING_TABLE",
+        "^CREATURE_FARM",
+        "^CREATURE_FEED",
+        "^JUNK",
+        "^WALL1",
+        "^BASE_FLAG",
+        "^BUILDBEACON"
+      ],
+      "score": 5.6
+    },
+    {
+      "ids": [
+        "^B_WALL_TECH1",
+        "^FRE_ROOM_REFINE",
+        "^BUILD_REFINER2",
+        "^SET_WEAPONBOX",
+        "^COOKER",
+        "^AM_EXOCRAFTTREE",
+        "^S9_BUILDERTREE",
+        "^BUILDHARVESTER",
+        "^O2_HARVESTER",
+        "^BUILDANTIMATTER",
+        "^CREATURE_FARM",
+        "^NIPPLANT",
+        "^JUNK",
+        "^WALL1"
+      ],
+      "score": 1.4
+    }
+  ]
 };
 
-const UTILITY_CATALOG_VERSION = 2;
+function evalNode(node, cat, ctx, depth) {
+  if (typeof node === "number") return node;
+  if (!node || typeof node !== "object") throw new Error("bad node");
+  if (depth > 60) throw new Error("too deep");
+  const d = depth + 1;
+  const args = () => (node.args || []).map((x) => evalNode(x, cat, ctx, d));
+  switch (node.op) {
+    case "const":
+      return Number(node.value);
+    case "has":
+      return (node.ids || []).some((i) => ctx.present.has(normalizeId(i))) ? 1 : 0;
+    case "count": {
+      const ids = (node.ids || []).map(normalizeId);
+      const prefixes = (node.prefixes || []).map(normalizeId);
+      let n = 0;
+      for (const id of ctx.ids) {
+        if (ids.includes(id) || prefixes.some((p) => id.startsWith(p))) n++;
+      }
+      return n;
+    }
+    case "chain": {
+      const levels = node.levels || [];
+      for (let lvl = 0; lvl < levels.length; lvl++) {
+        for (const cand of levels[lvl]) {
+          const c = normalizeId(cand);
+          if (!ctx.present.has(c)) continue;
+          const levelValue = 1 - lvl / levels.length;
+          const t = cat.__tiers;
+          const penalty = t.red.has(c) ? t.redFactor : t.orange.has(c) ? t.orangeFactor : 1.0;
+          return levelValue * penalty;
+        }
+      }
+      return 0;
+    }
+    case "add": return args().reduce((s, v) => s + v, 0);
+    case "mul": return args().reduce((s, v) => s * v, 1);
+    case "min": return Math.min(...args());
+    case "max": return Math.max(...args());
+    case "sub": { const v = args(); return v[0] - v[1]; }
+    case "div": { const v = args(); return v[1] === 0 ? 0 : v[0] / v[1]; }
+    case "clamp": { const v = args(); return Math.min(Math.max(v[0], v[1]), v[2]); }
+    case "if": {
+      const c = evalNode(node.args[0], cat, ctx, d);
+      return c > 0 ? evalNode(node.args[1], cat, ctx, d) : evalNode(node.args[2], cat, ctx, d);
+    }
+    case "gt": { const v = args(); return v[0] > v[1] ? 1 : 0; }
+    case "gte": { const v = args(); return v[0] >= v[1] ? 1 : 0; }
+    case "lt": { const v = args(); return v[0] < v[1] ? 1 : 0; }
+    case "lte": { const v = args(); return v[0] <= v[1] ? 1 : 0; }
+    case "eq": { const v = args(); return v[0] === v[1] ? 1 : 0; }
+    case "ref": return itemValue(node.key, cat, ctx, d);
+    case "mean": {
+      const g = cat.__groups[node.group].items;
+      let sum = 0;
+      for (const it of g) sum += itemValue(it.key, cat, ctx, d);
+      return g.length === 0 ? 0 : sum / g.length;
+    }
+    case "sumGroup": {
+      let sum = 0;
+      for (const it of cat.__groups[node.group].items) sum += itemValue(it.key, cat, ctx, d);
+      return sum;
+    }
+    case "size":
+      return cat.__groups[node.group].items.length;
+    case "weight":
+      return cat.__groups[node.group].weight;
+    default:
+      throw new Error("unknown op " + node.op);
+  }
+}
+
+function itemValue(key, cat, ctx, depth) {
+  if (Object.prototype.hasOwnProperty.call(ctx.memo, key)) return ctx.memo[key];
+  const it = cat.__items[key];
+  if (!it) throw new Error("unknown item " + key);
+  const v = evalNode(it.value, cat, ctx, depth);
+  ctx.memo[key] = v;
+  return v;
+}
+
+function prepareCatalog(c) {
+  const t = c.tiers || {};
+  c.__tiers = {
+    red: new Set((t.red || []).map(normalizeId)),
+    orange: new Set((t.orange || []).map(normalizeId)),
+    redFactor: typeof t.redFactor === "number" ? t.redFactor : 0.5,
+    orangeFactor: typeof t.orangeFactor === "number" ? t.orangeFactor : 0.75
+  };
+  c.__groups = {};
+  for (const g of c.groups) c.__groups[g.key] = { weight: g.weight, items: [] };
+  c.__items = {};
+  for (const it of c.items) {
+    c.__items[it.key] = it;
+    c.__groups[it.group].items.push(it);
+  }
+  return c;
+}
+
+function runEngine(cat, objectIds) {
+  const ids = objectIds.map(normalizeId);
+  const ctx = { ids, present: new Set(ids), memo: {} };
+  const items = [];
+  for (const it of cat.items) {
+    const value = itemValue(it.key, cat, ctx, 0);
+    if (value > 0) {
+      const badge = it.badge ? evalNode(it.badge, cat, ctx, 0) : null;
+      items.push({ label: it.label, value, badge });
+    }
+  }
+  let score = evalNode(cat.score, cat, ctx, 0);
+  const out = cat.output || {};
+  if (typeof out.min === "number") score = Math.max(score, out.min);
+  if (typeof out.max === "number") score = Math.min(score, out.max);
+  const f = Math.pow(10, typeof out.decimals === "number" ? out.decimals : 1);
+  return { score: Math.round(score * f) / f, items };
+}
+
+function validateNode(node, c, groupKeys, itemKeys) {
+  if (typeof node === "number") return;
+  if (!node || typeof node !== "object" || !ENGINE_OPS.has(node.op)) throw new Error("bad op");
+  if (node.op === "ref" && !itemKeys.has(node.key)) throw new Error("bad ref");
+  if ((node.op === "mean" || node.op === "sumGroup" || node.op === "size" || node.op === "weight") && !groupKeys.has(node.group)) throw new Error("bad group");
+  if (node.op === "chain" && !Array.isArray(node.levels)) throw new Error("bad chain");
+  if (["sub", "div", "gt", "gte", "lt", "lte", "eq"].includes(node.op) && (!Array.isArray(node.args) || node.args.length !== 2)) throw new Error("bad args");
+  if (["clamp", "if"].includes(node.op) && (!Array.isArray(node.args) || node.args.length !== 3)) throw new Error("bad args");
+  if (["add", "mul", "min", "max"].includes(node.op) && (!Array.isArray(node.args) || node.args.length === 0)) throw new Error("bad args");
+  for (const a of node.args || []) validateNode(a, c, groupKeys, itemKeys);
+}
+
+function validCatalog(c) {
+  try {
+    if (!c || typeof c !== "object") return false;
+    if (typeof c.engine !== "number" || c.engine < 1 || c.engine > ENGINE_SUPPORTED) return false;
+    if (typeof c.catalogVersion !== "number") return false;
+    if (!Array.isArray(c.groups) || !Array.isArray(c.items) || c.items.length === 0) return false;
+    const groupKeys = new Set(c.groups.map((g) => g.key));
+    const itemKeys = new Set(c.items.map((i) => i.key));
+    if (groupKeys.size !== c.groups.length || itemKeys.size !== c.items.length) return false;
+    for (const it of c.items) {
+      if (typeof it.label !== "string" || !groupKeys.has(it.group)) return false;
+      validateNode(it.value, c, groupKeys, itemKeys);
+      if (it.badge) validateNode(it.badge, c, groupKeys, itemKeys);
+    }
+    validateNode(c.score, c, groupKeys, itemKeys);
+    prepareCatalog(c);
+    for (const t of c.tests || []) {
+      if (Math.abs(runEngine(c, t.ids).score - t.score) > 1e-9) return false;
+    }
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+let ACTIVE_CATALOG = prepareCatalog(DEFAULT_CATALOG);
+let catalogCheckedAt = 0;
+
+function utilCatalogVersion() {
+  return ACTIVE_CATALOG.catalogVersion;
+}
+
+async function ensureCatalog(env, force) {
+  const now = Date.now();
+  if (!force && now - catalogCheckedAt < CATALOG_TTL_MS) return;
+  catalogCheckedAt = now;
+  try {
+    const init = { signal: AbortSignal.timeout(1500) };
+    if (!force) init.cf = { cacheTtl: 43200, cacheEverything: true };
+    const resp = await fetch(CATALOG_URL, init);
+    if (!resp.ok) return;
+    const c = JSON.parse(await resp.text());
+    if (!validCatalog(c)) return;
+    ACTIVE_CATALOG = c;
+  } catch (err) {
+    console.error("ensureCatalog failed: " + (err && err.message ? err.message : String(err)));
+  }
+}
 
 function idsFromShipText(text) {
   const ids = [];
@@ -149,44 +1696,12 @@ function idsFromShipText(text) {
 }
 
 function scoreShip(objectIds) {
-  const normIds = objectIds.map(normalizeId);
-  const present = new Set(normIds);
-  let score = 0;
-  const utilities = [];
-
-  function scanItem(item) {
-    if (item.countPrefixes) {
-      let count = 0;
-      for (const id of normIds) {
-        if (item.countPrefixes.some((p) => id.startsWith(p))) count++;
-      }
-      if (count > 0) {
-        utilities.push({ label: `${count} ${item.label}` });
-        return 1;
-      }
-      return 0;
-    }
-    for (let lvl = 0; lvl < item.chain.length; lvl++) {
-      for (const candidate of item.chain[lvl]) {
-        const cnorm = normalizeId(candidate);
-        if (present.has(cnorm)) {
-          const levelValue = 1 - lvl / item.chain.length;
-          const value = levelValue * tierPenalty(cnorm);
-          utilities.push({ label: item.label, value: Math.round(value * 100) / 100 });
-          return value;
-        }
-      }
-    }
-    return 0;
-  }
-
-  for (const catKey of ["mostRequired", "goodToHave", "overboard"]) {
-    const cat = UTILITY_CATALOG[catKey];
-    const perItem = cat.weight / cat.items.length;
-    for (const item of cat.items) score += scanItem(item) * perItem;
-  }
-
-  return { score: Math.round(score * 10) / 10, utilities };
+  const res = runEngine(ACTIVE_CATALOG, objectIds);
+  const utilities = res.items.map((it) => {
+    if (it.badge !== null && it.badge !== undefined) return { label: `${it.badge} ${it.label}` };
+    return { label: it.label, value: Math.round(it.value * 100) / 100 };
+  });
+  return { score: res.score, utilities };
 }
 
 function readUint16LE(view, off) {
@@ -1228,7 +2743,7 @@ async function promotePendingToLibrary(slug, env) {
       id: slug, name: stagedInfo.name, sha256: shipHash, submitter: stagedInfo.submitter || "",
       patreonUrl: stagedInfo.patreonUrl || "", youtubeUrl: stagedInfo.youtubeUrl || "", imageCount,
       objectCount: stagedInfo.objectCount, score: stagedInfo.score, utilities: stagedInfo.utilities,
-      downloads: 0, approvedAt: info.approvedAt, utilVersion: UTILITY_CATALOG_VERSION
+      downloads: 0, approvedAt: info.approvedAt, utilVersion: utilCatalogVersion()
     },
     `Add ${stagedInfo.name} to index`
   );
@@ -1270,7 +2785,7 @@ async function promoteLegacyPending(slug, env) {
       id: slug, name: stagedInfo.name, sha256: shipHash, submitter: stagedInfo.submitter || "",
       patreonUrl: stagedInfo.patreonUrl || "", youtubeUrl: stagedInfo.youtubeUrl || "", imageCount,
       objectCount: stagedInfo.objectCount, score: stagedInfo.score, utilities: stagedInfo.utilities,
-      downloads: 0, approvedAt: info.approvedAt, utilVersion: UTILITY_CATALOG_VERSION
+      downloads: 0, approvedAt: info.approvedAt, utilVersion: utilCatalogVersion()
     },
     `Add ${stagedInfo.name} to index`
   );
@@ -2232,6 +3747,7 @@ async function handlePendingCommand(interaction, env, ctx) {
 }
 
 async function recalcBatch(env, limit) {
+  await ensureCatalog(env, true);
   const shards = await readIndexShards(env);
   let done = 0;
   let remaining = 0;
@@ -2239,7 +3755,7 @@ async function recalcBatch(env, limit) {
   for (const sh of shards) {
     let changed = false;
     for (const e of sh.list) {
-      if ((e.utilVersion || 0) >= UTILITY_CATALOG_VERSION) continue;
+      if ((e.utilVersion || 0) >= utilCatalogVersion()) continue;
       if (done + failed >= limit) {
         remaining++;
         continue;
@@ -2254,7 +3770,7 @@ async function recalcBatch(env, limit) {
         const result = scoreShip(ids);
         e.score = result.score;
         e.utilities = result.utilities;
-        e.utilVersion = UTILITY_CATALOG_VERSION;
+        e.utilVersion = utilCatalogVersion();
         changed = true;
         done++;
       } catch (err) {
@@ -2509,6 +4025,8 @@ export default {
     const url = new URL(request.url);
 
     workerOrigin = url.origin;
+
+    if (request.method === "POST") await ensureCatalog(env);
 
     if (request.method === "GET") {
       if (url.pathname.startsWith("/img/")) return handlePendingImage(url, env);
