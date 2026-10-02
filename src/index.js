@@ -1334,6 +1334,11 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .rules h3{margin:0 0 6px 0;font-size:15px}
 .rules ol{margin:0;padding-left:20px}
 .rules li{margin-top:5px}
+.rulesbody{max-height:150px;overflow-y:auto;padding-right:10px;scrollbar-width:thin;scrollbar-color:#555 #1f1f23}
+.rulesbody::-webkit-scrollbar{width:8px}
+.rulesbody::-webkit-scrollbar-track{background:#1f1f23}
+.rulesbody::-webkit-scrollbar-thumb{background:#555;border-radius:4px}
+.rulesnote{font-size:11px;color:#9da5b4;margin-top:6px}
 .agree{display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:14px;color:#ddd;cursor:pointer}
 .agree input{width:auto;margin:3px 0 0 0}
 #status{margin-top:16px;font-size:14px}
@@ -1362,6 +1367,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <label>Extra image 3 (optional)<div class="file"><input type="file" name="image3" accept="image/*"><span class="filebtn">Choose file</span></div></label>
 <div class="rules">
 <h3>Upload rules</h3>
+<div class="rulesbody">
 <ol>
 <li>Only upload Corvettes you built yourself. Do not upload someone else's Corvette, even if you only changed the color or made a few small changes.</li>
 <li>No sexual, racist, hateful, discriminatory or otherwise offensive content. This applies to the Corvette, its name, photos and links.</li>
@@ -1374,6 +1380,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <li>Every Corvette is checked before it is published. I can reject or remove a Corvette if needed.</li>
 <li>Breaking these rules can result in a permanent ban.</li>
 </ol>
+</div>
+<div class="rulesnote">Scroll to read all the rules.</div>
 </div>
 <label class="agree"><input type="checkbox" id="agree" name="agree" value="yes" required><span>I have read the rules and I agree to them.</span></label>
 <div class="cf-turnstile" data-sitekey="${siteKey}" data-callback="onTsOk" data-expired-callback="onTsExpired" data-error-callback="onTsError" style="margin-top:16px"></div>
