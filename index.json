@@ -1429,5 +1429,26 @@
     "downloads": 2,
     "approvedAt": "2026-10-02T19:12:48.234Z",
     "utilVersion": 2
+  },
+  {
+    "id": "go-cart-y3uto",
+    "name": "Go Cart",
+    "sha256": "58bf84e0a413d6d15b065667f5a7a54b1caf0c687fb0928ca397546f2f82dabf",
+    "submitter": "MilLf&CoOkIeS",
+    "description": "Jump and stand on the side of the Go Cart. In first person view, Look down at the seat to enter cockpit",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 134,
+    "score": 1.5,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-02T20:14:34.499Z",
+    "utilVersion": 2
   }
 ]
