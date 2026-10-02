@@ -2671,7 +2671,7 @@ async function handlePendingImage(url, env) {
   return res;
 }
 
-async function stageSubmission({ name, submitter, patreonUrl, youtubeUrl, shipBytes, imageBufs, deleteCode, ipKey, userKey }, env) {
+async function stageSubmission({ name, submitter, description, patreonUrl, youtubeUrl, shipBytes, imageBufs, deleteCode, ipKey, userKey }, env) {
   if ((await pendingCount(env)) >= MAX_PENDING_ITEMS) {
     return { ok: false, error: "the waiting list is full, please try again later" };
   }
@@ -2683,7 +2683,7 @@ async function stageSubmission({ name, submitter, patreonUrl, youtubeUrl, shipBy
   const images = (imageBufs || []).slice(0, 3);
 
   const info = {
-    name, id: slug, submitter: submitter || "", patreonUrl: patreonUrl || "", youtubeUrl: youtubeUrl || "",
+    name, id: slug, submitter: submitter || "", description: description || "", patreonUrl: patreonUrl || "", youtubeUrl: youtubeUrl || "",
     objectCount: meta.objectCount, score: meta.score, utilities: meta.utilities,
     imageCount: images.length,
     stagedAt: new Date().toISOString()
@@ -2741,6 +2741,7 @@ async function promotePendingToLibrary(slug, env) {
     env,
     {
       id: slug, name: stagedInfo.name, sha256: shipHash, submitter: stagedInfo.submitter || "",
+      description: stagedInfo.description || "",
       patreonUrl: stagedInfo.patreonUrl || "", youtubeUrl: stagedInfo.youtubeUrl || "", imageCount,
       objectCount: stagedInfo.objectCount, score: stagedInfo.score, utilities: stagedInfo.utilities,
       downloads: 0, approvedAt: info.approvedAt, utilVersion: utilCatalogVersion()
@@ -2783,6 +2784,7 @@ async function promoteLegacyPending(slug, env) {
     env,
     {
       id: slug, name: stagedInfo.name, sha256: shipHash, submitter: stagedInfo.submitter || "",
+      description: stagedInfo.description || "",
       patreonUrl: stagedInfo.patreonUrl || "", youtubeUrl: stagedInfo.youtubeUrl || "", imageCount,
       objectCount: stagedInfo.objectCount, score: stagedInfo.score, utilities: stagedInfo.utilities,
       downloads: 0, approvedAt: info.approvedAt, utilVersion: utilCatalogVersion()
@@ -2995,6 +2997,7 @@ async function handleHumanStatus(url, env) {
   return json({ verified: row.verified === 1 && row.used === 0, expired: false });
 }
 
+const DESCRIPTION_MAX = 250;
 const UPLOAD_PER_ID_PER_DAY = 3;
 const UPLOAD_PER_IP_PER_DAY = 10;
 const UPLOAD_MAX_BODY = 40 * 1024 * 1024;
@@ -3098,11 +3101,15 @@ async function handleAppUpload(request, env, ctx) {
 
     const name = (form.get("name") || "").toString().trim().slice(0, 80);
     const builder = (form.get("builder") || "").toString().trim().slice(0, 80);
+    const description = (form.get("description") || "").toString().replace(/[\u0000-\u001f\u007f]+/g, " ").replace(/\s+/g, " ").trim();
     const shipFile = form.get("ship");
     const imageFiles = [form.get("image1"), form.get("image2"), form.get("image3")].filter((f) => f instanceof File);
 
     if (!name) return refuse(400, "Could not accept this submission: the Corvette name is required.");
     if (!builder) return refuse(400, "Could not accept this submission: your name is required.");
+    if (description.length > DESCRIPTION_MAX) {
+      return refuse(400, `Could not accept this submission: the description is longer than ${DESCRIPTION_MAX} characters.`);
+    }
 
     const problems = [];
     if (!(shipFile instanceof File)) problems.push("no ship file attached");
@@ -3135,7 +3142,7 @@ async function handleAppUpload(request, env, ctx) {
 
     const shipBytes = new Uint8Array(await shipFile.arrayBuffer());
     const staged = await stageSubmission(
-      { name, submitter: builder, patreonUrl: linkCheck.patreonUrl, youtubeUrl: linkCheck.youtubeUrl, shipBytes, imageBufs, deleteCode, ipKey, userKey: idKey },
+      { name, submitter: builder, description, patreonUrl: linkCheck.patreonUrl, youtubeUrl: linkCheck.youtubeUrl, shipBytes, imageBufs, deleteCode, ipKey, userKey: idKey },
       env
     );
     if (!staged.ok) return refuse(400, `Could not accept this ship file: ${staged.error}.`);
@@ -3158,6 +3165,7 @@ async function handleAppUpload(request, env, ctx) {
           color: 0x5b9bd5,
           fields: [
             { name: "Submitted by", value: `${builder} (via app)`, inline: true },
+            ...(description ? [{ name: "Description", value: description, inline: false }] : []),
             ...linkFields(linkCheck.youtubeUrl, linkCheck.patreonUrl),
             { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true },
             ...(await approvalExtraFields(slug, env, staged.check, imageBufs.length))
