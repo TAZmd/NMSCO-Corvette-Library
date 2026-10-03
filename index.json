@@ -1450,5 +1450,69 @@
     "downloads": 1,
     "approvedAt": "2026-10-02T20:14:34.499Z",
     "utilVersion": 2
+  },
+  {
+    "id": "banshee-medivac-rjf9k",
+    "name": "Banshee-Medivac",
+    "sha256": "a9d0a71c690a8bfd42a486edaa4c7267a5212957d7b93fde0b46376f558e7968",
+    "submitter": "TAZmd",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=-eryOW9UR9g",
+    "imageCount": 3,
+    "objectCount": 565,
+    "score": 6.1,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Nip Plant",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-03T11:32:01.468Z",
+    "utilVersion": 2
   }
 ]
