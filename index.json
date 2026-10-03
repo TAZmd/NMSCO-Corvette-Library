@@ -2022,5 +2022,65 @@
     "downloads": 0,
     "approvedAt": "2026-10-03T11:58:28.479Z",
     "utilVersion": 2
+  },
+  {
+    "id": "patrol-gunship-m4vdg",
+    "name": "Patrol Gunship",
+    "sha256": "060fabe4e7c2649f893def697d6d8184cee38a787c8ecd461e5857797286e315",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=8EuMerrQZo8",
+    "imageCount": 3,
+    "objectCount": 338,
+    "score": 5.9,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Nip Plant",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-03T11:58:46.325Z",
+    "utilVersion": 2
   }
 ]
