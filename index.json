@@ -2326,5 +2326,69 @@
     "downloads": 0,
     "approvedAt": "2026-10-03T12:15:41.299Z",
     "utilVersion": 2
+  },
+  {
+    "id": "razor-crest-remastered-rhqa1",
+    "name": "Razor Crest Remastered",
+    "sha256": "0d3574642764f319d789655534740e1a4df8295ac0c5c77043164a31d4f3868a",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=19crr-eIgvA",
+    "imageCount": 3,
+    "objectCount": 1198,
+    "score": 7.5,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-03T12:16:04.241Z",
+    "utilVersion": 2
   }
 ]
