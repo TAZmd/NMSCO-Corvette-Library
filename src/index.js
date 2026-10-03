@@ -2201,7 +2201,7 @@ async function editApprovalMessage(env, messageId, payload) {
 }
 
 async function verifyTurnstile(token, ip, env) {
-  if (!env.TURNSTILE_SECRET_KEY) return { ok: true, codes: [] };
+  if (!env.TURNSTILE_SECRET_KEY) return { ok: false, codes: ["missing-input-secret"] };
   if (!token) return { ok: false, codes: ["missing-token"] };
   try {
     const form = new FormData();
@@ -3003,9 +3003,9 @@ const UPLOAD_PER_IP_PER_DAY = 10;
 const UPLOAD_MAX_BODY = 40 * 1024 * 1024;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-async function uploadQuotaUsed(env, key) {
+async function uploadQuotaUsed(env, key, windowMs) {
   const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM upload_log WHERE k = ? AND at > ?")
-    .bind(key, Date.now() - DAY_MS)
+    .bind(key, Date.now() - (windowMs || DAY_MS))
     .first();
   return row ? row.n : 0;
 }
@@ -3015,6 +3015,64 @@ async function uploadQuotaAdd(env, keys) {
   const stmts = keys.filter(Boolean).map((k) => env.DB.prepare("INSERT INTO upload_log (k, at) VALUES (?, ?)").bind(k, now));
   stmts.push(env.DB.prepare("DELETE FROM upload_log WHERE at < ?").bind(now - 2 * DAY_MS));
   await env.DB.batch(stmts);
+}
+
+async function validateSubmission(form, refuse) {
+  const name = (form.get("name") || "").toString().trim().slice(0, 80);
+  const builder = (form.get("builder") || "").toString().trim().slice(0, 80);
+  const description = (form.get("description") || "").toString().replace(/[\u0000-\u001f\u007f]+/g, " ").replace(/\s+/g, " ").trim();
+  const shipFile = form.get("ship");
+  const imageFiles = [form.get("image1"), form.get("image2"), form.get("image3")].filter((f) => f instanceof File);
+
+  if (!name) return { response: await refuse(400, "Could not accept this submission: the Corvette name is required.") };
+  if (!builder) return { response: await refuse(400, "Could not accept this submission: your name is required.") };
+  if (description.length > DESCRIPTION_MAX) {
+    return { response: await refuse(400, `Could not accept this submission: the instructions are longer than ${DESCRIPTION_MAX} characters.`) };
+  }
+
+  const problems = [];
+  if (!(shipFile instanceof File)) problems.push("no ship file attached");
+  if (imageFiles.length === 0) problems.push("no image attached");
+  if (shipFile instanceof File && shipFile.size > 3 * 1024 * 1024) problems.push("ship file is larger than 3 MB");
+  if (shipFile instanceof File && !/\.(nmsship|json|txt)$/i.test(shipFile.name)) {
+    problems.push("ship file must be .nmsship, .json or .txt");
+  }
+  for (const f of imageFiles) {
+    if (f.size > 10 * 1024 * 1024) problems.push(`${f.name} is larger than 10 MB`);
+  }
+  if (problems.length) return { response: await refuse(400, `Could not accept this submission: ${problems.join(", ")}.`) };
+
+  const imageBufs = [];
+  for (const f of imageFiles) {
+    const buf = await f.arrayBuffer();
+    if (sniffImageType(new Uint8Array(buf)) === "application/octet-stream") {
+      return { response: await refuse(400, `Could not accept this submission: ${f.name} is not a real image.`) };
+    }
+    imageBufs.push(buf);
+  }
+
+  const linkCheck = classifyLinks(form.get("youtube"), form.get("patreon"), form.get("link"));
+  if (!linkCheck.ok) return { response: await refuse(400, `Could not accept this submission: ${linkCheck.error}.`) };
+
+  const deleteCode = normalizeDeleteCode(form.get("deletecode"));
+  if (deleteCode && !DELETE_CODE_RE.test(deleteCode)) {
+    return { response: await refuse(400, "Could not accept this submission: the delete code must be exactly 6 digits.") };
+  }
+  return { sub: { name, builder, description, shipFile, imageBufs, linkCheck, deleteCode } };
+}
+
+function approvalEmbedFor(name, builder, via, description, linkCheck, staged, extraFields) {
+  return {
+    title: name,
+    color: 0x5b9bd5,
+    fields: [
+      { name: "Submitted by", value: `${builder} (${via})`, inline: true },
+      ...(description ? [{ name: "Instructions", value: description, inline: false }] : []),
+      ...linkFields(linkCheck.youtubeUrl, linkCheck.patreonUrl),
+      { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true },
+      ...extraFields
+    ]
+  };
 }
 
 async function handleAppUpload(request, env, ctx) {
@@ -3099,46 +3157,9 @@ async function handleAppUpload(request, env, ctx) {
       });
     }
 
-    const name = (form.get("name") || "").toString().trim().slice(0, 80);
-    const builder = (form.get("builder") || "").toString().trim().slice(0, 80);
-    const description = (form.get("description") || "").toString().replace(/[\u0000-\u001f\u007f]+/g, " ").replace(/\s+/g, " ").trim();
-    const shipFile = form.get("ship");
-    const imageFiles = [form.get("image1"), form.get("image2"), form.get("image3")].filter((f) => f instanceof File);
-
-    if (!name) return refuse(400, "Could not accept this submission: the Corvette name is required.");
-    if (!builder) return refuse(400, "Could not accept this submission: your name is required.");
-    if (description.length > DESCRIPTION_MAX) {
-      return refuse(400, `Could not accept this submission: the instructions are longer than ${DESCRIPTION_MAX} characters.`);
-    }
-
-    const problems = [];
-    if (!(shipFile instanceof File)) problems.push("no ship file attached");
-    if (imageFiles.length === 0) problems.push("no image attached");
-    if (shipFile instanceof File && shipFile.size > 3 * 1024 * 1024) problems.push("ship file is larger than 3 MB");
-    if (shipFile instanceof File && !/\.(nmsship|json|txt)$/i.test(shipFile.name)) {
-      problems.push("ship file must be .nmsship, .json or .txt");
-    }
-    for (const f of imageFiles) {
-      if (f.size > 10 * 1024 * 1024) problems.push(`${f.name} is larger than 10 MB`);
-    }
-    if (problems.length) return refuse(400, `Could not accept this submission: ${problems.join(", ")}.`);
-
-    const imageBufs = [];
-    for (const f of imageFiles) {
-      const buf = await f.arrayBuffer();
-      if (sniffImageType(new Uint8Array(buf)) === "application/octet-stream") {
-        return refuse(400, `Could not accept this submission: ${f.name} is not a real image.`);
-      }
-      imageBufs.push(buf);
-    }
-
-    const linkCheck = classifyLinks(form.get("youtube"), form.get("patreon"), form.get("link"));
-    if (!linkCheck.ok) return refuse(400, `Could not accept this submission: ${linkCheck.error}.`);
-
-    const deleteCode = normalizeDeleteCode(form.get("deletecode"));
-    if (deleteCode && !DELETE_CODE_RE.test(deleteCode)) {
-      return refuse(400, "Could not accept this submission: the delete code must be exactly 6 digits.");
-    }
+    const v = await validateSubmission(form, refuse);
+    if (v.response) return v.response;
+    const { name, builder, description, shipFile, imageBufs, linkCheck, deleteCode } = v.sub;
 
     const shipBytes = new Uint8Array(await shipFile.arrayBuffer());
     const staged = await stageSubmission(
@@ -3160,17 +3181,7 @@ async function handleAppUpload(request, env, ctx) {
     const slug = staged.slug;
     ctx.waitUntil(
       (async () => {
-        const embed = {
-          title: name,
-          color: 0x5b9bd5,
-          fields: [
-            { name: "Submitted by", value: `${builder} (via app)`, inline: true },
-            ...(description ? [{ name: "Instructions", value: description, inline: false }] : []),
-            ...linkFields(linkCheck.youtubeUrl, linkCheck.patreonUrl),
-            { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true },
-            ...(await approvalExtraFields(slug, env, staged.check, imageBufs.length))
-          ]
-        };
+        const embed = approvalEmbedFor(name, builder, "via app", description, linkCheck, staged, await approvalExtraFields(slug, env, staged.check, imageBufs.length));
         const posted = await postApprovalMessage(env, embed, slug, imageBufs[0]);
         if (!posted) console.error("approval message could not be posted for " + slug + " - use /pending");
       })()
@@ -3183,6 +3194,635 @@ async function handleAppUpload(request, env, ctx) {
     return new Response("Server error while saving your submission: " + msg.slice(0, 120), { status: 500 });
   }
 }
+
+const GUEST_COOKIE = "guest_session";
+const GUEST_SESSION_MS = 4 * 60 * 60 * 1000;
+const GUEST_LOGIN_MAX_FAILS = 5;
+const GUEST_LOGIN_WINDOW_MS = 60 * 60 * 1000;
+const GUEST_UPLOADS_PER_HOUR = 30;
+const GUEST_MAX_BATCH = 10;
+const HOUR_MS = 60 * 60 * 1000;
+
+async function hmacHex(keyText, data) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(keyText), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(data));
+  return Array.from(new Uint8Array(sig), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function constantTimeEqual(a, b) {
+  if (a.length !== b.length) return false;
+  let r = 0;
+  for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return r === 0;
+}
+
+function guestConfigured(env) {
+  return !!env.UPLOAD_PASSWORD && !!env.DB && deleteCodesReady(env);
+}
+
+async function guestPasswordMatches(env, given) {
+  const k = "guest-pw|" + (env.DELETE_PEPPER || "");
+  const a = await hmacHex(k, given);
+  const b = await hmacHex(k, env.UPLOAD_PASSWORD);
+  return constantTimeEqual(a, b);
+}
+
+function guestSessionKey(env) {
+  return "guest-session|" + env.UPLOAD_PASSWORD + "|" + (env.DELETE_PEPPER || "");
+}
+
+async function makeGuestSession(env) {
+  const exp = String(Date.now() + GUEST_SESSION_MS);
+  return exp + "." + (await hmacHex(guestSessionKey(env), exp));
+}
+
+async function guestSessionValid(request, env) {
+  if (!env.UPLOAD_PASSWORD) return false;
+  const header = request.headers.get("Cookie") || "";
+  const match = header.split(";").map((p) => p.trim()).find((p) => p.startsWith(GUEST_COOKIE + "="));
+  if (!match) return false;
+  const value = match.slice(GUEST_COOKIE.length + 1);
+  const dot = value.indexOf(".");
+  if (dot < 1) return false;
+  const exp = value.slice(0, dot);
+  const sig = value.slice(dot + 1);
+  if (!/^[0-9]{10,16}$/.test(exp) || Number(exp) < Date.now()) return false;
+  return constantTimeEqual(sig, await hmacHex(guestSessionKey(env), exp));
+}
+
+function guestCookie(value, maxAgeSeconds) {
+  return `${GUEST_COOKIE}=${value}; Path=/; Max-Age=${maxAgeSeconds}; HttpOnly; Secure; SameSite=Strict`;
+}
+
+function htmlResponse(html) {
+  return new Response(html, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
+}
+
+async function handleGuestPage(request, env) {
+  if (!guestConfigured(env)) return htmlResponse(guestLoginHtml("", false));
+  if (await guestSessionValid(request, env)) return htmlResponse(guestBatchHtml());
+  return htmlResponse(guestLoginHtml(env.TURNSTILE_SITE_KEY || "", true));
+}
+
+async function handleGuestLogin(request, env) {
+  try {
+    if (!guestConfigured(env)) return new Response("Guest upload is not set up on the server yet.", { status: 503 });
+    await ensureD1(env);
+    const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+    const ipKey = await ipBanKey(ip, env);
+    if (await isBanned(env, [ipKey])) return new Response("This connection is blocked.", { status: 403 });
+    const failKey = `lgfail:${ipKey ? ipKey.slice(7) : "x"}`;
+    if ((await uploadQuotaUsed(env, failKey, GUEST_LOGIN_WINDOW_MS)) >= GUEST_LOGIN_MAX_FAILS) {
+      return new Response("Too many wrong attempts. Please try again in an hour.", { status: 429 });
+    }
+    let form;
+    try {
+      form = await request.formData();
+    } catch (e) {
+      return new Response("Invalid request.", { status: 400 });
+    }
+    const turnstile = await verifyTurnstile(form.get("cf-turnstile-response"), ip, env);
+    if (!turnstile.ok) {
+      console.error("turnstile failed: " + turnstile.codes.join(","));
+      return new Response(turnstileMessage(turnstile.codes), { status: 400 });
+    }
+    const given = (form.get("password") || "").toString().slice(0, 200);
+    if (!given || !(await guestPasswordMatches(env, given))) {
+      await uploadQuotaAdd(env, [failKey]);
+      return new Response("That code is not correct.", { status: 401 });
+    }
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: {
+        "content-type": "application/json",
+        "set-cookie": guestCookie(await makeGuestSession(env), Math.floor(GUEST_SESSION_MS / 1000))
+      }
+    });
+  } catch (err) {
+    const msg = err && err.message ? String(err.message) : String(err);
+    console.error("handleGuestLogin failed: " + msg);
+    return new Response("Server error: " + msg.slice(0, 120), { status: 500 });
+  }
+}
+
+function handleGuestLogout() {
+  return new Response("ok", { status: 200, headers: { "set-cookie": guestCookie("", 0) } });
+}
+
+async function handleGuestUpload(request, env, ctx) {
+  const refuse = async (status, text, blocked) => new Response(text, { status, headers: blocked ? { "x-blocked": "1" } : {} });
+  try {
+    if (!guestConfigured(env)) return new Response("Guest upload is not set up on the server yet.", { status: 503 });
+    if (!(await guestSessionValid(request, env))) {
+      return new Response("Your session has expired. Reload the page and enter the code again.", { status: 401 });
+    }
+    await ensureD1(env);
+    const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+    const ipKey = await ipBanKey(ip, env);
+    if (await isBanned(env, [ipKey])) {
+      return new Response("Uploads from this connection are blocked.", { status: 403, headers: { "x-blocked": "1" } });
+    }
+    const declared = parseInt(request.headers.get("content-length") || "0", 10);
+    if (declared > UPLOAD_MAX_BODY) return new Response("The upload is too large.", { status: 413 });
+
+    const hourKey = `guest:${ipKey ? ipKey.slice(7) : "x"}`;
+    if ((await uploadQuotaUsed(env, hourKey, HOUR_MS)) >= GUEST_UPLOADS_PER_HOUR) {
+      return new Response("Too many uploads in the last hour. Please try again later.", { status: 429, headers: { "x-blocked": "1" } });
+    }
+
+    let form;
+    try {
+      form = await request.formData();
+    } catch (e) {
+      return new Response("Invalid form submission.", { status: 400 });
+    }
+    if (form.get("agree") !== "yes") {
+      return refuse(400, "Could not accept this submission: you must agree to the upload rules first.");
+    }
+    const v = await validateSubmission(form, refuse);
+    if (v.response) return v.response;
+    const { name, builder, description, shipFile, imageBufs, linkCheck, deleteCode } = v.sub;
+
+    const shipBytes = new Uint8Array(await shipFile.arrayBuffer());
+    const staged = await stageSubmission(
+      { name, submitter: builder, description, patreonUrl: linkCheck.patreonUrl, youtubeUrl: linkCheck.youtubeUrl, shipBytes, imageBufs, deleteCode, ipKey, userKey: null },
+      env
+    );
+    if (!staged.ok) return refuse(400, `Could not accept this ship file: ${staged.error}.`);
+    await uploadQuotaAdd(env, [hourKey]);
+
+    const slug = staged.slug;
+    ctx.waitUntil(
+      (async () => {
+        const embed = approvalEmbedFor(name, builder, "guest upload", description, linkCheck, staged, await approvalExtraFields(slug, env, staged.check, imageBufs.length));
+        const posted = await postApprovalMessage(env, embed, slug, imageBufs[0]);
+        if (!posted) console.error("approval message could not be posted for " + slug + " - use /pending");
+      })()
+    );
+    return new Response("Sent for approval.", { status: 200 });
+  } catch (err) {
+    const msg = err && err.message ? String(err.message) : String(err);
+    console.error("handleGuestUpload failed: " + msg);
+    return new Response("Server error while saving your submission: " + msg.slice(0, 120), { status: 500 });
+  }
+}
+
+function guestPageShell(title, body, script) {
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${title}</title>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<style>
+body{font-family:sans-serif;background:#1e1e1e;color:#ddd;max-width:860px;margin:30px auto;padding:0 16px}
+h2{margin:0 0 6px 0}
+h3{margin:18px 0 6px 0;font-size:15px}
+label{display:block;margin-top:12px;font-size:14px}
+input[type=text],input[type=password],textarea,select{width:100%;padding:8px;margin-top:4px;background:#2a2a2e;border:1px solid #555;color:#ddd;border-radius:4px;box-sizing:border-box;font-family:inherit;font-size:14px}
+textarea{resize:vertical;min-height:62px}
+button{padding:9px 16px;background:#3a6ea5;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:14px}
+button.grey{background:#3a3a40;border:1px solid #555}
+button.small{padding:3px 9px;font-size:12px}
+button:disabled{opacity:.5;cursor:not-allowed}
+.hint{font-size:12px;color:#9da5b4;margin-top:6px;line-height:1.45}
+.row{display:flex;gap:12px}
+.row>*{flex:1}
+.drop{margin-top:16px;padding:26px 14px;border:2px dashed #555;border-radius:8px;text-align:center;color:#9da5b4}
+.drop.over{border-color:#3a6ea5;background:#232a33;color:#ddd}
+.card{margin-top:14px;padding:12px 14px;background:#25252a;border:1px solid #3f3f46;border-radius:8px}
+.card.done{border-color:#2d7a2d;background:#1d2a1f}
+.card.error{border-color:#8b2020}
+.card.sending{border-color:#3a6ea5}
+.cardhead{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:#9da5b4}
+.cardhead b{color:#ddd}
+.count{font-size:11px;color:#9da5b4;text-align:right}
+.thumbs{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.thumb{position:relative;width:104px}
+.thumb img{width:104px;height:70px;object-fit:cover;border-radius:4px;border:1px solid #555;display:block}
+.thumb .x{position:absolute;top:2px;right:2px;padding:0 6px;background:#000a;color:#fff;border-radius:3px;font-size:12px;line-height:18px}
+.thumb select{margin-top:4px;padding:3px;font-size:11px}
+.thumb .nm{font-size:10px;color:#9da5b4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg{margin-top:8px;font-size:13px}
+.ok{color:#6fcf6f}
+.err{color:#e05555}
+.tray{margin-top:16px;padding:10px 14px;border:1px dashed #8a6d1f;border-radius:8px;background:#2b2619}
+.rules{background:#1f1f23;border:1px solid #3f3f46;border-radius:6px;padding:12px 16px;margin-top:22px;font-size:13px;line-height:1.5;color:#d4d4d4}
+.rules h3{margin:0 0 6px 0;font-size:15px}
+.rules ol{margin:0;padding-left:20px}
+.rules li{margin-top:5px}
+.rulesbody{max-height:150px;overflow-y:auto;padding-right:10px;scrollbar-width:thin;scrollbar-color:#555 #1f1f23}
+.rulesnote{font-size:11px;color:#9da5b4;margin-top:6px}
+.agree{display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:14px;cursor:pointer}
+.agree input{width:auto;margin:3px 0 0 0}
+#status{margin-top:14px;font-size:14px}
+.top{display:flex;justify-content:space-between;align-items:center}
+</style>
+</head>
+<body>
+${body}
+<script>
+${script}
+</script>
+</body>
+</html>`;
+}
+
+function guestLoginHtml(siteKey, configured) {
+  const body = configured
+    ? `<h2>Guest upload</h2>
+<p class="hint">This page is only for invited guests. Enter the code you received.</p>
+<form id="lf">
+<label>Code<input type="password" name="password" autocomplete="off" required></label>
+<div class="cf-turnstile" data-sitekey="${siteKey}" data-callback="onTsOk" data-expired-callback="onTsGone" data-error-callback="onTsGone" style="margin-top:16px"></div>
+${siteKey ? "" : '<div class="hint">Verification is not set up on the server (TURNSTILE_SITE_KEY is missing).</div>'}
+<button type="submit" style="margin-top:16px">Continue</button>
+</form>
+<div id="status"></div>`
+    : `<h2>Guest upload</h2><p class="hint">Guest upload is not set up on the server yet.</p>`;
+  const script = `
+let tsToken = '';
+function onTsOk(t) { tsToken = t; }
+function onTsGone() { tsToken = ''; }
+const lf = document.getElementById('lf');
+if (lf) lf.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const status = document.getElementById('status');
+  if (!tsToken) { status.className = 'err'; status.textContent = 'Please wait for the verification check mark first.'; return; }
+  status.className = ''; status.textContent = 'Checking...';
+  const form = new FormData(lf);
+  form.set('cf-turnstile-response', tsToken);
+  try {
+    const resp = await fetch('/upload-login', { method: 'POST', body: form, credentials: 'same-origin' });
+    if (resp.ok) { location.reload(); return; }
+    status.className = 'err';
+    status.textContent = await resp.text();
+  } catch (err) {
+    status.className = 'err';
+    status.textContent = 'Network error. Please try again.';
+  }
+  tsToken = '';
+  try { if (typeof turnstile !== 'undefined') turnstile.reset(); } catch (err) {}
+});`;
+  return guestPageShell("Guest upload", body, script);
+}
+
+function guestBatchHtml() {
+  const body = `<div class="top"><h2>Submit Corvettes</h2><button class="grey small" id="logout" type="button">Log out</button></div>
+<div class="hint">Add between 1 and ${GUEST_MAX_BATCH} Corvettes at once. Drop all Corvette files and all photos together. Photos whose file name starts with the Corvette file name are matched automatically, the rest you can assign yourself.</div>
+<div class="row">
+<label>Your name (builder)<input type="text" id="builder" maxlength="80"></label>
+<label>Patreon link (optional)<input type="text" id="patreon" maxlength="200" placeholder="https://www.patreon.com/yourname"></label>
+</div>
+<div class="hint">The builder name and the Patreon link are used for every Corvette in this batch. Patreon: patreon.com only.</div>
+<label>Delete code (optional)<input type="text" id="deletecode" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="6 digits, for example 482915"></label>
+<div class="hint">A delete code is what you supply to me when you want a ship to be removed from the Corvette library. Pick 6 random digits, only for this. Never use a code from anywhere else (bank, phone, accounts). The same code is used for every Corvette in this batch. This browser remembers it for next time. I cannot see or recover it, so write it down.</div>
+<div class="drop" id="drop">Drop Corvette files (.nmsship, .json, .txt) and photos here<br><br><button type="button" class="grey" id="pick">Choose files</button><input type="file" id="files" multiple accept=".nmsship,.json,.txt,image/*" style="display:none"></div>
+<div id="limitmsg" class="msg err"></div>
+<div id="ships"></div>
+<div class="tray" id="tray" style="display:none"><b>Photos without a Corvette</b><div class="hint">Choose in the list under each photo which Corvette it belongs to. Photos you leave here are ignored.</div><div class="thumbs" id="trayList"></div></div>
+<div class="rules">
+<h3>Upload rules</h3>
+<div class="rulesbody">
+<ol>
+<li>Only upload Corvettes you built yourself. Do not upload someone else's Corvette, even if you only changed the color or made a few small changes.</li>
+<li>No sexual, racist, hateful, discriminatory or otherwise offensive content. This applies to the Corvette, its name, photos and links.</li>
+<li>Use your own builder name. Do not use someone else's name or pretend to be another builder.</li>
+<li>Only use photos of the Corvette you are uploading.</li>
+<li>Only link to your own Patreon or YouTube.</li>
+<li>Do not upload the same Corvette more than once. Spam uploads are not allowed.</li>
+<li>Only upload normal, unmodified Corvette files. Modified or tampered files will be rejected.</li>
+<li>By uploading a Corvette, you allow other users to download and use it for free in their own game.</li>
+<li>Every Corvette is checked before it is published. I can reject or remove a Corvette if needed.</li>
+<li>Breaking these rules can result in a permanent ban.</li>
+</ol>
+</div>
+<div class="rulesnote">Scroll to read all the rules.</div>
+</div>
+<label class="agree"><input type="checkbox" id="agree"><span>I have read the rules and I agree to them.</span></label>
+<button type="button" id="send" style="margin-top:18px">Send for approval</button>
+<div id="status"></div>`;
+  const script = `
+const MAX_SHIPS = ${GUEST_MAX_BATCH};
+const MAX_PHOTOS = 3;
+const SHIP_EXT = /\\.(nmsship|json|txt)$/i;
+const IMG_EXT = /\\.(png|jpe?g|gif|webp|bmp)$/i;
+let ships = [];
+let tray = [];
+let nextId = 1;
+let busy = false;
+
+function baseName(n) { return n.replace(/\\.[^.]+$/, ''); }
+function normKey(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, ''); }
+function stripPhotoSuffix(s) {
+  let t = s.toLowerCase();
+  let numberDone = false;
+  for (let i = 0; i < 3; i++) {
+    const before = t;
+    if (!numberDone) {
+      const noNumber = t.replace(/[\\s_\\-()\\[\\]]*[0-9]+[\\s_\\-()\\[\\]]*$/, '');
+      if (noNumber !== t) {
+        t = noNumber;
+        numberDone = true;
+        continue;
+      }
+    }
+    t = t.replace(/[\\s_\\-()\\[\\]]+(?:preview|photo|picture|pic|screenshot|screen|image|img|view)$/, '');
+    if (t === before) break;
+  }
+  return t;
+}
+function findShipForPhoto(photoName, shipList) {
+  const raw = normKey(baseName(photoName));
+  const stripped = normKey(stripPhotoSuffix(baseName(photoName)));
+  const keys = shipList.map((s) => normKey(baseName(s.file.name)));
+  const exact = [];
+  keys.forEach((k, i) => { if (k && (k === raw || k === stripped)) exact.push(i); });
+  if (exact.length === 1) return exact[0];
+  if (exact.length > 1) return -1;
+  const loose = [];
+  if (stripped.length >= 3) {
+    keys.forEach((k, i) => { if (k.length >= 3 && (k.indexOf(stripped) === 0 || stripped.indexOf(k) === 0)) loose.push(i); });
+  }
+  return loose.length === 1 ? loose[0] : -1;
+}
+function matchBlockEnd() {}
+
+function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function el(tag, attrs, kids) {
+  const e = document.createElement(tag);
+  if (attrs) Object.keys(attrs).forEach((k) => {
+    if (k === 'class') e.className = attrs[k];
+    else if (k === 'text') e.textContent = attrs[k];
+    else if (k.indexOf('on') === 0) e.addEventListener(k.slice(2), attrs[k]);
+    else if (attrs[k] !== false && attrs[k] !== null && attrs[k] !== undefined) e.setAttribute(k, attrs[k] === true ? '' : attrs[k]);
+  });
+  (kids || []).forEach((c) => { if (c) e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+  return e;
+}
+function shipLabel(s) { return (s.name && s.name.trim()) ? s.name.trim() : baseName(s.file.name); }
+function cleanName(fileName) { return baseName(fileName).replace(/[_]+/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 80); }
+
+function addFiles(fileList) {
+  const limitMsg = document.getElementById('limitmsg');
+  limitMsg.textContent = '';
+  const incoming = Array.from(fileList);
+  const newShips = [];
+  const newPhotos = [];
+  let skipped = 0;
+  let ignored = 0;
+  incoming.forEach((f) => {
+    if (SHIP_EXT.test(f.name)) {
+      if (ships.filter((x) => x.status !== 'done').length + newShips.length >= MAX_SHIPS) { skipped++; return; }
+      newShips.push({ id: nextId++, file: f, name: cleanName(f.name), youtube: '', desc: '', photos: [], status: 'ready', msg: '' });
+    } else if (IMG_EXT.test(f.name) || (f.type && f.type.indexOf('image/') === 0)) {
+      newPhotos.push({ id: nextId++, file: f, url: URL.createObjectURL(f) });
+    } else {
+      ignored++;
+    }
+  });
+  ships = ships.concat(newShips);
+  const pool = ships.filter((s) => s.status !== 'done');
+  newPhotos.forEach((p) => {
+    const idx = findShipForPhoto(p.file.name, pool);
+    let target = idx >= 0 ? pool[idx] : null;
+    if (!target && pool.length === 1) target = pool[0];
+    if (target && target.photos.length < MAX_PHOTOS) target.photos.push(p);
+    else tray.push(p);
+  });
+  const notes = [];
+  if (skipped) notes.push(skipped + ' Corvette file(s) were not added because the maximum is ' + MAX_SHIPS + ' per batch.');
+  if (ignored) notes.push(ignored + ' file(s) were ignored because they are not Corvette files or photos.');
+  limitMsg.textContent = notes.join(' ');
+  render();
+}
+
+function assignPhoto(photo, fromList, targetValue) {
+  const idx = fromList.indexOf(photo);
+  if (idx >= 0) fromList.splice(idx, 1);
+  if (targetValue === 'remove') { URL.revokeObjectURL(photo.url); render(); return; }
+  if (targetValue === 'tray') { tray.push(photo); render(); return; }
+  const target = ships.find((s) => String(s.id) === targetValue);
+  if (target && target.photos.length < MAX_PHOTOS) target.photos.push(photo);
+  else { tray.push(photo); document.getElementById('limitmsg').textContent = 'A Corvette can have at most ' + MAX_PHOTOS + ' photos.'; }
+  render();
+}
+
+function photoThumb(photo, list, ownerId) {
+  const sel = el('select', { onchange: (e) => assignPhoto(photo, list, e.target.value) });
+  sel.appendChild(el('option', { value: ownerId === null ? 'tray' : String(ownerId), text: ownerId === null ? 'Assign to...' : 'Move to...' }));
+  ships.forEach((s) => { if (s.id !== ownerId && s.status !== 'done') sel.appendChild(el('option', { value: String(s.id), text: shipLabel(s) })); });
+  if (ownerId !== null) sel.appendChild(el('option', { value: 'tray', text: 'No Corvette' }));
+  sel.appendChild(el('option', { value: 'remove', text: 'Remove photo' }));
+  return el('div', { class: 'thumb' }, [
+    el('img', { src: photo.url, alt: '' }),
+    el('div', { class: 'nm', text: photo.file.name }),
+    sel
+  ]);
+}
+
+function render() {
+  const holder = document.getElementById('ships');
+  holder.textContent = '';
+  ships.forEach((s, i) => {
+    const locked = s.status === 'done' || s.status === 'sending' || busy;
+    const nameIn = el('input', { type: 'text', maxlength: '80', value: s.name, disabled: locked, oninput: (e) => { s.name = e.target.value; } });
+    const ytIn = el('input', { type: 'text', maxlength: '200', value: s.youtube, placeholder: 'https://youtu.be/...', disabled: locked, oninput: (e) => { s.youtube = e.target.value; } });
+    const counter = el('div', { class: 'count', text: s.desc.length + '/250' });
+    const descIn = el('textarea', { maxlength: '250', disabled: locked, placeholder: 'Instructions (optional). For example: how to enter the cockpit', oninput: (e) => { s.desc = e.target.value; counter.textContent = s.desc.length + '/250'; } });
+    descIn.value = s.desc;
+    const thumbs = el('div', { class: 'thumbs' });
+    s.photos.forEach((p) => {
+      const t = photoThumb(p, s.photos, s.id);
+      if (locked) t.querySelector('select').disabled = true;
+      thumbs.appendChild(t);
+    });
+    const addPhoto = el('button', { type: 'button', class: 'grey small', text: '+ Add photo', disabled: locked || s.photos.length >= MAX_PHOTOS, onclick: () => {
+      const inp = el('input', { type: 'file', accept: 'image/*', multiple: true });
+      inp.addEventListener('change', () => {
+        Array.from(inp.files).forEach((f) => {
+          if (s.photos.length < MAX_PHOTOS) s.photos.push({ id: nextId++, file: f, url: URL.createObjectURL(f) });
+        });
+        render();
+      });
+      inp.click();
+    } });
+    const rm = el('button', { type: 'button', class: 'grey small', text: 'Remove Corvette', disabled: s.status === 'sending' || busy, onclick: () => {
+      s.photos.forEach((p) => URL.revokeObjectURL(p.url));
+      ships = ships.filter((x) => x !== s);
+      render();
+    } });
+    const statusText = s.status === 'done' ? 'Sent' : s.status === 'sending' ? 'Sending...' : s.status === 'error' ? 'Not sent' : 'Ready';
+    const card = el('div', { class: 'card ' + (s.status === 'ready' ? '' : s.status) }, [
+      el('div', { class: 'cardhead' }, [el('span', {}, [el('b', { text: 'Corvette ' + (i + 1) + ': ' }), s.file.name, ' (' + statusText + ')']), rm]),
+      el('div', { class: 'row' }, [el('label', {}, ['Corvette name', nameIn]), el('label', {}, ['YouTube link (optional)', ytIn])]),
+      el('label', {}, ['Instructions (optional)', descIn]),
+      counter,
+      el('div', { class: 'hint', text: 'Photos (1 to ' + MAX_PHOTOS + ', the first one is the preview image):' }),
+      thumbs,
+      el('div', { style: 'margin-top:8px' }, [addPhoto]),
+      s.msg ? el('div', { class: 'msg ' + (s.status === 'done' ? 'ok' : 'err'), text: s.msg }) : null
+    ]);
+    holder.appendChild(card);
+  });
+  const trayBox = document.getElementById('tray');
+  const trayList = document.getElementById('trayList');
+  trayList.textContent = '';
+  tray.forEach((p) => trayList.appendChild(photoThumb(p, tray, null)));
+  trayBox.style.display = tray.length ? 'block' : 'none';
+  updateSend();
+}
+
+function updateSend() {
+  const pending = ships.filter((s) => s.status !== 'done').length;
+  const btn = document.getElementById('send');
+  btn.disabled = busy || pending === 0 || !document.getElementById('agree').checked;
+  btn.textContent = busy ? 'Sending...' : (pending > 0 ? 'Send ' + pending + ' Corvette' + (pending === 1 ? '' : 's') + ' for approval' : 'Send for approval');
+}
+
+function loadSaved() {
+  try {
+    const b = localStorage.getItem('builderName');
+    if (b) document.getElementById('builder').value = b;
+    const p = localStorage.getItem('patreonLink');
+    if (p) document.getElementById('patreon').value = p;
+    const c = localStorage.getItem('deleteCode');
+    if (c) document.getElementById('deletecode').value = c;
+    if (localStorage.getItem('agreeRules') === 'yes') document.getElementById('agree').checked = true;
+  } catch (e) {}
+}
+function saveField(key, value, valid) {
+  try {
+    if (value && valid) localStorage.setItem(key, value);
+    else if (!value) localStorage.removeItem(key);
+  } catch (e) {}
+}
+
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const maxDim = 1280;
+      let w = img.width, h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+        else { w = Math.round(w * maxDim / h); h = maxDim; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('image compression failed')), 'image/jpeg', 0.85);
+    };
+    img.onerror = () => reject(new Error('this image cannot be opened by the browser'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+function validateBatch() {
+  const builder = document.getElementById('builder').value.trim();
+  const code = document.getElementById('deletecode').value.trim();
+  if (!builder) return 'Please fill in your builder name.';
+  if (code && !/^[0-9]{6}$/.test(code)) return 'The delete code must be exactly 6 digits.';
+  const pending = ships.filter((s) => s.status !== 'done');
+  if (pending.length === 0) return 'There is nothing to send.';
+  for (let i = 0; i < pending.length; i++) {
+    const s = pending[i];
+    const label = '"' + shipLabel(s) + '"';
+    if (!s.name.trim()) return 'Corvette ' + label + ' needs a name.';
+    if (s.photos.length === 0) return 'Corvette ' + label + ' needs at least 1 photo.';
+    if (s.desc.length > 250) return 'The instructions of ' + label + ' are longer than 250 characters.';
+    if (s.file.size > 3 * 1024 * 1024) return 'The file of ' + label + ' is larger than 3 MB.';
+  }
+  return '';
+}
+
+async function sendAll() {
+  const status = document.getElementById('status');
+  status.className = '';
+  const problem = validateBatch();
+  if (problem) { status.className = 'err'; status.textContent = problem; return; }
+  if (tray.length && !confirm(tray.length + ' photo(s) have no Corvette and will be ignored. Continue?')) return;
+  busy = true;
+  render();
+  const builder = document.getElementById('builder').value.trim();
+  const patreon = document.getElementById('patreon').value.trim();
+  const code = document.getElementById('deletecode').value.trim();
+  const todo = ships.filter((s) => s.status !== 'done');
+  let sent = 0, failed = 0, expired = false;
+  for (let n = 0; n < todo.length; n++) {
+    const s = todo[n];
+    status.textContent = 'Sending ' + (n + 1) + ' of ' + todo.length + ': ' + shipLabel(s);
+    s.status = 'sending';
+    s.msg = '';
+    render();
+    try {
+      const form = new FormData();
+      form.set('agree', 'yes');
+      form.set('builder', builder);
+      form.set('patreon', patreon);
+      form.set('deletecode', code);
+      form.set('name', s.name.trim());
+      form.set('youtube', s.youtube.trim());
+      form.set('description', s.desc.replace(/\\s+/g, ' ').trim());
+      form.set('ship', s.file, s.file.name);
+      for (let i = 0; i < s.photos.length; i++) {
+        const blob = await compressImage(s.photos[i].file);
+        form.set('image' + (i + 1), blob, 'image' + (i + 1) + '.jpg');
+      }
+      const resp = await fetch('/upload-guest', { method: 'POST', body: form, credentials: 'same-origin' });
+      const text = await resp.text();
+      if (resp.status === 401) { s.status = 'error'; s.msg = text; expired = true; failed++; render(); break; }
+      if (resp.ok) { s.status = 'done'; s.msg = text; sent++; }
+      else { s.status = 'error'; s.msg = text; failed++; }
+    } catch (err) {
+      s.status = 'error';
+      s.msg = 'Something went wrong (' + (err && err.message ? err.message : 'unknown error') + '). Try a smaller JPG image or send this Corvette again.';
+      failed++;
+    }
+    render();
+  }
+  todo.forEach((s) => { if (s.status === 'sending') s.status = 'ready'; });
+  busy = false;
+  render();
+  if (expired) {
+    status.className = 'err';
+    status.textContent = 'Your session has expired. Reload the page and enter the code again. Corvettes that were already sent are safe.';
+  } else {
+    status.className = failed ? 'err' : 'ok';
+    status.textContent = sent + ' sent for approval' + (failed ? ', ' + failed + ' not sent. Fix the red ones and press the button again.' : '. You can close this page.');
+  }
+}
+
+document.getElementById('pick').addEventListener('click', () => document.getElementById('files').click());
+document.getElementById('files').addEventListener('change', (e) => { addFiles(e.target.files); e.target.value = ''; });
+const drop = document.getElementById('drop');
+['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', (e) => { if (e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files); });
+window.addEventListener('dragover', (e) => e.preventDefault());
+window.addEventListener('drop', (e) => e.preventDefault());
+document.getElementById('send').addEventListener('click', sendAll);
+document.getElementById('agree').addEventListener('change', () => {
+  updateSend();
+  try {
+    if (document.getElementById('agree').checked) localStorage.setItem('agreeRules', 'yes');
+    else localStorage.removeItem('agreeRules');
+  } catch (e) {}
+});
+document.getElementById('builder').addEventListener('input', (e) => saveField('builderName', e.target.value.trim(), true));
+document.getElementById('patreon').addEventListener('input', (e) => saveField('patreonLink', e.target.value.trim(), true));
+document.getElementById('deletecode').addEventListener('input', (e) => saveField('deleteCode', e.target.value.trim(), /^[0-9]{6}$/.test(e.target.value.trim())));
+document.getElementById('logout').addEventListener('click', async () => {
+  try { await fetch('/upload-logout', { method: 'POST', credentials: 'same-origin' }); } catch (e) {}
+  location.reload();
+});
+loadSaved();
+render();`;
+  return guestPageShell("Submit Corvettes", body, script);
+}
+
 
 let d1SchemaReady = false;
 
@@ -3632,7 +4272,7 @@ async function handleBanCommand(interaction, env) {
     }
   }
   if (!parts.length) {
-    return ephemeral("No app installation was stored for this ship (older upload), so nobody was banned. Run /ban again with also_ip set to true if you want to ban the connection.");
+    return ephemeral("No app installation was stored for this ship (guest upload or older upload), so nobody was banned. Run /ban again with also_ip set to true if you want to ban the connection.");
   }
   return ephemeral(`Banned the submitter of "${owner.label}" (${parts.join(" + ")}). They can no longer upload or count downloads. Use /unban to undo.`);
 }
@@ -3898,6 +4538,7 @@ export default {
       if (url.pathname.startsWith("/img/")) return handlePendingImage(url, env);
       if (url.pathname.startsWith("/ship/")) return handlePendingShip(url, env);
       if (url.pathname === "/register") return handleRegister(url, env);
+      if (url.pathname === "/upload") return handleGuestPage(request, env);
       if (url.pathname === "/human") return handleHumanPage(url, env);
       if (url.pathname === "/human-status") return handleHumanStatus(url, env);
       return new Response("Corvette Library bot is running.", { status: 200 });
@@ -3905,6 +4546,9 @@ export default {
 
     if (request.method === "POST") {
       if (url.pathname === "/upload-app") return handleAppUpload(request, env, ctx);
+      if (url.pathname === "/upload-login") return handleGuestLogin(request, env);
+      if (url.pathname === "/upload-logout") return handleGuestLogout();
+      if (url.pathname === "/upload-guest") return handleGuestUpload(request, env, ctx);
       if (url.pathname === "/human-start") return handleHumanStart(request, env);
       if (url.pathname === "/human") return handleHumanVerify(request, env);
       if (url.pathname === "/download-request") return handleDownloadRequest(request, env, ctx);
