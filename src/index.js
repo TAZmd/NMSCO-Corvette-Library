@@ -2061,7 +2061,7 @@ const ALL_WINDOW_MS = 60 * 60 * 1000;
 const ALL_LIMIT = 60;
 const REJECT_WINDOW_MS = 30 * 60 * 1000;
 const REJECT_LIMIT = 10;
-const MAX_PENDING_ITEMS = 50;
+const MAX_PENDING_ITEMS = 100;
 
 function userBanKey(discordId) {
   return `ban:user:${discordId}`;
