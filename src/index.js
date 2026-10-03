@@ -3563,7 +3563,7 @@ function el(tag, attrs, kids) {
   return e;
 }
 function shipLabel(s) { return (s.name && s.name.trim()) ? s.name.trim() : baseName(s.file.name); }
-function cleanName(fileName) { return baseName(fileName).replace(/[_]+/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 80); }
+function cleanName(fileName) { return baseName(fileName).replace(/[_-]+/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 80); }
 
 function addFiles(fileList) {
   const limitMsg = document.getElementById('limitmsg');
