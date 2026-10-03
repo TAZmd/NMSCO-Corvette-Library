@@ -2262,5 +2262,69 @@
     "downloads": 0,
     "approvedAt": "2026-10-03T12:15:32.230Z",
     "utilVersion": 2
+  },
+  {
+    "id": "manticore-explorer-wl4to",
+    "name": "Manticore Explorer",
+    "sha256": "28f14f073bc4fef59abdb9bb2683fefdb0b8b26ee0345c150e79f14c6a871bf5",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=8RI23b8A9gI",
+    "imageCount": 2,
+    "objectCount": 531,
+    "score": 6.2,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-03T12:15:41.299Z",
+    "utilVersion": 2
   }
 ]
