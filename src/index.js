@@ -82,7 +82,7 @@ function normalizeId(id) {
 
 const DEFAULT_CATALOG = {
   "engine": 1,
-  "catalogVersion": 2,
+  "catalogVersion": 3,
   "tiers": {
     "redFactor": 0.5,
     "orangeFactor": 0.75,
@@ -387,7 +387,8 @@ const DEFAULT_CATALOG = {
         "op": "chain",
         "levels": [
           [
-            "AM_SUITTREE"
+            "AM_SUITTREE",
+            "S9_SUITTREE"
           ]
         ]
       }
@@ -400,7 +401,8 @@ const DEFAULT_CATALOG = {
         "op": "chain",
         "levels": [
           [
-            "AM_WEAPONTREE"
+            "AM_WEAPONTREE",
+            "S9_WEAPONTREE"
           ]
         ]
       }
@@ -3433,6 +3435,7 @@ ${script}
 function guestLoginHtml(siteKey, configured) {
   const body = configured
     ? `<h2>Guest upload</h2>
+<p class="hint">This upload is only for a few trusted builders. Ask TAZmd for permission.</p>
 <p class="hint">This page is only for invited guests. Enter the code you received.</p>
 <form id="lf">
 <label>Code<input type="password" name="password" autocomplete="off" required></label>
