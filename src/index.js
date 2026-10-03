@@ -2052,6 +2052,7 @@ async function checkRateLimit(ip) {
 const INSTALL_ID_RE = /^([0-9a-fA-F]{32}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/;
 const STAT_CAP_PER_HOUR = 10;
 const STAT_CAP_PER_DAY = 25;
+const STAT_MAX_IDS_PER_IP = 2;
 const SHIP_WINDOW_MS = 30 * 60 * 1000;
 const SHIP_LIMIT = 10;
 const ALL_WINDOW_MS = 60 * 60 * 1000;
@@ -3942,12 +3943,17 @@ async function pendingCount(env) {
   return row ? row.n : 0;
 }
 
-async function recordDownloadStat(env, id, installId) {
+async function recordDownloadStat(env, id, installId, ip) {
   if (!env.DB || !env.DELETE_PEPPER) return;
   const idHash = (await hashDeleteCode(`dlid:${id}`, installId.toLowerCase(), env)).slice(0, 32);
   await ensureD1(env);
   const seen = await env.DB.prepare("SELECT 1 AS x FROM dl_seen WHERE ship = ? AND kind = 'id' AND hash = ?").bind(id, idHash).first();
   if (seen) return;
+  const ipKind = ip && ip !== "unknown" ? `ip:${(await hashDeleteCode(`dlip:${id}`, ip, env)).slice(0, 24)}` : null;
+  if (ipKind) {
+    const ipRow = await env.DB.prepare("SELECT COUNT(*) AS n FROM dl_seen WHERE ship = ? AND kind = ?").bind(id, ipKind).first();
+    if (ipRow && ipRow.n >= STAT_MAX_IDS_PER_IP) return;
+  }
   const hourKey = `cap:${id}:${Math.floor(Date.now() / 3600000)}`;
   const dayKey = `capd:${id}:${Math.floor(Date.now() / 86400000)}`;
   const capHour = await env.DB.prepare("SELECT n FROM counters WHERE k = ?").bind(hourKey).first();
@@ -3959,8 +3965,10 @@ async function recordDownloadStat(env, id, installId) {
   found.entry.downloads = (found.entry.downloads || 0) + 1;
   await writeShard(env, found.shard, `Track download: ${id}`);
 
+  const seenStmts = [env.DB.prepare("INSERT OR IGNORE INTO dl_seen (ship, kind, hash) VALUES (?, 'id', ?)").bind(id, idHash)];
+  if (ipKind) seenStmts.push(env.DB.prepare("INSERT OR IGNORE INTO dl_seen (ship, kind, hash) VALUES (?, ?, ?)").bind(id, ipKind, idHash));
   await env.DB.batch([
-    env.DB.prepare("INSERT OR IGNORE INTO dl_seen (ship, kind, hash) VALUES (?, 'id', ?)").bind(id, idHash),
+    ...seenStmts,
     env.DB.prepare("INSERT INTO counters (k, n) VALUES (?, 1) ON CONFLICT(k) DO UPDATE SET n = n + 1").bind(hourKey),
     env.DB.prepare("INSERT INTO counters (k, n) VALUES (?, 1) ON CONFLICT(k) DO UPDATE SET n = n + 1").bind(dayKey)
   ]);
@@ -4011,7 +4019,7 @@ async function handleDownloadRequest(request, env, ctx) {
   if (strike) return json({ allowed: false, banned: strike.banned, seconds: strike.seconds });
 
   ctx.waitUntil(
-    recordDownloadStat(env, id, installId).catch((err) => {
+    recordDownloadStat(env, id, installId, request.headers.get("CF-Connecting-IP") || "unknown").catch((err) => {
       console.error("recordDownloadStat failed: " + (err && err.message ? err.message : String(err)));
     })
   );
