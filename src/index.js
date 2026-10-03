@@ -3408,7 +3408,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .msg{margin-top:8px;font-size:13px}
 .ok{color:#6fcf6f}
 .err{color:#e05555}
-.tray{margin-top:16px;padding:10px 14px;border:1px dashed #8a6d1f;border-radius:8px;background:#2b2619}
+.tray{margin:16px 0;padding:10px 14px;border:1px dashed #8a6d1f;border-radius:8px;background:#2b2619}
 .rules{background:#1f1f23;border:1px solid #3f3f46;border-radius:6px;padding:12px 16px;margin-top:22px;font-size:13px;line-height:1.5;color:#d4d4d4}
 .rules h3{margin:0 0 6px 0;font-size:15px}
 .rules ol{margin:0;padding-left:20px}
@@ -3481,8 +3481,8 @@ function guestBatchHtml() {
 <div class="hint">A delete code is what you supply to me when you want a ship to be removed from the Corvette library. Pick 6 random digits, only for this. Never use a code from anywhere else (bank, phone, accounts). The same code is used for every Corvette in this batch. This browser remembers it for next time. I cannot see or recover it, so write it down.</div>
 <div class="drop" id="drop">Drop Corvette files (.nmsship, .json, .txt) and photos here<br><br><button type="button" class="grey" id="pick">Choose files</button><input type="file" id="files" multiple accept=".nmsship,.json,.txt,image/*" style="display:none"></div>
 <div id="limitmsg" class="msg err"></div>
-<div id="ships"></div>
 <div class="tray" id="tray" style="display:none"><b>Photos without a Corvette</b><div class="hint">Choose in the list under each photo which Corvette it belongs to. Photos you leave here are ignored.</div><div class="thumbs" id="trayList"></div></div>
+<div id="ships"></div>
 <div class="rules">
 <h3>Upload rules</h3>
 <div class="rulesbody">
