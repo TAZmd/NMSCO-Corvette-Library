@@ -1,0 +1,83 @@
+{
+  "name": "Titan Scarab withTractorBeam JSON Objects",
+  "id": "titan-scarab-withtractorbeam-json-object-f7fo1",
+  "submitter": "Aresmar",
+  "description": "",
+  "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+  "youtubeUrl": "https://www.youtube.com/watch?v=bTUXIHnb7aI",
+  "objectCount": 768,
+  "score": 8.4,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "20 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Staff Builder",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Holo-Arena Game Table",
+      "value": 1
+    },
+    {
+      "label": "Utopia Build Station",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "801cf2bbd11007c5afe79cc170898f7a8e352be0fb465052c2b11e60ab970408",
+  "downloads": 0,
+  "approvedAt": "2026-10-03T12:03:26.040Z"
+}
