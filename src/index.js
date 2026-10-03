@@ -3108,7 +3108,7 @@ async function handleAppUpload(request, env, ctx) {
     if (!name) return refuse(400, "Could not accept this submission: the Corvette name is required.");
     if (!builder) return refuse(400, "Could not accept this submission: your name is required.");
     if (description.length > DESCRIPTION_MAX) {
-      return refuse(400, `Could not accept this submission: the description is longer than ${DESCRIPTION_MAX} characters.`);
+      return refuse(400, `Could not accept this submission: the instructions are longer than ${DESCRIPTION_MAX} characters.`);
     }
 
     const problems = [];
@@ -3165,7 +3165,7 @@ async function handleAppUpload(request, env, ctx) {
           color: 0x5b9bd5,
           fields: [
             { name: "Submitted by", value: `${builder} (via app)`, inline: true },
-            ...(description ? [{ name: "Description", value: description, inline: false }] : []),
+            ...(description ? [{ name: "Instructions", value: description, inline: false }] : []),
             ...linkFields(linkCheck.youtubeUrl, linkCheck.patreonUrl),
             { name: "Objects", value: `${staged.meta.objectCount} \u00b7 utility score ${staged.meta.score}/10`, inline: true },
             ...(await approvalExtraFields(slug, env, staged.check, imageBufs.length))
