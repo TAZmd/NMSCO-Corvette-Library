@@ -2166,5 +2166,101 @@
     "downloads": 0,
     "approvedAt": "2026-10-03T12:03:26.040Z",
     "utilVersion": 2
+  },
+  {
+    "id": "gryphon-salvager-967r4",
+    "name": "Gryphon Salvager",
+    "sha256": "4251adba070bc02c2ce3b76d7a1dd7a180d18d2a98b0c03e0de98af74ab7ccd1",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=8-w2YIFF-ZM",
+    "imageCount": 2,
+    "objectCount": 555,
+    "score": 8.6,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-03T12:15:32.230Z",
+    "utilVersion": 2
   }
 ]
