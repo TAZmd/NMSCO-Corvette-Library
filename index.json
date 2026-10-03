@@ -1610,5 +1610,41 @@
     "downloads": 0,
     "approvedAt": "2026-10-03T11:32:14.094Z",
     "utilVersion": 2
+  },
+  {
+    "id": "black-wasp-bike-xepbc",
+    "name": "Black Wasp Bike",
+    "sha256": "54684d4ea38d13f693448b10cae797506ee2c419946b7a296697e85a49bf504d",
+    "submitter": "Aresmar",
+    "description": "Read https://tinyurl.com/BlackWaspManual for all info",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=ISydOzHDuro",
+    "imageCount": 2,
+    "objectCount": 306,
+    "score": 3.6,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "2 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-03T11:57:32.888Z",
+    "utilVersion": 2
   }
 ]
