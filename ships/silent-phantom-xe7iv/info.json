@@ -1,0 +1,55 @@
+{
+  "name": "Silent Phantom",
+  "id": "silent-phantom-xe7iv",
+  "submitter": "MiLf&CoOkIeS",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 372,
+  "score": 5.7,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Staff Builder",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "b30ed92ce805a35451f7cf2a30e6ee75d0ee332c1c13599febfb11721b8a1bfe",
+  "downloads": 0,
+  "approvedAt": "2026-10-05T00:54:13.250Z"
+}

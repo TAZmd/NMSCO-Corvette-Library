@@ -1,0 +1,55 @@
+{
+  "name": "Bubble Ship",
+  "id": "bubble-ship-37thj",
+  "submitter": "Aresmar",
+  "description": "",
+  "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+  "youtubeUrl": "https://www.youtube.com/watch?v=ys3mCEgRi8M",
+  "objectCount": 347,
+  "score": 5.8,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "20 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "9659f048d4435dac0d25de766d7b03847d4a72a60bc090316395ea0edcc06934",
+  "downloads": 0,
+  "approvedAt": "2026-10-03T11:57:44.296Z"
+}

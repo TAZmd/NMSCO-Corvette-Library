@@ -1,0 +1,51 @@
+{
+  "name": "Meridian",
+  "id": "meridian-qutwz",
+  "submitter": "DRAOS",
+  "description": "A small empty side on the left when you enter, feel free to decorate how you see fit.",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 2672,
+  "score": 5.5,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "4b5e2e2329ea816d9bac3cdd4ec5cd231562ad0c187ff8ce44ddbefe8173429d",
+  "downloads": 0,
+  "approvedAt": "2026-10-05T02:03:47.342Z"
+}

@@ -1,0 +1,143 @@
+[
+  {
+    "id": "the-benatar-jpkfx",
+    "name": "The Benatar",
+    "sha256": "6c8797a0244e488ec5ca2f534eab24c877d473e60074ff2dca2596be0b2279b1",
+    "submitter": "The Benatar",
+    "description": "The Benatar",
+    "patreonUrl": "",
+    "youtubeUrl": "https://www.youtube.com/watch?v=woVSAtsb8KY&t=6s",
+    "imageCount": 3,
+    "objectCount": 1390,
+    "score": 5.6,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "4 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      }
+    ],
+    "downloads": 4,
+    "approvedAt": "2026-10-04T15:15:59.434Z",
+    "utilVersion": 3,
+    "disabledAt": "2026-10-04T21:03:13.704Z",
+    "disabledBy": "tazmd"
+  },
+  {
+    "id": "the-milano-7jnan",
+    "name": "The Milano",
+    "sha256": "447f3e60652004b4494fc49c8bb0678336480a08042cfd0c826fb841808f918e",
+    "submitter": "The Milano",
+    "description": "The Milano from Guardians of the Galaxy - Full movie accurate interior & exterior",
+    "patreonUrl": "",
+    "youtubeUrl": "https://www.youtube.com/watch?v=vf_81kt4MKc",
+    "imageCount": 3,
+    "objectCount": 1935,
+    "score": 4.9,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "8 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      }
+    ],
+    "downloads": 2,
+    "approvedAt": "2026-10-04T15:14:14.597Z",
+    "utilVersion": 3,
+    "disabledAt": "2026-10-04T21:03:28.565Z",
+    "disabledBy": "tazmd"
+  },
+  {
+    "id": "ambasfloor-58e4n",
+    "name": "Ambasfloor",
+    "sha256": "eea3aaebc85526731137e770394e37a2869eb2d74e1efd055324223070703d2a",
+    "submitter": "Dedienty",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 1,
+    "objectCount": 28,
+    "score": 5,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-05T18:30:34.156Z",
+    "utilVersion": 3,
+    "disabledAt": "2026-10-05T18:31:28.067Z",
+    "disabledBy": "Dedienty (uploader)",
+    "purgeAt": "2026-10-12T18:31:27.693Z",
+    "noticeId": "1556735601703780353"
+  }
+]

@@ -1,0 +1,41 @@
+name = "nmsco-corvette-library"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+keep_vars = true
+
+[vars]
+DISCORD_APPLICATION_ID = "1554537284173439106"
+DISCORD_GUILD_ID = "285756001469202432"
+APPROVER_USER_ID = "80942727767785472"
+GITHUB_OWNER = "TAZmd"
+GITHUB_REPO = "nmsco-corvette-library"
+APPROVAL_CHANNEL_ID = "1554536984255401994"
+ADMIN_CHANNEL_ID = "1556257165344247868"
+CHECK_CHANNEL_ID = "1556418181323825214"
+REVIEW_ROLE_ID = "1556260075889229894"
+SUPERVISOR_ROLE_ID = "1556261430745890836"
+BULK_ROLE_ID = "1556489625131032606"
+REMOVE_CHANNEL_ID = "1556670811354693722"
+VERIFIED_ROLE_ID = "1556702817173901413"
+ANNOUNCE_CHANNEL_ID = "1556918395285409823"
+COMMENT_CHANNEL_ID = "1557271383904354365"
+STORAGE_BACKEND = "r2"
+
+[[kv_namespaces]]
+binding = "DELETE_CODES"
+id = "981225a2c74c468597591ddcc9fa0411"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "corvette-library-stats"
+database_id = "25281ebb-67bd-450e-b921-81984e6f1e73"
+
+[[r2_buckets]]
+binding = "SHIPS"
+bucket_name = "corvettelib"
+
+[observability]
+enabled = true
+
+[triggers]
+crons = ["0 */6 * * *"]

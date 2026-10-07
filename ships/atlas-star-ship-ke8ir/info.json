@@ -1,0 +1,67 @@
+{
+  "name": "Atlas Star Ship",
+  "id": "atlas-star-ship-ke8ir",
+  "submitter": "MiLf&CoOkIeS",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 774,
+  "score": 7.3,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 0.5
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 0.5
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Staff Builder",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Antimatter Reactor",
+      "value": 1
+    },
+    {
+      "label": "Fishpond",
+      "value": 1
+    }
+  ],
+  "imageCount": 2,
+  "sha256": "aa25f0ae68df308df2759e49a73e0d41213ee096bb3950d66d40419a72ed4c5e",
+  "downloads": 0,
+  "approvedAt": "2026-10-04T20:23:03.873Z"
+}

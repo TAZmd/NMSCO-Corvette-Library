@@ -1,0 +1,113 @@
+{
+  "name": "Storm Carrier",
+  "id": "storm-carrier-775bc",
+  "submitter": "TAZmd",
+  "patreonUrl": "https://www.youtube.com/watch?v=jUk4hj83-NU",
+  "objectCount": 675,
+  "score": 8,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "20 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Staff Builder",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Exocraft Research Station",
+      "value": 1
+    },
+    {
+      "label": "Ship Research Station",
+      "value": 1
+    },
+    {
+      "label": "Exosuit Research Station",
+      "value": 1
+    },
+    {
+      "label": "Multi-Tool Research Station",
+      "value": 1
+    },
+    {
+      "label": "Utopia Build Station",
+      "value": 1
+    },
+    {
+      "label": "Stellar Extractor Room",
+      "value": 1
+    },
+    {
+      "label": "Autonomous Mining Unit",
+      "value": 1
+    },
+    {
+      "label": "Gas Harvester",
+      "value": 1
+    },
+    {
+      "label": "Oxygen Harvester",
+      "value": 1
+    },
+    {
+      "label": "Antimatter Reactor",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    },
+    {
+      "label": "Nip Plant",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "0218d15aaee36596942c41b756f9dd7c17cea3e7fcf0ac40cca2041a95334113",
+  "downloads": 0,
+  "approvedAt": "2026-10-01T11:41:48.249Z"
+}

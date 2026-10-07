@@ -1,0 +1,24 @@
+{
+  "name": "ADFX-02 \"Morgan\"",
+  "id": "adfx-02-morgan-2crkd",
+  "submitter": "DriftTheDude",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 132,
+  "score": 1.7,
+  "utilities": [
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "3deb50b51c95635a0b930280f59a8c2f627739ea99fae2d1ff2535c2cf452f08",
+  "downloads": 0,
+  "approvedAt": "2026-10-05T16:08:07.350Z"
+}

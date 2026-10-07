@@ -1,0 +1,20 @@
+{
+  "name": "Tornado",
+  "id": "tornado-6om39",
+  "submitter": "Bowser",
+  "description": "Cockpit is under the chair and is from sonic the hedgehog.",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 177,
+  "score": 1.5,
+  "utilities": [
+    {
+      "label": "Scanner Room",
+      "value": 1
+    }
+  ],
+  "imageCount": 1,
+  "sha256": "ce313fd8db547f9c6cecc28bfa587637e8de5a6023aa8a9c1be63d3be5eff8bd",
+  "downloads": 0,
+  "approvedAt": "2026-10-04T18:40:19.543Z"
+}

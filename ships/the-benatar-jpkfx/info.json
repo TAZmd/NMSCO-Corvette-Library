@@ -1,0 +1,55 @@
+{
+  "name": "The Benatar",
+  "id": "the-benatar-jpkfx",
+  "submitter": "The Benatar",
+  "description": "The Benatar",
+  "patreonUrl": "",
+  "youtubeUrl": "https://www.youtube.com/watch?v=woVSAtsb8KY&t=6s",
+  "objectCount": 1390,
+  "score": 5.6,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "4 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Oxygen Harvester",
+      "value": 1
+    },
+    {
+      "label": "Antimatter Reactor",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "6c8797a0244e488ec5ca2f534eab24c877d473e60074ff2dca2596be0b2279b1",
+  "downloads": 0,
+  "approvedAt": "2026-10-04T15:15:59.434Z"
+}

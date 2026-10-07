@@ -1,0 +1,111 @@
+{
+  "name": "Chimera Smuggler",
+  "id": "chimera-smuggler-r6rm4",
+  "submitter": "Aresmar",
+  "description": "",
+  "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+  "youtubeUrl": "https://www.youtube.com/watch?v=q_BKC_nLLRc",
+  "objectCount": 860,
+  "score": 7.8,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "20 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Staff Builder",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Holo-Arena Game Table",
+      "value": 1
+    },
+    {
+      "label": "Exosuit Research Station",
+      "value": 1
+    },
+    {
+      "label": "Multi-Tool Research Station",
+      "value": 1
+    },
+    {
+      "label": "Utopia Build Station",
+      "value": 1
+    },
+    {
+      "label": "Stellar Extractor Room",
+      "value": 1
+    },
+    {
+      "label": "Autonomous Mining Unit",
+      "value": 1
+    },
+    {
+      "label": "Gas Harvester",
+      "value": 1
+    },
+    {
+      "label": "Oxygen Harvester",
+      "value": 1
+    },
+    {
+      "label": "Antimatter Reactor",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    },
+    {
+      "label": "Fishpond",
+      "value": 1
+    }
+  ],
+  "imageCount": 2,
+  "sha256": "efd9b815cb5653fa25a909dd62e3fa5592cc3bbd1d4da1135f6b697225038ca0",
+  "downloads": 0,
+  "approvedAt": "2026-10-04T15:50:00.793Z"
+}

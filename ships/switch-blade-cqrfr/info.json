@@ -1,0 +1,83 @@
+{
+  "name": "Switch Blade",
+  "id": "switch-blade-cqrfr",
+  "submitter": "Phantomdark30",
+  "description": "Mods are under the wings of the ship and inside cockpit",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 404,
+  "score": 6.9,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 0.5
+    },
+    {
+      "label": "Staff Builder",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Exosuit Research Station",
+      "value": 1
+    },
+    {
+      "label": "Multi-Tool Research Station",
+      "value": 1
+    },
+    {
+      "label": "Utopia Build Station",
+      "value": 1
+    },
+    {
+      "label": "Autonomous Mining Unit",
+      "value": 1
+    },
+    {
+      "label": "Gas Harvester",
+      "value": 1
+    }
+  ],
+  "imageCount": 1,
+  "sha256": "ea1bbca9527b2797bf3ce340d20804d96e31236ffd6dcf62cb1929466ad3a39e",
+  "downloads": 0,
+  "approvedAt": "2026-10-04T20:32:34.784Z"
+}

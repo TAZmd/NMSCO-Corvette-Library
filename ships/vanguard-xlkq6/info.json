@@ -1,0 +1,24 @@
+{
+  "name": "Vanguard",
+  "id": "vanguard-xlkq6",
+  "submitter": "Sai",
+  "description": "first design I have ever made in blender. Hope you all enjoy",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 204,
+  "score": 1.7,
+  "utilities": [
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "22bf3388633e394a928fbb1f144032da8a3029881e0f51663d128bdf578aec92",
+  "downloads": 0,
+  "approvedAt": "2026-10-04T23:59:25.921Z"
+}

@@ -1,0 +1,79 @@
+{
+  "name": "Sith Fury Interceptor",
+  "id": "sith-fury-interceptor-v3za7",
+  "submitter": "Precision",
+  "description": "",
+  "patreonUrl": "https://www.patreon.com/cw/ThePrecisionTechnician",
+  "youtubeUrl": "",
+  "objectCount": 4160,
+  "score": 5.1,
+  "utilities": [
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Stellar Extractor Room",
+      "value": 1
+    },
+    {
+      "label": "Autonomous Mining Unit",
+      "value": 1
+    },
+    {
+      "label": "Gas Harvester",
+      "value": 1
+    },
+    {
+      "label": "Oxygen Harvester",
+      "value": 1
+    },
+    {
+      "label": "Antimatter Reactor",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    }
+  ],
+  "imageCount": 2,
+  "sha256": "618dc21e6fd72d9316b1a02fcad6796cfd0427be9afc920c375ead17ff7d8b6e",
+  "downloads": 0,
+  "approvedAt": "2026-10-04T15:21:04.949Z"
+}

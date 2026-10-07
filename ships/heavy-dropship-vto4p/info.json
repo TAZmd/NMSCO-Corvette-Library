@@ -1,0 +1,95 @@
+{
+  "name": "Heavy Dropship",
+  "id": "heavy-dropship-vto4p",
+  "submitter": "Aresmar",
+  "description": "",
+  "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+  "youtubeUrl": "https://www.youtube.com/watch?v=A89BpqTypsw",
+  "objectCount": 537,
+  "score": 7.2,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Staff Builder",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Utopia Build Station",
+      "value": 1
+    },
+    {
+      "label": "Stellar Extractor Room",
+      "value": 1
+    },
+    {
+      "label": "Autonomous Mining Unit",
+      "value": 1
+    },
+    {
+      "label": "Gas Harvester",
+      "value": 1
+    },
+    {
+      "label": "Oxygen Harvester",
+      "value": 1
+    },
+    {
+      "label": "Antimatter Reactor",
+      "value": 1
+    },
+    {
+      "label": "Fishpond",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "6455f4db6d0383d0bbd2fcf79a955989d4b41f01a3fc7526a07cf81633cff52d",
+  "downloads": 0,
+  "approvedAt": "2026-10-03T11:58:19.431Z"
+}

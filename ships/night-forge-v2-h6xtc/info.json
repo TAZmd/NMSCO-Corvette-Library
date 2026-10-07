@@ -1,0 +1,61 @@
+{
+  "name": "Night Forge v2",
+  "id": "night-forge-v2-h6xtc",
+  "submitter": "TAZmd",
+  "patreonUrl": "",
+  "objectCount": 608,
+  "score": 6.1,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 0.5
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    }
+  ],
+  "imageCount": 1,
+  "sha256": "579492533c82fa968538157b48ad7ca2d3678d160af92cc3230bd0cb1a841785",
+  "downloads": 0,
+  "approvedAt": "2026-10-01T11:15:14.697Z"
+}

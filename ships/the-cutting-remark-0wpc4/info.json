@@ -1,0 +1,55 @@
+{
+  "name": "The Cutting Remark",
+  "id": "the-cutting-remark-0wpc4",
+  "submitter": "Pastullio the Harmonious",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "https://www.tiktok.com/@pastulliotheharmonious/video/7693611857906519310",
+  "objectCount": 2083,
+  "score": 5.7,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 0.5
+    },
+    {
+      "label": "Staff Builder",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    }
+  ],
+  "imageCount": 1,
+  "sha256": "dfee70c4c664258f4ef228c543d9de0976aa9d31e81b79beab8fa27ca79a449e",
+  "downloads": 0,
+  "approvedAt": "2026-10-06T15:35:45.145Z"
+}

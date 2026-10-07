@@ -1,0 +1,104 @@
+{
+  "name": "Federal Corvette v4",
+  "id": "federal-corvette-v3-g2ycd",
+  "submitter": "TAZmd",
+  "patreonUrl": "https://www.youtube.com/watch?v=a7N9Ogk9sXs",
+  "objectCount": 698,
+  "score": 9.2,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "20 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Staff Builder",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Holo-Arena Game Table",
+      "value": 1
+    },
+    {
+      "label": "Exocraft Research Station",
+      "value": 1
+    },
+    {
+      "label": "Ship Research Station",
+      "value": 1
+    },
+    {
+      "label": "Exosuit Research Station",
+      "value": 1
+    },
+    {
+      "label": "Multi-Tool Research Station",
+      "value": 1
+    },
+    {
+      "label": "Utopia Build Station",
+      "value": 1
+    },
+    {
+      "label": "Stellar Extractor Room",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "0d5a895174425a60a43c50a3d0c1108369886ed2513ad9f8f15a8d6b3fc78891",
+  "downloads": 0,
+  "approvedAt": "2026-10-01T11:50:53.164Z",
+  "version": 2,
+  "updatedAt": "2026-10-06T12:04:52.159Z",
+  "updateNote": "Added 3 Missing Utilities, Signal Booster, Health Station, Hazard Protection Unit."
+}

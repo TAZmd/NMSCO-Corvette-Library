@@ -1,0 +1,4108 @@
+[
+  {
+    "id": "bi-cab-express-dysmn",
+    "name": "Bi-Cab Express",
+    "sha256": "50f4a31ba3b046677b5a8d3101dc832a79da1747a5cbf3d7e8eb3eafd306ba4c",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 1,
+    "objectCount": 56,
+    "score": 5.4,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      }
+    ],
+    "downloads": 2,
+    "approvedAt": "2026-09-30T19:13:19.540Z"
+  },
+  {
+    "id": "cosmoliner-qfgct",
+    "name": "Cosmoliner",
+    "sha256": "380c375ae7da2f0a1f634b9ad8c69fbd1f9b782143a98a8693de548d582c5281",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 1,
+    "objectCount": 1254,
+    "score": 0,
+    "utilities": [],
+    "downloads": 3,
+    "approvedAt": "2026-09-30T19:13:44.259Z"
+  },
+  {
+    "id": "aquara-rsrvt",
+    "name": "Aquara",
+    "sha256": "44265343fb6ba3f12f55afd52b356a58c0412f62762faef4200ebc2c937fef4e",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 2,
+    "objectCount": 73,
+    "score": 4.5,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      }
+    ],
+    "downloads": 3,
+    "approvedAt": "2026-09-30T19:22:59.469Z"
+  },
+  {
+    "id": "lightspire-4vl3i",
+    "name": "LightSpire",
+    "sha256": "464f9ac64dfcdd1e1998982cc4c829d9faa29316a31489ef233fbc5f49292fde",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 2,
+    "objectCount": 927,
+    "score": 5.3,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      }
+    ],
+    "downloads": 3,
+    "approvedAt": "2026-09-30T19:23:43.430Z"
+  },
+  {
+    "id": "frosty-the-snowman-kxlz9",
+    "name": "Frosty The Snowman",
+    "sha256": "c4b4b6db644691ca36068c6d588ddab88b09bffab779ce95a845192438f3c7d4",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 1,
+    "objectCount": 680,
+    "score": 3,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      }
+    ],
+    "downloads": 1,
+    "approvedAt": "2026-10-01T05:28:11.644Z"
+  },
+  {
+    "id": "the-niblet-qhrb9",
+    "name": "The Niblet",
+    "sha256": "6495285a75649cfdadae1a47c24e6bb76f0a1420176f8ab3ca312640eccee5f9",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 1,
+    "objectCount": 174,
+    "score": 5,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Nip Plant",
+        "value": 1
+      }
+    ],
+    "downloads": 1,
+    "approvedAt": "2026-10-01T05:28:24.250Z"
+  },
+  {
+    "id": "evil-snowman-w4prd",
+    "name": "Evil Snowman",
+    "sha256": "a44960c21a3a361f53d313f271d2df631032e68b6a840d44e67699c8420279e8",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 1,
+    "objectCount": 217,
+    "score": 0,
+    "utilities": [],
+    "downloads": 1,
+    "approvedAt": "2026-10-01T05:32:29.349Z"
+  },
+  {
+    "id": "flintstones-car-p0e7b",
+    "name": "Flintstones Car",
+    "sha256": "27cf6518ee3e736605ed35fed255c35af715bf56a117f85fc63eeb98c6fd8037",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 1,
+    "objectCount": 305,
+    "score": 0,
+    "utilities": [],
+    "downloads": 3,
+    "approvedAt": "2026-10-01T05:32:44.049Z"
+  },
+  {
+    "id": "party-all-the-time-1hhq7",
+    "name": "Party All The Time",
+    "sha256": "1e1c871a74f79f0aa7a12d2a6adcccd6a0b3d10ae8b48f2281a8468773172508",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 3,
+    "objectCount": 317,
+    "score": 0,
+    "utilities": [],
+    "downloads": 3,
+    "approvedAt": "2026-10-01T05:37:33.740Z"
+  },
+  {
+    "id": "black-ark-ntzf8",
+    "name": "Black Ark",
+    "sha256": "ff1b947f293f7c7b57eb0bff355ecd8a8f3de76e86a8ad347f549bb461ca246d",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 2,
+    "objectCount": 182,
+    "score": 6.2,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Nip Plant",
+        "value": 1
+      }
+    ],
+    "downloads": 5,
+    "approvedAt": "2026-10-01T06:09:02.771Z"
+  },
+  {
+    "id": "blue-horizon-srndq",
+    "name": "Blue Horizon",
+    "sha256": "b840bb4377cc1254c360785b103c5eeae32733859d14235552ce397a5b930e45",
+    "submitter": "TAZmd",
+    "patreonUrl": "https://www.youtube.com/watch?v=eskoC1yWmb8",
+    "imageCount": 3,
+    "objectCount": 467,
+    "score": 6.5,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Nip Plant",
+        "value": 1
+      }
+    ],
+    "downloads": 3,
+    "approvedAt": "2026-10-01T06:31:57.699Z"
+  },
+  {
+    "id": "starliner-rv-k3rf0",
+    "name": "Starliner RV",
+    "sha256": "6b7965183f60d3a4c77b60cb3be8d7ce755bffc958e03fb9ac7ca1afb83eb277",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 3,
+    "objectCount": 450,
+    "score": 6.2,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 2,
+    "approvedAt": "2026-10-01T10:10:34.400Z"
+  },
+  {
+    "id": "hexagonia-auux7",
+    "name": "Hexagonia",
+    "sha256": "cf2023e4928c39508851ebd75e438389f34918d2f3194fd5c06d3d96d782bed5",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 1,
+    "objectCount": 1157,
+    "score": 4.3,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 3,
+    "approvedAt": "2026-10-01T10:23:40.868Z"
+  },
+  {
+    "id": "aeronix-0n1h5",
+    "name": "Aeronix",
+    "sha256": "2341cbfb474e226bce9f0005a2db2b3f850c7192037c8c3aa73f3cc16beed80e",
+    "submitter": "TAZmd",
+    "patreonUrl": "https://www.youtube.com/watch?v=o-u7oOCsqWk",
+    "imageCount": 3,
+    "objectCount": 269,
+    "score": 5.3,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      }
+    ],
+    "downloads": 7,
+    "approvedAt": "2026-10-01T10:29:09.643Z"
+  },
+  {
+    "id": "night-forge-off1x",
+    "name": "Night Forge",
+    "sha256": "126bdc4c3d37371fca3ebc200f8c026bc3f6d2e0da50549b8f920c85da39ef83",
+    "submitter": "TAZmd",
+    "patreonUrl": "https://www.youtube.com/watch?v=tlM93jIWY0U",
+    "imageCount": 2,
+    "objectCount": 604,
+    "score": 6.1,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      }
+    ],
+    "downloads": 1,
+    "approvedAt": "2026-10-01T11:14:09.399Z"
+  },
+  {
+    "id": "aero-flash-yzll3",
+    "name": "Aero Flash",
+    "sha256": "11c497c2dce9e78d18911080d74b426d9911173bae1650d2eb6c8748bf58c6ea",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 2,
+    "objectCount": 192,
+    "score": 0,
+    "utilities": [],
+    "downloads": 2,
+    "approvedAt": "2026-10-01T11:14:30.907Z"
+  },
+  {
+    "id": "night-forge-v2-h6xtc",
+    "name": "Night Forge v2",
+    "sha256": "579492533c82fa968538157b48ad7ca2d3678d160af92cc3230bd0cb1a841785",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 1,
+    "objectCount": 608,
+    "score": 6.1,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      }
+    ],
+    "downloads": 3,
+    "approvedAt": "2026-10-01T11:15:14.697Z"
+  },
+  {
+    "id": "cargo-hauler-02-w0zz7",
+    "name": "Cargo Hauler 02",
+    "sha256": "0fca38309756f8fb3897b7a19e29fe86b5c29b0075e9b0d19cfa41ee5a638d1f",
+    "submitter": "TAZmd / Nismosoflo",
+    "patreonUrl": "https://www.youtube.com/watch?v=KCgitgkwM5Y",
+    "imageCount": 3,
+    "objectCount": 1139,
+    "score": 8,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Exocraft Research Station",
+        "value": 1
+      },
+      {
+        "label": "Ship Research Station",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Nip Plant",
+        "value": 1
+      }
+    ],
+    "downloads": 6,
+    "approvedAt": "2026-10-01T11:25:31.873Z"
+  },
+  {
+    "id": "storm-carrier-775bc",
+    "name": "Storm Carrier",
+    "sha256": "0218d15aaee36596942c41b756f9dd7c17cea3e7fcf0ac40cca2041a95334113",
+    "submitter": "TAZmd",
+    "patreonUrl": "https://www.youtube.com/watch?v=jUk4hj83-NU",
+    "imageCount": 3,
+    "objectCount": 675,
+    "score": 8,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Exocraft Research Station",
+        "value": 1
+      },
+      {
+        "label": "Ship Research Station",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Nip Plant",
+        "value": 1
+      }
+    ],
+    "downloads": 11,
+    "approvedAt": "2026-10-01T11:41:48.249Z"
+  },
+  {
+    "id": "zainap-kf06l",
+    "name": "Zainap",
+    "sha256": "8d993ae730a3e4df9a90d79686880aeaab1fb744e07286c09f483e753f92fb5b",
+    "submitter": "TAZmd",
+    "patreonUrl": "",
+    "imageCount": 3,
+    "objectCount": 261,
+    "score": 5.4,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      }
+    ],
+    "downloads": 5,
+    "approvedAt": "2026-10-01T11:48:06.102Z"
+  },
+  {
+    "id": "obsidian-crown-v2-4lte3",
+    "name": "Obsidian Crown v2",
+    "sha256": "327d6e0df9dd35313bb4b40e80adcc6cf3ce9d0eea8454ad370bf3dd5036ebcd",
+    "submitter": "TAZmd",
+    "patreonUrl": "https://www.youtube.com/watch?v=d1I_ouItWe8",
+    "imageCount": 3,
+    "objectCount": 521,
+    "score": 7.6,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Holo-Arena Game Table",
+        "value": 1
+      },
+      {
+        "label": "Exocraft Research Station",
+        "value": 1
+      },
+      {
+        "label": "Ship Research Station",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 5,
+    "approvedAt": "2026-10-01T11:49:32.940Z"
+  },
+  {
+    "id": "federal-corvette-v3-g2ycd",
+    "name": "Federal Corvette v4",
+    "sha256": "0d5a895174425a60a43c50a3d0c1108369886ed2513ad9f8f15a8d6b3fc78891",
+    "submitter": "TAZmd",
+    "patreonUrl": "https://www.youtube.com/watch?v=a7N9Ogk9sXs",
+    "imageCount": 3,
+    "objectCount": 698,
+    "score": 9.2,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Holo-Arena Game Table",
+        "value": 1
+      },
+      {
+        "label": "Exocraft Research Station",
+        "value": 1
+      },
+      {
+        "label": "Ship Research Station",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 23,
+    "approvedAt": "2026-10-01T11:50:53.164Z",
+    "version": 2,
+    "updatedAt": "2026-10-06T12:04:52.159Z",
+    "utilVersion": 3,
+    "updateNote": "Added 3 Missing Utilities, Signal Booster, Health Station, Hazard Protection Unit."
+  },
+  {
+    "id": "the-360-harvester-1c9on",
+    "name": "The 360 Harvester",
+    "sha256": "98055e924b7a84b4c7662f8e3cedb74147945b261eeb8cc48127dee486e21116",
+    "submitter": "TAZmd",
+    "patreonUrl": "https://www.youtube.com/watch?v=2MXVTlUryac",
+    "imageCount": 3,
+    "objectCount": 278,
+    "score": 9.1,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Holo-Arena Game Table",
+        "value": 1
+      },
+      {
+        "label": "Exocraft Research Station",
+        "value": 1
+      },
+      {
+        "label": "Ship Research Station",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 10,
+    "approvedAt": "2026-10-01T11:59:46.557Z"
+  },
+  {
+    "id": "quadjumper-gekp7",
+    "name": "QuadJumper",
+    "sha256": "8327d410252723f573aad909d9d9e6d083c9420d5c50908032f1daa38acefc61",
+    "submitter": "Aresmar",
+    "patreonUrl": "https://www.patreon.com/aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=MpWbkzmjYe4",
+    "imageCount": 3,
+    "objectCount": 212,
+    "score": 7.3,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      }
+    ],
+    "downloads": 6,
+    "approvedAt": "2026-10-01T12:51:36.503Z"
+  },
+  {
+    "id": "chimera-x-salvager-a0lao",
+    "name": "Chimera X Salvager",
+    "sha256": "37b6f6fb7d2eb674a4f6f714d4b02e90979d64a30d2210d8f666d807c6a74617",
+    "submitter": "Aresmar",
+    "patreonUrl": "https://www.patreon.com/aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=-qcwJ4JiD2M",
+    "imageCount": 3,
+    "objectCount": 824,
+    "score": 8.8,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Holo-Arena Game Table",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Fishpond",
+        "value": 1
+      }
+    ],
+    "downloads": 21,
+    "approvedAt": "2026-10-02T07:31:42.082Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "thai-fly-by-h70uy",
+    "name": "Thai Fly By",
+    "sha256": "c5c79cb233cf54380b9b4483544159f61670f739a4b040d7d747af7739dce918",
+    "submitter": "MiLf&CoOkIeS",
+    "description": "The cockpit to enter is under the stool.",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 2,
+    "objectCount": 519,
+    "score": 5.3,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      }
+    ],
+    "downloads": 6,
+    "approvedAt": "2026-10-02T18:18:39.025Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "the-hawking-0s1u3",
+    "name": "The Hawking",
+    "sha256": "a3fdd68e95496564fcd581eb91c1225612adf0884db1165edacc0c54211ffecd",
+    "submitter": "MiLf&CoOkIeS",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 2,
+    "objectCount": 79,
+    "score": 0,
+    "utilities": [],
+    "downloads": 4,
+    "approvedAt": "2026-10-02T19:12:48.234Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "go-cart-y3uto",
+    "name": "Go Cart",
+    "sha256": "58bf84e0a413d6d15b065667f5a7a54b1caf0c687fb0928ca397546f2f82dabf",
+    "submitter": "MiLf&CoOkIeS",
+    "description": "Jump and stand on the side of the Go Cart. In first person view, Look down at the seat to enter cockpit",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 134,
+    "score": 1.5,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      }
+    ],
+    "downloads": 2,
+    "approvedAt": "2026-10-02T20:14:34.499Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "banshee-medivac-rjf9k",
+    "name": "Banshee-Medivac",
+    "sha256": "a9d0a71c690a8bfd42a486edaa4c7267a5212957d7b93fde0b46376f558e7968",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=-eryOW9UR9g",
+    "imageCount": 3,
+    "objectCount": 565,
+    "score": 6.1,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Nip Plant",
+        "value": 1
+      }
+    ],
+    "downloads": 4,
+    "approvedAt": "2026-10-03T11:32:01.468Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "basilisk-stealth-bomber-ql699",
+    "name": "Basilisk-Stealth-Bomber",
+    "sha256": "adadee74792e8e24f18a46e5ed826f70e89303a35fc7436805ae1c1e405a2027",
+    "submitter": "Aresmar",
+    "description": "Be resposible where you bomb! Or drop balls that is...",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=ieyphp_pZ50",
+    "imageCount": 2,
+    "objectCount": 447,
+    "score": 7.2,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 3,
+    "approvedAt": "2026-10-03T11:32:14.094Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "black-wasp-bike-xepbc",
+    "name": "Black Wasp Bike",
+    "sha256": "54684d4ea38d13f693448b10cae797506ee2c419946b7a296697e85a49bf504d",
+    "submitter": "Aresmar",
+    "description": "Read https://tinyurl.com/BlackWaspManual for all info",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=ISydOzHDuro",
+    "imageCount": 2,
+    "objectCount": 306,
+    "score": 3.6,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "2 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      }
+    ],
+    "downloads": 7,
+    "approvedAt": "2026-10-03T11:57:32.888Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "bubble-ship-37thj",
+    "name": "Bubble Ship",
+    "sha256": "9659f048d4435dac0d25de766d7b03847d4a72a60bc090316395ea0edcc06934",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=ys3mCEgRi8M",
+    "imageCount": 3,
+    "objectCount": 347,
+    "score": 5.8,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      }
+    ],
+    "downloads": 4,
+    "approvedAt": "2026-10-03T11:57:44.296Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "chimera-variant-x-52xfw",
+    "name": "Chimera Variant X",
+    "sha256": "72c7f037d4cd5f27ef006c88ab4a55a4a202593c61d22f76cc9be97447a1c27b",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=0XFj9AYgUjk",
+    "imageCount": 2,
+    "objectCount": 758,
+    "score": 7,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Holo-Arena Game Table",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Fishpond",
+        "value": 1
+      }
+    ],
+    "downloads": 3,
+    "approvedAt": "2026-10-03T11:57:56.262Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "hammerhead-gunship-t1hi1",
+    "name": "Hammerhead Gunship",
+    "sha256": "62b54b0f70667050f6c573d43cce949e585c3ca4a3b7ac73a0a776309d26916f",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=P8iA-KXyWPA",
+    "imageCount": 3,
+    "objectCount": 663,
+    "score": 6.7,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 3,
+    "approvedAt": "2026-10-03T11:58:05.634Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "heavy-dropship-vto4p",
+    "name": "Heavy Dropship",
+    "sha256": "6455f4db6d0383d0bbd2fcf79a955989d4b41f01a3fc7526a07cf81633cff52d",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=A89BpqTypsw",
+    "imageCount": 3,
+    "objectCount": 537,
+    "score": 7.2,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Fishpond",
+        "value": 1
+      }
+    ],
+    "downloads": 6,
+    "approvedAt": "2026-10-03T11:58:19.431Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "hunter-killer-6jm9t",
+    "name": "Hunter Killer",
+    "sha256": "9c7cc0349da1aaeb445104e818a03226474389985ba85b93ee4578e2057c278b",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=tkA5d6F6W5U",
+    "imageCount": 2,
+    "objectCount": 257,
+    "score": 5.8,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      }
+    ],
+    "downloads": 7,
+    "approvedAt": "2026-10-03T11:58:28.479Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "patrol-gunship-m4vdg",
+    "name": "Patrol Gunship",
+    "sha256": "060fabe4e7c2649f893def697d6d8184cee38a787c8ecd461e5857797286e315",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=8EuMerrQZo8",
+    "imageCount": 3,
+    "objectCount": 338,
+    "score": 5.9,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Nip Plant",
+        "value": 1
+      }
+    ],
+    "downloads": 10,
+    "approvedAt": "2026-10-03T11:58:46.325Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "titan-scarab-withtractorbeam-json-object-f7fo1",
+    "name": "Titan Scarab",
+    "sha256": "801cf2bbd11007c5afe79cc170898f7a8e352be0fb465052c2b11e60ab970408",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=bTUXIHnb7aI",
+    "imageCount": 3,
+    "objectCount": 768,
+    "score": 8.4,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Holo-Arena Game Table",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 10,
+    "approvedAt": "2026-10-03T12:03:26.040Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "gryphon-salvager-967r4",
+    "name": "Gryphon Salvager",
+    "sha256": "4251adba070bc02c2ce3b76d7a1dd7a180d18d2a98b0c03e0de98af74ab7ccd1",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=8-w2YIFF-ZM",
+    "imageCount": 2,
+    "objectCount": 555,
+    "score": 8.6,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      }
+    ],
+    "downloads": 18,
+    "approvedAt": "2026-10-03T12:15:32.230Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "manticore-explorer-wl4to",
+    "name": "Manticore Explorer",
+    "sha256": "28f14f073bc4fef59abdb9bb2683fefdb0b8b26ee0345c150e79f14c6a871bf5",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=8RI23b8A9gI",
+    "imageCount": 2,
+    "objectCount": 531,
+    "score": 6.2,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      }
+    ],
+    "downloads": 3,
+    "approvedAt": "2026-10-03T12:15:41.299Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "razor-crest-remastered-rhqa1",
+    "name": "Razor Crest Remastered",
+    "sha256": "0d3574642764f319d789655534740e1a4df8295ac0c5c77043164a31d4f3868a",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=19crr-eIgvA",
+    "imageCount": 3,
+    "objectCount": 1198,
+    "score": 7.5,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      }
+    ],
+    "downloads": 11,
+    "approvedAt": "2026-10-03T12:16:04.241Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "warthog-specops-fn95m",
+    "name": "Warthog SpecOps",
+    "sha256": "4489eddd59782330a283770eb398d9ce8713964b83b21bef2a0797cfd4ed33d1",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=d0-bh1E6Ypk",
+    "imageCount": 3,
+    "objectCount": 531,
+    "score": 5.9,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      }
+    ],
+    "downloads": 6,
+    "approvedAt": "2026-10-03T12:16:16.098Z",
+    "utilVersion": 2
+  },
+  {
+    "id": "sith-fury-interceptor-v3za7",
+    "name": "Sith Fury Interceptor",
+    "sha256": "618dc21e6fd72d9316b1a02fcad6796cfd0427be9afc920c375ead17ff7d8b6e",
+    "submitter": "Precision",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/ThePrecisionTechnician",
+    "youtubeUrl": "",
+    "imageCount": 2,
+    "objectCount": 4160,
+    "score": 5.1,
+    "utilities": [
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 14,
+    "approvedAt": "2026-10-04T15:21:04.949Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "chimera-smuggler-r6rm4",
+    "name": "Chimera Smuggler",
+    "sha256": "efd9b815cb5653fa25a909dd62e3fa5592cc3bbd1d4da1135f6b697225038ca0",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=q_BKC_nLLRc",
+    "imageCount": 2,
+    "objectCount": 860,
+    "score": 7.8,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Holo-Arena Game Table",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Fishpond",
+        "value": 1
+      }
+    ],
+    "downloads": 6,
+    "approvedAt": "2026-10-04T15:50:00.793Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "gryphon-heavy-transport-aygkn",
+    "name": "Gryphon Heavy Transport",
+    "sha256": "4da795d36a8ea541beb136324d98863be17842a40a215525312b5d5ad8630282",
+    "submitter": "Aresmar",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+    "youtubeUrl": "https://www.youtube.com/watch?v=2qE1f7ltXKg",
+    "imageCount": 3,
+    "objectCount": 556,
+    "score": 7.4,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      }
+    ],
+    "downloads": 12,
+    "approvedAt": "2026-10-04T15:50:10.454Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "sc-moonti-jec0x",
+    "name": "SC-Moonti",
+    "sha256": "6ebdc0ce6f3ca958fbed5c73a52b47a85c3b689724de4051eb5e309a9560754c",
+    "submitter": "DRAOS",
+    "description": "No outer mods, cargo vent ready. Built fully in game, added telporter, Nutrient processpr looking kitchen table, mission rader prefab, pc prefab, all storage containers, tea/smoking table+seat+outer window looking area for afk chill, GameTable.",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 618,
+    "score": 5.8,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Holo-Arena Game Table",
+        "value": 1
+      }
+    ],
+    "downloads": 8,
+    "approvedAt": "2026-10-04T17:50:36.385Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "asterion-the-celestial-ark-dcuwb",
+    "name": "Asterion - The Celestial Ark",
+    "sha256": "5b9f5c0e0e0bfed9c5de399cee4fea7dc3a7170ca88a4f0d3ae559565c62ee26",
+    "submitter": "DRAOS",
+    "description": "Iron Looking ship, super slick design, includes all essential utilites: Signal Booster, kitchen Nprocessor, Planetery Prob, Multi Tool Research Station, teleporter + G.Trade Terminal, Refiner + all storage containers, small shiny iron looking ingame",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 2999,
+    "score": 5.8,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      }
+    ],
+    "downloads": 8,
+    "approvedAt": "2026-10-04T18:01:20.822Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "tornado-6om39",
+    "name": "Tornado",
+    "sha256": "ce313fd8db547f9c6cecc28bfa587637e8de5a6023aa8a9c1be63d3be5eff8bd",
+    "submitter": "Bowser",
+    "description": "Cockpit is under the chair and is from sonic the hedgehog.",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 1,
+    "objectCount": 177,
+    "score": 1.5,
+    "utilities": [
+      {
+        "label": "Scanner Room",
+        "value": 1
+      }
+    ],
+    "downloads": 3,
+    "approvedAt": "2026-10-04T18:40:19.543Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "atlas-star-ship-ke8ir",
+    "name": "Atlas Star Ship",
+    "sha256": "aa25f0ae68df308df2759e49a73e0d41213ee096bb3950d66d40419a72ed4c5e",
+    "submitter": "MiLf&CoOkIeS",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 2,
+    "objectCount": 774,
+    "score": 7.3,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 0.5
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Fishpond",
+        "value": 1
+      }
+    ],
+    "downloads": 9,
+    "approvedAt": "2026-10-04T20:23:03.873Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "switch-blade-cqrfr",
+    "name": "Switch Blade",
+    "sha256": "ea1bbca9527b2797bf3ce340d20804d96e31236ffd6dcf62cb1929466ad3a39e",
+    "submitter": "Phantomdark30",
+    "description": "Mods are under the wings of the ship and inside cockpit",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 1,
+    "objectCount": 404,
+    "score": 6.9,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      }
+    ],
+    "downloads": 4,
+    "approvedAt": "2026-10-04T20:32:34.784Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "white-sabbath-92cmp",
+    "name": "White Sabbath",
+    "sha256": "7bc8a8d78c136bbdadd226bf3c1d6dd9b01d3f8f5717da3f206b490b1e984b20",
+    "submitter": "Phantomdark30",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 1,
+    "objectCount": 1742,
+    "score": 7.4,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Nip Plant",
+        "value": 1
+      }
+    ],
+    "downloads": 5,
+    "approvedAt": "2026-10-04T20:44:38.590Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "red-sabbath-ojua7",
+    "name": "Red Sabbath",
+    "sha256": "8428826a8fa2c8929914d1ace0d342e3859c0a4f76b450228183168cc4d77144",
+    "submitter": "Phantomdark30",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 1,
+    "objectCount": 2043,
+    "score": 7.3,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Nip Plant",
+        "value": 1
+      }
+    ],
+    "downloads": 8,
+    "approvedAt": "2026-10-04T20:55:13.104Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "black-sabbath-14hpr",
+    "name": "Black Sabbath",
+    "sha256": "6dc14417d4934fdfe97f6c1562567070061b28649d01df3f8a5b0c2fd8f0833d",
+    "submitter": "Phantomdark30",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 1,
+    "objectCount": 2051,
+    "score": 7.4,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Nip Plant",
+        "value": 1
+      }
+    ],
+    "downloads": 12,
+    "approvedAt": "2026-10-04T21:16:12.789Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "fighter-aa8vz",
+    "name": "Fighter",
+    "sha256": "fdc22ed3f28d26493d11c06c9477b95a967b9a7d0d8dde19f48d8e85a414dc6c",
+    "submitter": "Sai",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 1,
+    "objectCount": 75,
+    "score": 0.6,
+    "utilities": [
+      {
+        "label": "1 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      }
+    ],
+    "downloads": 6,
+    "approvedAt": "2026-10-04T22:21:22.633Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "vanguard-xlkq6",
+    "name": "Vanguard",
+    "sha256": "22bf3388633e394a928fbb1f144032da8a3029881e0f51663d128bdf578aec92",
+    "submitter": "Sai",
+    "description": "first design I have ever made in blender. Hope you all enjoy",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 204,
+    "score": 1.7,
+    "utilities": [
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      }
+    ],
+    "downloads": 5,
+    "approvedAt": "2026-10-04T23:59:25.921Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "silent-phantom-xe7iv",
+    "name": "Silent Phantom",
+    "sha256": "b30ed92ce805a35451f7cf2a30e6ee75d0ee332c1c13599febfb11721b8a1bfe",
+    "submitter": "MiLf&CoOkIeS",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 372,
+    "score": 5.7,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 4,
+    "approvedAt": "2026-10-05T00:54:13.250Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "the-segway-2yce7",
+    "name": "The Segway",
+    "sha256": "d265928ea3c3372150b1a2e7caa497ce5698028496223bfa9042e240c6e9e8ca",
+    "submitter": "MiLf&CoOkIeS",
+    "description": "No room for anything else LOL",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 2,
+    "objectCount": 41,
+    "score": 0,
+    "utilities": [],
+    "downloads": 1,
+    "approvedAt": "2026-10-05T01:32:11.004Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "the-turdis-gwjfk",
+    "name": "The Turdis",
+    "sha256": "46914518f6d7c593d984da2ee7e48b2a16fc8ca379e37bc6d91c030887175969",
+    "submitter": "MiLf&CoOkIeS",
+    "description": "Just a crappy ride",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 55,
+    "score": 0,
+    "utilities": [],
+    "downloads": 3,
+    "approvedAt": "2026-10-05T01:50:34.904Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "devils-blade-ggcr5",
+    "name": "Devils Blade",
+    "sha256": "f46459955926a32fd482ef0cec613ef0dcf1f6fbf7782f25025c23ea9eeed3f1",
+    "submitter": "Phantomdark30",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 1,
+    "objectCount": 1278,
+    "score": 7.3,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Fishpond",
+        "value": 1
+      }
+    ],
+    "downloads": 6,
+    "approvedAt": "2026-10-05T01:56:25.366Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "red-phantom-5qqkd",
+    "name": "Red Phantom",
+    "sha256": "b2bb53d827e55c5b75ad6554dbcabdc2dfa3147dc55c47d0a5df0eb294fbefd5",
+    "submitter": "Phantomdark30",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 1,
+    "objectCount": 498,
+    "score": 5.5,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 6,
+    "approvedAt": "2026-10-05T02:03:37.747Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "meridian-qutwz",
+    "name": "Meridian",
+    "sha256": "4b5e2e2329ea816d9bac3cdd4ec5cd231562ad0c187ff8ce44ddbefe8173429d",
+    "submitter": "DRAOS",
+    "description": "A small empty side on the left when you enter, feel free to decorate how you see fit.",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 2672,
+    "score": 5.5,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 3,
+    "approvedAt": "2026-10-05T02:03:47.342Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "vipergx-h7nhm",
+    "name": "ViperGX",
+    "sha256": "820e3928701fe73f340e71381dacd53e545141a3e50d4eebeaada2f89c02d48e",
+    "submitter": "Phantomdark30",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 1,
+    "objectCount": 1516,
+    "score": 6.9,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "11 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 8,
+    "approvedAt": "2026-10-05T02:04:18.731Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "sable-aoexc",
+    "name": "Sable",
+    "sha256": "e5279595a41d27d673796ff6d7126e5acd4807214d1660bf9fea5cf1d083bfb8",
+    "submitter": "DRAOS",
+    "description": "Nice Slick Iron Plated look! Many utilities inside.",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 2831,
+    "score": 5.4,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      }
+    ],
+    "downloads": 8,
+    "approvedAt": "2026-10-05T02:07:07.158Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "ragnarok-xv-2-k27kz",
+    "name": "Ragnarok XV.2",
+    "sha256": "a59b1dd738e3b0caa7dcb4b6e0a75d9e21b1b22262390363a9c946bf64a22aaa",
+    "submitter": "Phantomdark30",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 1,
+    "objectCount": 2508,
+    "score": 7.4,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Holo-Arena Game Table",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 13,
+    "approvedAt": "2026-10-05T02:29:29.751Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "adfx-02-morgan-2crkd",
+    "name": "ADFX-02 \"Morgan\"",
+    "sha256": "3deb50b51c95635a0b930280f59a8c2f627739ea99fae2d1ff2535c2cf452f08",
+    "submitter": "DriftTheDude",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 132,
+    "score": 1.7,
+    "utilities": [
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      }
+    ],
+    "downloads": 4,
+    "approvedAt": "2026-10-05T16:08:07.350Z",
+    "utilVersion": 3
+  },
+  {
+    "id": "loaded-dorito-demo-ship-jhm8x",
+    "name": "Loaded Dorito Demo Ship",
+    "sha256": "46f04fe3aada9daff841ce6218cc8b940c56e0119e768c36e0b87f7ed09cdd68",
+    "submitter": "MiLf&CoOkIeS",
+    "description": "This Ship is not 100% complete. Just testing out a new Idea. let me know what you think!",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 443,
+    "score": 8.2,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 8,
+    "approvedAt": "2026-10-06T03:51:12.523Z",
+    "utilVersion": 3,
+    "version": 2,
+    "updatedAt": "2026-10-06T22:15:39.477Z",
+    "updateNote": "V 1.3 has added decor and corrections to panels"
+  },
+  {
+    "id": "the-cutting-remark-0wpc4",
+    "name": "The Cutting Remark",
+    "sha256": "dfee70c4c664258f4ef228c543d9de0976aa9d31e81b79beab8fa27ca79a449e",
+    "submitter": "Pastullio the Harmonious",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "https://www.tiktok.com/@pastulliotheharmonious/video/7693611857906519310",
+    "imageCount": 1,
+    "objectCount": 2083,
+    "score": 5.7,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      }
+    ],
+    "downloads": 5,
+    "approvedAt": "2026-10-06T15:35:45.145Z",
+    "utilVersion": 3
+  }
+]

@@ -1,0 +1,35 @@
+{
+  "name": "The Milano",
+  "id": "the-milano-7jnan",
+  "submitter": "The Milano",
+  "description": "The Milano from Guardians of the Galaxy - Full movie accurate interior & exterior",
+  "patreonUrl": "",
+  "youtubeUrl": "https://www.youtube.com/watch?v=vf_81kt4MKc",
+  "objectCount": 1935,
+  "score": 4.9,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "8 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "447f3e60652004b4494fc49c8bb0678336480a08042cfd0c826fb841808f918e",
+  "downloads": 0,
+  "approvedAt": "2026-10-04T15:14:14.597Z"
+}

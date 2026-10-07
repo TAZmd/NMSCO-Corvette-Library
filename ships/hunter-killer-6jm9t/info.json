@@ -1,0 +1,55 @@
+{
+  "name": "Hunter Killer",
+  "id": "hunter-killer-6jm9t",
+  "submitter": "Aresmar",
+  "description": "",
+  "patreonUrl": "https://www.patreon.com/cw/Aresmar",
+  "youtubeUrl": "https://www.youtube.com/watch?v=tkA5d6F6W5U",
+  "objectCount": 257,
+  "score": 5.8,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    }
+  ],
+  "imageCount": 2,
+  "sha256": "9c7cc0349da1aaeb445104e818a03226474389985ba85b93ee4578e2057c278b",
+  "downloads": 0,
+  "approvedAt": "2026-10-03T11:58:28.479Z"
+}

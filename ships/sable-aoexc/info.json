@@ -1,0 +1,47 @@
+{
+  "name": "Sable",
+  "id": "sable-aoexc",
+  "submitter": "DRAOS",
+  "description": "Nice Slick Iron Plated look! Many utilities inside.",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 2831,
+  "score": 5.4,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Multi-Tool Research Station",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "e5279595a41d27d673796ff6d7126e5acd4807214d1660bf9fea5cf1d083bfb8",
+  "downloads": 0,
+  "approvedAt": "2026-10-05T02:07:07.158Z"
+}

@@ -1,0 +1,55 @@
+{
+  "name": "SC-Moonti",
+  "id": "sc-moonti-jec0x",
+  "submitter": "DRAOS",
+  "description": "No outer mods, cargo vent ready. Built fully in game, added telporter, Nutrient processpr looking kitchen table, mission rader prefab, pc prefab, all storage containers, tea/smoking table+seat+outer window looking area for afk chill, GameTable.",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 618,
+  "score": 5.8,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Holo-Arena Game Table",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "6ebdc0ce6f3ca958fbed5c73a52b47a85c3b689724de4051eb5e309a9560754c",
+  "downloads": 0,
+  "approvedAt": "2026-10-04T17:50:36.385Z"
+}

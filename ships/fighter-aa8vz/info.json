@@ -1,0 +1,27 @@
+{
+  "name": "Fighter",
+  "id": "fighter-aa8vz",
+  "submitter": "Sai",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 75,
+  "score": 0.6,
+  "utilities": [
+    {
+      "label": "1 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    }
+  ],
+  "imageCount": 1,
+  "sha256": "fdc22ed3f28d26493d11c06c9477b95a967b9a7d0d8dde19f48d8e85a414dc6c",
+  "downloads": 0,
+  "approvedAt": "2026-10-04T22:21:22.633Z"
+}

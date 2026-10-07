@@ -1,0 +1,55 @@
+{
+  "name": "Asterion - The Celestial Ark",
+  "id": "asterion-the-celestial-ark-dcuwb",
+  "submitter": "DRAOS",
+  "description": "Iron Looking ship, super slick design, includes all essential utilites: Signal Booster, kitchen Nprocessor, Planetery Prob, Multi Tool Research Station, teleporter + G.Trade Terminal, Refiner + all storage containers, small shiny iron looking ingame",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 2999,
+  "score": 5.8,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Multi-Tool Research Station",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "5b9f5c0e0e0bfed9c5de399cee4fea7dc3a7170ca88a4f0d3ae559565c62ee26",
+  "downloads": 0,
+  "approvedAt": "2026-10-04T18:01:20.822Z"
+}

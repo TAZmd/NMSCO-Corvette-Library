@@ -1,0 +1,45 @@
+{
+  "name": "Bi-Cab Express",
+  "id": "bi-cab-express-dysmn",
+  "submitter": "TAZmd",
+  "patreonUrl": "",
+  "objectCount": 56,
+  "score": 5.4,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    }
+  ],
+  "imageCount": 1,
+  "sha256": "50f4a31ba3b046677b5a8d3101dc832a79da1747a5cbf3d7e8eb3eafd306ba4c",
+  "downloads": 0,
+  "approvedAt": "2026-09-30T19:13:19.540Z"
+}
