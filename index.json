@@ -4201,9 +4201,9 @@
         "value": 1
       }
     ],
-    "downloads": 1,
+    "downloads": 5,
     "approvedAt": "2026-10-07T15:43:16.580Z",
-    "utilVersion": 5,
+    "utilVersion": 3,
     "version": 1,
     "updatedAt": "2026-10-07T15:52:53.273Z",
     "updateNote": "slight tweaks to colossus"
