@@ -3964,9 +3964,15 @@ async function requireUserSession(env, installIdRaw, token) {
   const raw = (installIdRaw || "").toString().trim();
   if (!INSTALL_ID_RE.test(raw)) return { response: json({ ok: false, error: "Invalid request." }, 400) };
   const idKey = await installBanKey(raw.toLowerCase(), env);
+  if (await isBanned(env, [idKey])) {
+    return { response: json({ ok: false, banned: true, error: BLOCKED_MESSAGE }, 403) };
+  }
   const sess = await resolveDiscordSession(env, (token || "").toString(), idKey.slice(7));
   if (!sess) {
     return { response: json({ ok: false, expired: true, error: "Your Discord login has expired. Please log in with Discord again." }, 401) };
+  }
+  if (await isBanned(env, [userBanKey(sess.discordId)])) {
+    return { response: json({ ok: false, banned: true, error: BLOCKED_MESSAGE }, 403) };
   }
   return { discordId: sess.discordId, username: sess.username };
 }
@@ -4795,6 +4801,55 @@ async function recordDownloadStat(env, id, installId, ip) {
   ]);
 }
 
+const DL_DAY_LIMIT_GUEST = 25;
+const DL_DAY_LIMIT_USER = 50;
+const DL_DAY_LIMIT_IP_USER = 100;
+const DL_TEMPO_LIMIT = 10;
+const DL_TEMPO_WINDOW_MS = 10 * 60 * 1000;
+const DL_PATTERN_INSTALLS = 4;
+const FRONT_LIMIT_PER_MIN = 120;
+const IP_GATED_PATHS = new Set([
+  "/my-ships",
+  "/my-remove",
+  "/my-dismiss",
+  "/comments-list",
+  "/comment-post",
+  "/comments-unread",
+  "/comments-read",
+  "/my-update"
+]);
+
+async function rateWindowInfo(cacheKey, windowMs) {
+  const hit = await caches.default.match(new Request(`https://rate.internal/${cacheKey}`));
+  const now = Date.now();
+  let times = [];
+  if (hit) {
+    try {
+      times = JSON.parse(await hit.text());
+    } catch (e) {
+      times = [];
+    }
+  }
+  times = times.filter((t) => now - t < windowMs);
+  return { count: times.length, oldest: times.length ? Math.min(...times) : now };
+}
+
+async function frontGate(env, ip) {
+  const fh = (await hashDeleteCode("fg:ip", ip, env)).slice(0, 24);
+  const blockReq = new Request(`https://rate.internal/fgblock/${fh}`);
+  const tooMany = () => new Response("Too many requests. Please wait a few minutes.", { status: 429, headers: { "retry-after": "600" } });
+  if (await caches.default.match(blockReq)) return tooMany();
+  const n = await rateWindowPush(`fg/${fh}`, 60 * 1000);
+  if (n <= FRONT_LIMIT_PER_MIN) return null;
+  await caches.default.put(blockReq, new Response("1", { headers: { "Cache-Control": "max-age=600" } }));
+  if (await firstAlert(`fg/${fh}`)) {
+    const k = await ipBanKey(ip, env);
+    await rememberIp(env, ip, k);
+    await notifyAdmin(env, `Request flood: one connection sent more than ${FRONT_LIMIT_PER_MIN} requests in 1 minute. Paused for 10 minutes.${ipHint(k)}`);
+  }
+  return tooMany();
+}
+
 async function handleDownloadRequest(request, env, ctx) {
   let body;
   try {
@@ -4810,9 +4865,33 @@ async function handleDownloadRequest(request, env, ctx) {
   const installId = rawInstall.toLowerCase();
   const idHash = (await hashDeleteCode("ban:id", installId, env)).slice(0, 32);
   const code = idHash.slice(0, 4);
+  const callerIp = request.headers.get("CF-Connecting-IP") || "unknown";
+  let ipHash = null;
+  let ipBan = null;
+  if (callerIp !== "unknown") {
+    ipHash = (await hashDeleteCode("tk:ip", callerIp, env)).slice(0, 24);
+    ipBan = await ipBanKey(callerIp, env);
+  }
 
+  if (ipBan && (await env.DELETE_CODES.get(ipBan))) {
+    console.log(JSON.stringify({ event: "denied-ban", kind: "ip", ip: callerIp, ship: id }));
+    return json({ allowed: false, banned: true });
+  }
   if (await env.DELETE_CODES.get(`ban:id:${idHash}`)) {
-    console.log(JSON.stringify({ event: "denied-ban", code, ship: id }));
+    console.log(JSON.stringify({ event: "denied-ban", kind: "install", code, ship: id }));
+    return json({ allowed: false, banned: true });
+  }
+  let dlUser = null;
+  if (body.discordSession && discordLoginReady(env) && env.DB) {
+    try {
+      const sess = await resolveDiscordSession(env, (body.discordSession || "").toString(), idHash);
+      if (sess) dlUser = sess.discordId;
+    } catch (err) {
+      console.error("download session failed: " + (err && err.message ? err.message : String(err)));
+    }
+  }
+  if (dlUser && (await env.DELETE_CODES.get(userBanKey(dlUser)))) {
+    console.log(JSON.stringify({ event: "denied-ban", kind: "discord", code, ship: id }));
     return json({ allowed: false, banned: true });
   }
   const lockRaw = await env.DELETE_CODES.get(`lock:id:${idHash}`);
@@ -4827,6 +4906,19 @@ async function handleDownloadRequest(request, env, ctx) {
     } catch (e) {}
   }
 
+  if (ipHash) {
+    const tempo = await rateWindowInfo(`dltempo/${ipHash}`, DL_TEMPO_WINDOW_MS);
+    if (tempo.count >= DL_TEMPO_LIMIT) {
+      const wait = Math.max(30, Math.ceil((tempo.oldest + DL_TEMPO_WINDOW_MS - Date.now()) / 1000));
+      if (await firstAlert(`dltempo/${ipHash}`)) {
+        await rememberIp(env, callerIp, ipBan);
+        const who = dlUser ? `<@${dlUser}>` : `app installation ${code}`;
+        await notifyAdmin(env, `Download tempo: one connection asked for more than ${DL_TEMPO_LIMIT} downloads in 10 minutes (${who}). Paused for ${Math.ceil(wait / 60)} minutes.${ipHint(ipBan)}`);
+      }
+      return json({ allowed: false, banned: false, seconds: wait, reason: "tempo" });
+    }
+  }
+
   const shipCount = await rateWindowPush(`ship/${idHash}/${id}`, SHIP_WINDOW_MS);
   const allCount = await rateWindowPush(`all/${idHash}`, ALL_WINDOW_MS);
   let strike = null;
@@ -4839,42 +4931,100 @@ async function handleDownloadRequest(request, env, ctx) {
   }
   if (strike) return json({ allowed: false, banned: strike.banned, seconds: strike.seconds });
 
-  let dlWho = "";
-  try {
-    const dlUser = await commentSessionOptional(env, { installId: rawInstall, discordSession: body.discordSession });
-    if (dlUser) dlWho = dlUser;
-    if (dlUser && env.DB) {
-      await ensureD1(env);
-      await env.DB.prepare("INSERT OR IGNORE INTO ship_downloaders (discord_id, ship, at) VALUES (?, ?, ?)").bind(dlUser, id, Date.now()).run();
-    }
-  } catch (err) {
-    console.error("record downloader failed: " + (err && err.message ? err.message : String(err)));
-  }
-
-  const callerIp = request.headers.get("CF-Connecting-IP") || "unknown";
-  if (callerIp !== "unknown") {
-    const ipHash = (await hashDeleteCode("tk:ip", callerIp, env)).slice(0, 24);
+  if (ipHash) {
     const issued = await rateWindowPush(`tk/${ipHash}`, 60 * 60 * 1000);
     if (issued > TICKET_IP_LIMIT_PER_HOUR) {
       if (await firstAlert(`dlip/${ipHash}`)) {
-        const dlIpKey = await ipBanKey(callerIp, env);
-        await rememberIp(env, callerIp, dlIpKey);
-        const dlPerson = dlWho ? `<@${dlWho}>` : (await describeKey(env, `ban:id:${idHash}`)) || `app installation ${code}`;
-        await notifyAdmin(env, `Download spam: more than ${TICKET_IP_LIMIT_PER_HOUR} downloads in 1 hour from one connection (${dlPerson}). Blocked for 10 minutes.${ipHint(dlIpKey)}`);
+        await rememberIp(env, callerIp, ipBan);
+        const dlPerson = dlUser ? `<@${dlUser}>` : (await describeKey(env, `ban:id:${idHash}`)) || `app installation ${code}`;
+        await notifyAdmin(env, `Download spam: more than ${TICKET_IP_LIMIT_PER_HOUR} downloads in 1 hour from one connection (${dlPerson}). Blocked for 10 minutes.${ipHint(ipBan)}`);
         console.log(JSON.stringify({ event: "download-spam", ip: callerIp, code }));
       }
       return json({ allowed: false, banned: false, seconds: 600 });
     }
   }
 
+  let remaining = null;
+  let dayLimit = null;
+  if (env.DB && ipHash) {
+    try {
+      await ensureD1(env);
+      const day = Math.floor(Date.now() / 86400000);
+      const ipDayKey = `dld:i:${ipHash}:${day}`;
+      const userDayKey = dlUser ? `dld:u:${dlUser}:${day}` : null;
+      const limitIp = dlUser ? DL_DAY_LIMIT_IP_USER : DL_DAY_LIMIT_GUEST;
+      const rows = await env.DB.prepare("SELECT k, n FROM counters WHERE k IN (?, ?)").bind(ipDayKey, userDayKey || ipDayKey).all();
+      let usedIp = 0;
+      let usedUser = 0;
+      for (const r of rows.results || []) {
+        if (r.k === ipDayKey) usedIp = r.n;
+        else if (r.k === userDayKey) usedUser = r.n;
+      }
+      const hitUser = !!dlUser && usedUser >= DL_DAY_LIMIT_USER;
+      const hitIp = usedIp >= limitIp;
+      if (hitUser || hitIp) {
+        const resetSeconds = Math.max(60, Math.ceil((86400000 - (Date.now() % 86400000)) / 1000));
+        const alertKey = hitUser ? dlUser : ipHash;
+        if (await firstAlert(`dlday/${alertKey}`, 86400000)) {
+          await rememberIp(env, callerIp, ipBan);
+          const text = hitUser
+            ? `Daily limit reached: <@${dlUser}> used ${usedUser} of ${DL_DAY_LIMIT_USER} downloads today.`
+            : `Daily limit reached: one connection used ${usedIp} of ${limitIp} downloads today (${dlUser ? `logged in as <@${dlUser}>` : "not logged in"}).`;
+          await notifyAdmin(env, `${text}${ipHint(ipBan)}`);
+        }
+        return json({
+          allowed: false,
+          banned: false,
+          seconds: resetSeconds,
+          reason: "daily",
+          limit: hitUser ? DL_DAY_LIMIT_USER : limitIp,
+          loggedIn: !!dlUser,
+          userLimit: DL_DAY_LIMIT_USER
+        });
+      }
+      const stmts = [
+        env.DB.prepare("INSERT INTO counters (k, n) VALUES (?, 1) ON CONFLICT(k) DO UPDATE SET n = n + 1").bind(ipDayKey),
+        env.DB.prepare("INSERT OR IGNORE INTO counters (k, n) VALUES (?, 1)").bind(`dli:${ipHash}:${day}:${idHash.slice(0, 12)}`)
+      ];
+      if (userDayKey) stmts.push(env.DB.prepare("INSERT INTO counters (k, n) VALUES (?, 1) ON CONFLICT(k) DO UPDATE SET n = n + 1").bind(userDayKey));
+      await env.DB.batch(stmts);
+      dayLimit = dlUser ? DL_DAY_LIMIT_USER : DL_DAY_LIMIT_GUEST;
+      remaining = dlUser ? Math.min(DL_DAY_LIMIT_USER - usedUser - 1, limitIp - usedIp - 1) : limitIp - usedIp - 1;
+      const cnt = await env.DB.prepare("SELECT COUNT(*) AS n FROM counters WHERE k GLOB ?").bind(`dli:${ipHash}:${day}:*`).first();
+      if (cnt && cnt.n >= DL_PATTERN_INSTALLS && (await firstAlert(`dlpat/${ipHash}`, 86400000))) {
+        await rememberIp(env, callerIp, ipBan);
+        await notifyAdmin(env, `Possible scraper: one connection used ${cnt.n} different app installations for downloads today.${ipHint(ipBan)}`);
+      }
+    } catch (err) {
+      console.error("daily limit check failed: " + (err && err.message ? err.message : String(err)));
+    }
+  }
+
+  if (ipHash) await rateWindowPush(`dltempo/${ipHash}`, DL_TEMPO_WINDOW_MS);
+
+  if (dlUser && env.DB) {
+    try {
+      await env.DB.prepare("INSERT OR IGNORE INTO ship_downloaders (discord_id, ship, at) VALUES (?, ?, ?)").bind(dlUser, id, Date.now()).run();
+    } catch (err) {
+      console.error("record downloader failed: " + (err && err.message ? err.message : String(err)));
+    }
+  }
+
   ctx.waitUntil(
-    recordDownloadStat(env, id, installId, request.headers.get("CF-Connecting-IP") || "unknown").catch((err) => {
+    recordDownloadStat(env, id, installId, callerIp).catch((err) => {
       console.error("recordDownloadStat failed: " + (err && err.message ? err.message : String(err)));
     })
   );
   const exp = Date.now() + 120000;
   const ticket = `${exp}.${(await hashDeleteCode(`ticket:${id}`, String(exp), env)).slice(0, 32)}`;
-  return json({ allowed: true, ticket });
+  const out = { allowed: true, ticket };
+  if (remaining !== null && dayLimit !== null) {
+    out.remaining = Math.max(0, remaining);
+    out.limit = dayLimit;
+    out.userLimit = DL_DAY_LIMIT_USER;
+    out.loggedIn = !!dlUser;
+  }
+  return json(out);
 }
 
 async function handleLibraryAccess(request, env) {
@@ -7057,6 +7207,17 @@ export default {
     const url = new URL(request.url);
 
     workerOrigin = url.origin;
+
+    const fgIp = request.headers.get("CF-Connecting-IP") || "unknown";
+    if (url.pathname !== "/" && fgIp !== "unknown" && deleteCodesReady(env) && !request.headers.get("x-signature-ed25519")) {
+      const blockedResp = await frontGate(env, fgIp);
+      if (blockedResp) return blockedResp;
+      if (request.method === "POST" && IP_GATED_PATHS.has(url.pathname)) {
+        if (await isBanned(env, [await ipBanKey(fgIp, env)])) {
+          return json({ ok: false, banned: true, error: BLOCKED_MESSAGE }, 403);
+        }
+      }
+    }
 
     if (request.method === "POST") await ensureCatalog(env);
 
