@@ -4343,5 +4343,97 @@
     "downloads": 0,
     "approvedAt": "2026-10-08T05:29:34.331Z",
     "utilVersion": 3
+  },
+  {
+    "id": "cover-art-voyager-7zsbu",
+    "name": "Cover art Voyager",
+    "sha256": "20f469d7e310283150af7a77bd7683704522c2ae1b48b21f6e36c6f44e2356cb",
+    "submitter": "Skullkid & Soysauce",
+    "description": "thanks to skullkid for letting me use the orignal design and helping to finesse this version of it. it's got the works. 1st and 3rd person cockpit",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 590,
+    "score": 8.3,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Exocraft Research Station",
+        "value": 1
+      },
+      {
+        "label": "Ship Research Station",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Fishpond",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-08T05:46:12.785Z",
+    "utilVersion": 3
   }
 ]
