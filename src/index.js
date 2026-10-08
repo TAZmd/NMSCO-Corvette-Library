@@ -3521,6 +3521,7 @@ async function handleAppUpload(request, env, ctx) {
     const discordName = gate.username;
     const verified = gate.verified;
     strikeUser = discordId;
+    await rememberIp(env, ip, ipKey);
 
     if (form.get("agree") !== "yes") {
       return refuse(400, "Could not accept this submission: you must agree to the upload rules first.");
@@ -3600,7 +3601,7 @@ async function checkDiscordAccess(env, discordId, bulk) {
   }
   const left = await lockSecondsLeft(env, `lock:user:${discordId}`);
   if (left > 0) {
-    return { ok: false, status: 429, text: `Too many rejected uploads. Please try again in ${Math.max(1, Math.ceil(left / 60))} minutes.`, blocked: true };
+    return { ok: false, status: 429, text: `You are temporarily timed out. Please try again in ${Math.max(1, Math.ceil(left / 60))} minutes.`, blocked: true };
   }
   const m = await fetchGuildMember(env, discordId);
   if (!m.ok) {
@@ -3693,6 +3694,10 @@ async function handleDiscordStart(request, env) {
       return new Response("Too many rejected uploads. Please try again later.", { status: 429 });
     }
     if (ipKey && (await rateWindowPush(`ds/${ipKey.slice(7)}`, DISCORD_START_WINDOW_MS)) > DISCORD_START_LIMIT) {
+      if (await firstAlert(`ds/${ipKey.slice(7)}`)) {
+        await rememberIp(env, ip, ipKey);
+        await notifyAdmin(env, `Login spam: one connection started more than ${DISCORD_START_LIMIT} Discord logins in a short time. Blocked for a few minutes.${ipHint(ipKey)}`);
+      }
       return new Response("Too many login attempts. Please wait a few minutes.", { status: 429 });
     }
     await env.DB.prepare("DELETE FROM discord_logins WHERE created < ?").bind(Date.now() - 2 * 60 * 60 * 1000).run();
@@ -4181,27 +4186,39 @@ async function handleCommentPost(request, env, ctx) {
     if (await isBanned(env, [userBanKey(gate.discordId)])) {
       return json({ ok: false, error: "You can no longer comment." }, 403);
     }
+    const commentLock = await lockSecondsLeft(env, `lock:user:${gate.discordId}`);
+    if (commentLock > 0) {
+      return json({ ok: false, error: `You are timed out. Please try again in ${Math.max(1, Math.ceil(commentLock / 60))} minutes.` }, 429);
+    }
     const ship = (body.ship || "").toString().trim();
     if (!/^[a-z0-9-]{1,120}$/.test(ship)) return json({ ok: false, error: "Invalid request." }, 400);
     const text = commentCleanText(body.text);
     if (!text) return json({ ok: false, error: "Please write a comment first." }, 400);
     if (text.length > COMMENT_MAX_LEN) return json({ ok: false, error: `A comment can be at most ${COMMENT_MAX_LEN} characters.` }, 400);
     if (commentHasBadWord(text)) {
-      return json({ ok: false, filtered: true, error: "Your comment contains words that are not allowed here." }, 400);
+      const abWord = await commentAbuse(env, gate, "comment blocked by the word filter");
+      return json({ ok: false, filtered: true, error: "Your comment contains words that are not allowed here." + abuseSuffix(abWord) }, 400);
     }
     await ensureD1(env);
     const now = Date.now();
     const recent = await env.DB.prepare("SELECT body, at FROM comments WHERE author_id = ? ORDER BY id DESC LIMIT 25").bind(gate.discordId).all();
     const rows = recent.results || [];
-    if (rows.filter((r) => now - r.at < 10 * 60 * 1000).length >= COMMENT_LIMIT_10MIN) {
-      return json({ ok: false, error: "Slow down a bit. You can post 3 comments every 10 minutes." }, 429);
+    const in10 = rows.filter((r) => now - r.at < 10 * 60 * 1000);
+    if (in10.length >= COMMENT_LIMIT_10MIN) {
+      const ab10 = await commentAbuse(env, gate, "hit the 3 comments per 10 minutes limit");
+      const wait10 = Math.max(1, Math.ceil((in10[COMMENT_LIMIT_10MIN - 1].at + 10 * 60 * 1000 - now) / 1000));
+      return json({ ok: false, retryAfter: wait10, error: "Slow down a bit. You can post 3 comments every 10 minutes." + abuseSuffix(ab10) }, 429);
     }
-    if (rows.filter((r) => now - r.at < 24 * 60 * 60 * 1000).length >= COMMENT_LIMIT_DAY) {
-      return json({ ok: false, error: "You reached the daily limit of 20 comments." }, 429);
+    const inDay = rows.filter((r) => now - r.at < 24 * 60 * 60 * 1000);
+    if (inDay.length >= COMMENT_LIMIT_DAY) {
+      const abDay = await commentAbuse(env, gate, "hit the daily limit of 20 comments");
+      const waitDay = Math.max(1, Math.ceil((inDay[COMMENT_LIMIT_DAY - 1].at + 24 * 60 * 60 * 1000 - now) / 1000));
+      return json({ ok: false, retryAfter: waitDay, error: "You reached the daily limit of 20 comments." + abuseSuffix(abDay) }, 429);
     }
     const flat = (t) => t.toLowerCase().replace(/\s+/g, " ").trim();
     if (rows.length && flat(rows[0].body) === flat(text)) {
-      return json({ ok: false, error: "You just posted the same comment." }, 400);
+      const abSame = await commentAbuse(env, gate, "posted the same comment twice");
+      return json({ ok: false, error: "You just posted the same comment." + abuseSuffix(abSame) }, 400);
     }
     let ownerId = "";
     try {
@@ -4358,6 +4375,9 @@ async function handleMyUpdate(request, env) {
     const shipId = (form.get("ship") || "").toString().trim();
     if (!/^[a-z0-9-]{1,80}$/.test(shipId)) return json({ ok: false, error: "Invalid request." }, 400);
     if ((await rateWindowPush(`mu/${gate.discordId}`, HOUR_MS)) > 10) {
+      if (await firstAlert(`mu/${gate.discordId}`)) {
+        await notifyAdmin(env, `Update spam: **${gate.username || "unknown"}** <@${gate.discordId}> tried more than 10 ship updates in 1 hour. Blocked for now.`);
+      }
       return json({ ok: false, error: "Too many updates in a short time. Please try again later." }, 429);
     }
     await ensureD1(env);
@@ -4504,6 +4524,7 @@ async function handleAppBatchUpload(request, env, ctx) {
     const discordName = gate.username;
     const verified = gate.verified;
     strikeUser = discordId;
+    await rememberIp(env, ip, ipKey);
     if (form.get("agree") !== "yes") {
       return refuse(400, "Could not accept this submission: you must agree to the upload rules first.");
     }
@@ -4599,11 +4620,79 @@ async function notifyAdmin(env, content) {
   try {
     await discordApi(`/channels/${env.ADMIN_CHANNEL_ID || env.APPROVAL_CHANNEL_ID}/messages`, env, {
       method: "POST",
-      body: JSON.stringify({ content })
+      body: JSON.stringify({ content, allowed_mentions: { parse: [] } })
     });
   } catch (err) {
     console.error("notifyAdmin failed: " + (err && err.message ? err.message : String(err)));
   }
+}
+
+const COMMENT_ABUSE_WINDOW_MS = 30 * 60 * 1000;
+const COMMENT_ABUSE_LIMIT = 5;
+const ALERT_WINDOW_MS = 30 * 60 * 1000;
+
+function ipRawKey(ipKey) {
+  return ipKey && ipKey.startsWith("ban:ip:") ? `ipraw:${ipKey.slice(7)}` : null;
+}
+
+async function rememberIp(env, ip, ipKey) {
+  try {
+    const k = ipRawKey(ipKey);
+    if (!env.DELETE_CODES || !k || !ip || ip === "unknown") return;
+    await env.DELETE_CODES.put(k, ip, { expirationTtl: 30 * 24 * 60 * 60 });
+  } catch (e) {}
+}
+
+async function firstAlert(key, windowMs) {
+  try {
+    return (await rateWindowPush(`alert/${key}`, windowMs || ALERT_WINDOW_MS)) === 1;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function describeKey(env, key) {
+  if (!key || !env.DELETE_CODES) return "";
+  try {
+    let did = "";
+    if (key.startsWith("ban:user:")) did = key.slice(9);
+    else if (key.startsWith("ban:id:")) did = (await env.DELETE_CODES.get(linkKey(key))) || "";
+    if (!did) return "";
+    const nm = (await env.DELETE_CODES.get(`dname:${did}`)) || "";
+    return `<@${did}>${nm ? ` (${nm})` : ""}`;
+  } catch (e) {
+    return "";
+  }
+}
+
+function ipHint(ipKey) {
+  const k = ipRawKey(ipKey);
+  return k ? ` IP: open Cloudflare, KV, key \`${k}\` (the real IP is only stored there).` : "";
+}
+
+async function commentAbuse(env, gate, reason) {
+  try {
+    if (!env.DELETE_CODES) return;
+    const cacheKey = `cabuse/${gate.discordId}`;
+    const n = await rateWindowPush(cacheKey, COMMENT_ABUSE_WINDOW_MS);
+    if (n === 1) {
+      await notifyAdmin(env, `Comment warning: **${gate.username || "unknown"}** <@${gate.discordId}> - ${reason}.`);
+    }
+    if (n >= COMMENT_ABUSE_LIMIT) {
+      await rateWindowClear(cacheKey);
+      await applyStrike(env, { rule: "comment", kind: "user", hash: gate.discordId, code: gate.username || gate.discordId });
+    }
+    return n;
+  } catch (err) {
+    console.error("commentAbuse failed: " + (err && err.message ? err.message : String(err)));
+    return 0;
+  }
+}
+
+function abuseSuffix(n) {
+  if (n >= COMMENT_ABUSE_LIMIT) return " You are now timed out for a while.";
+  if (n >= COMMENT_ABUSE_LIMIT - 2) return " Warning: more blocked comments will give you a timeout.";
+  return "";
 }
 
 async function lockSecondsLeft(env, lockKey) {
@@ -4630,9 +4719,12 @@ async function applyStrike(env, t) {
   const ruleText =
     rule === "ship" ? `same ship (${shipId}) ${SHIP_LIMIT}x in 30 minutes`
     : rule === "all" ? `more than ${ALL_LIMIT} requests in 1 hour`
+    : rule === "comment" ? `${COMMENT_ABUSE_LIMIT} blocked comments in 30 minutes`
     : `${REJECT_LIMIT} rejected uploads in 30 minutes`;
   const who = kind === "id" ? "app installation" : kind === "ip" ? "connection" : "Discord user";
-  const strikes = ["ship", "all", "upload"].map((r) => `strike:${kind}:${hash}:${r}`);
+  const strikes = ["ship", "all", "upload", "comment"].map((r) => `strike:${kind}:${hash}:${r}`);
+  const person = await describeKey(env, `ban:${kind}:${hash}`);
+  const extra = (person ? ` - ${person}` : "") + (kind === "ip" ? ipHint(`ban:ip:${hash}`) : "");
 
   let seconds = 0;
   if (rule === "all") seconds = n === 1 ? 3600 : 0;
@@ -4642,7 +4734,7 @@ async function applyStrike(env, t) {
     await addBan(env, banKey, `${who} ${code} - auto-ban: ${ruleText}`, "auto-ban", strikes);
     await env.DELETE_CODES.delete(lockKey);
     console.log(JSON.stringify({ event: "ban", kind, code, rule, ship: shipId || null, strike: n }));
-    await notifyAdmin(env, `Ban: ${who} **${code}** is banned (${ruleText}, strike ${n}). Use /unban to lift it.`);
+    await notifyAdmin(env, `Ban: ${who} **${code}**${extra} is banned (${ruleText}, strike ${n}). Use /unban to lift it.`);
     return { banned: true, seconds: 0 };
   }
   const until = Date.now() + seconds * 1000;
@@ -4652,7 +4744,7 @@ async function applyStrike(env, t) {
     { expirationTtl: seconds + 3600 }
   );
   console.log(JSON.stringify({ event: "lock", kind, code, rule, ship: shipId || null, strike: n, seconds }));
-  await notifyAdmin(env, `Lock: ${who} **${code}** is locked for ${seconds >= 86400 ? "24 hours" : "1 hour"} (${ruleText}, strike ${n}).`);
+  await notifyAdmin(env, `Lock: ${who} **${code}**${extra} is locked for ${seconds >= 86400 ? "24 hours" : "1 hour"} (${ruleText}, strike ${n}).`);
   return { banned: false, seconds };
 }
 
@@ -4747,8 +4839,10 @@ async function handleDownloadRequest(request, env, ctx) {
   }
   if (strike) return json({ allowed: false, banned: strike.banned, seconds: strike.seconds });
 
+  let dlWho = "";
   try {
     const dlUser = await commentSessionOptional(env, { installId: rawInstall, discordSession: body.discordSession });
+    if (dlUser) dlWho = dlUser;
     if (dlUser && env.DB) {
       await ensureD1(env);
       await env.DB.prepare("INSERT OR IGNORE INTO ship_downloaders (discord_id, ship, at) VALUES (?, ?, ?)").bind(dlUser, id, Date.now()).run();
@@ -4761,7 +4855,16 @@ async function handleDownloadRequest(request, env, ctx) {
   if (callerIp !== "unknown") {
     const ipHash = (await hashDeleteCode("tk:ip", callerIp, env)).slice(0, 24);
     const issued = await rateWindowPush(`tk/${ipHash}`, 60 * 60 * 1000);
-    if (issued > TICKET_IP_LIMIT_PER_HOUR) return json({ allowed: false, banned: false, seconds: 600 });
+    if (issued > TICKET_IP_LIMIT_PER_HOUR) {
+      if (await firstAlert(`dlip/${ipHash}`)) {
+        const dlIpKey = await ipBanKey(callerIp, env);
+        await rememberIp(env, callerIp, dlIpKey);
+        const dlPerson = dlWho ? `<@${dlWho}>` : (await describeKey(env, `ban:id:${idHash}`)) || `app installation ${code}`;
+        await notifyAdmin(env, `Download spam: more than ${TICKET_IP_LIMIT_PER_HOUR} downloads in 1 hour from one connection (${dlPerson}). Blocked for 10 minutes.${ipHint(dlIpKey)}`);
+        console.log(JSON.stringify({ event: "download-spam", ip: callerIp, code }));
+      }
+      return json({ allowed: false, banned: false, seconds: 600 });
+    }
   }
 
   ctx.waitUntil(
@@ -4772,6 +4875,43 @@ async function handleDownloadRequest(request, env, ctx) {
   const exp = Date.now() + 120000;
   const ticket = `${exp}.${(await hashDeleteCode(`ticket:${id}`, String(exp), env)).slice(0, 32)}`;
   return json({ allowed: true, ticket });
+}
+
+async function handleLibraryAccess(request, env) {
+  try {
+    if (!deleteCodesReady(env)) return json({ blocked: false });
+    const body = await readJsonBody(request);
+    if (!body) return json({ blocked: false });
+    const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+    const ipKey = await ipBanKey(ip, env);
+    const checks = [{ key: ipKey, kind: "connection" }];
+    let idKey = null;
+    const rawInstall = (body.installId || "").toString().trim();
+    if (INSTALL_ID_RE.test(rawInstall)) {
+      idKey = await installBanKey(rawInstall.toLowerCase(), env);
+      checks.push({ key: idKey, kind: "app installation" });
+    }
+    const token = (body.discordSession || "").toString();
+    if (idKey && DISCORD_SESSION_RE.test(token) && env.DB) {
+      const sess = await resolveDiscordSession(env, token, idKey.slice(7));
+      if (sess) checks.push({ key: userBanKey(sess.discordId), kind: "Discord user" });
+    }
+    for (const c of checks) {
+      if (c.key && (await env.DELETE_CODES.get(c.key))) {
+        if (await firstAlert(`libblock/${c.key}`, 24 * 60 * 60 * 1000)) {
+          if (c.kind === "connection") await rememberIp(env, ip, c.key);
+          const person = (await describeKey(env, c.key)) || (await describeKey(env, idKey));
+          await notifyAdmin(env, `Blocked visitor tried to open the library (${c.kind} ban)${person ? ` - ${person}` : ""}.${c.kind === "connection" ? ipHint(c.key) : ""}`);
+        }
+        console.log(JSON.stringify({ event: "library-blocked", kind: c.kind, ip }));
+        return json({ blocked: true });
+      }
+    }
+    return json({ blocked: false });
+  } catch (err) {
+    console.error("handleLibraryAccess failed: " + (err && err.message ? err.message : String(err)));
+    return json({ blocked: false });
+  }
 }
 
 const TICKET_IP_LIMIT_PER_HOUR = 30;
@@ -6520,16 +6660,19 @@ async function handleBanCommand(interaction, env) {
     await addBan(env, owner.userKey, owner.label, "banned by admin");
     parts.push("app installation");
   }
+  let banIpKey = null;
   if (opts.also_ip === true) {
     if (owner.ipKey) {
       await addBan(env, owner.ipKey, owner.label, "banned by admin (IP)");
       parts.push("internet connection (IP)");
+      banIpKey = owner.ipKey;
     }
   }
   if (!parts.length) {
     return ephemeral("No Discord user or app installation was stored for this ship (guest upload or older upload), so nobody was banned. Run /ban again with also_ip set to true if you want to ban the connection.");
   }
-  return ephemeral(`Banned the submitter of "${owner.label}" (${parts.join(" + ")}). They can no longer upload or count downloads. Use /unban to undo.`);
+  await notifyAdmin(env, `Ban by ${clicker && clicker.username ? clicker.username : "a supervisor"}: **${owner.label}**${owner.discordId ? ` <@${owner.discordId}>` : ""} - banned: ${parts.join(" + ")}.${ipHint(banIpKey)}`);
+  return ephemeral(`Banned the submitter of "${owner.label}" (${parts.join(" + ")}). They can no longer upload, open the library or count downloads. Use /unban to undo.`);
 }
 
 async function handleUnbanCommand(interaction, env) {
@@ -6541,13 +6684,16 @@ async function handleUnbanCommand(interaction, env) {
   const key = (opts.ban || "").toString().trim();
   if (!(key.startsWith("ban:") || key.startsWith("lock:")) || !env.DELETE_CODES) return ephemeral("Pick a ban or lock from the list.");
   const raw = await env.DELETE_CODES.get(key);
+  let unbanLabel = "";
   if (raw) {
     try {
       const rec = JSON.parse(raw);
+      unbanLabel = rec.label || "";
       for (const sk of rec.strikes || []) await env.DELETE_CODES.delete(sk);
     } catch (e) {}
   }
   await env.DELETE_CODES.delete(key);
+  await notifyAdmin(env, `${key.startsWith("lock:") ? "Lock" : "Ban"} removed by ${clicker && clicker.username ? clicker.username : "a supervisor"}: ${unbanLabel || key.split(":").slice(0, 2).join(":")}.`);
   return ephemeral(key.startsWith("lock:") ? "Lock removed. The visitor starts fresh." : "Ban removed. The visitor starts fresh.");
 }
 
@@ -6718,6 +6864,7 @@ async function handleCommand(interaction, env, ctx) {
 async function handleComponent(interaction, env, ctx) {
   const customId = interaction.data.custom_id;
   const clicker = interaction.member?.user || interaction.user;
+  console.log(JSON.stringify({ event: "button", customId, user: clicker && clicker.username, channel: interaction.channel_id }));
   const [rawAction, slug] = customId.split(":");
   const isModalSubmit = interaction.type === 5;
   const action = rawAction === "rejmodal" ? "reject" : rawAction;
@@ -6767,11 +6914,13 @@ async function handleComponent(interaction, env, ctx) {
   const message = interaction.message;
   const embed = message.embeds?.[0];
   if (!embed) {
-    return json({ type: InteractionResponseType.UPDATE_MESSAGE, data: { embeds: [], components: [] } });
+    console.log(JSON.stringify({ event: "button-no-embed", customId }));
+    return ephemeral("This message has no submission data anymore.");
   }
 
   if (!slug) {
-    return json({ type: InteractionResponseType.UPDATE_MESSAGE, data: {} });
+    console.log(JSON.stringify({ event: "button-no-slug", customId }));
+    return ephemeral("This button has no submission id. Please tell the developer.");
   }
 
   const channelId = message.channel_id || interaction.channel_id;
@@ -6784,7 +6933,13 @@ async function handleComponent(interaction, env, ctx) {
     ctx.waitUntil(
       (async () => {
         let note = "";
-        if (action === "timeout") note = await applyTimeout(slug, env);
+        if (action === "timeout") {
+          note = await applyTimeout(slug, env);
+          if (note.startsWith("Submitter got")) {
+            const ow = await getSubmissionOwner(slug, env);
+            await notifyAdmin(env, `Timeout 24h by ${clicker && clicker.username ? clicker.username : "a reviewer"}: **${ow && ow.label ? ow.label : embed.title}**${ow && ow.discordId ? ` <@${ow.discordId}>` : ""}.`);
+          }
+        }
         const sent = await sendToSupervisor(env, slug, embed, clicker, note);
         const label = action === "timeout" ? "Timeout given, sent to supervisor" : "Sent to supervisor";
         const payload = sent
@@ -6826,6 +6981,10 @@ async function handleComponent(interaction, env, ctx) {
           }
         }
         const result = await rejectPending(slug, env);
+        if (result.ok && action === "rejban" && banNote.startsWith(" and banned")) {
+          const rbIp = banNote.includes("connection IP") && ownerRec ? ownerRec.ipKey : null;
+          await notifyAdmin(env, `Reject and ban by ${clicker && clicker.username ? clicker.username : "a supervisor"}: **${embed.title}**${ownerRec && ownerRec.discordId ? ` <@${ownerRec.discordId}>` : ""} - banned${banNote.slice(11)}.${ipHint(rbIp)}`);
+        }
         if (result.ok && ownerRec) await uploaderBump(env, ownerStatKey(ownerRec), "rejected", "");
         if (result.ok && action === "reject" && ownerRec && ownerRec.discordId && env.DELETE_CODES) {
           try {
@@ -6856,9 +7015,18 @@ async function handleComponent(interaction, env, ctx) {
   if (action === "approve") {
     ctx.waitUntil(
       (async () => {
-        const ownerRec = await getSubmissionOwner(slug, env);
-        const result = await promotePendingToLibraryTry(slug, env);
-        if (result.ok && ownerRec) await uploaderBump(env, ownerStatKey(ownerRec), "approved", "");
+        let ownerRec = null;
+        let result;
+        try {
+          ownerRec = await getSubmissionOwner(slug, env);
+          result = await promotePendingToLibraryTry(slug, env);
+          if (result.ok && ownerRec) await uploaderBump(env, ownerStatKey(ownerRec), "approved", "");
+        } catch (err) {
+          const em = err && err.message ? String(err.message) : String(err);
+          console.error("approve crashed: " + em);
+          result = { ok: false, error: em.slice(0, 180) };
+        }
+        console.log(JSON.stringify({ event: "approve-result", slug, ok: result.ok, error: result.error || "" }));
         const payload = result.ok
           ? { embeds: retitle(`Approved - ${embed.title}`, 0x2d7a2d), components: [] }
           : {
@@ -6874,7 +7042,8 @@ async function handleComponent(interaction, env, ctx) {
     });
   }
 
-  return json({ type: InteractionResponseType.UPDATE_MESSAGE, data: {} });
+  console.log(JSON.stringify({ event: "button-unknown", customId }));
+  return ephemeral(`Unknown button: ${rawAction}`);
 }
 
 export default {
@@ -6926,6 +7095,7 @@ export default {
       if (url.pathname === "/staff-ship") return handleStaffShip(request, env);
       if (url.pathname === "/human") return handleHumanVerify(request, env);
       if (url.pathname === "/download-request") return handleDownloadRequest(request, env, ctx);
+      if (url.pathname === "/library-access") return handleLibraryAccess(request, env);
 
       const signature = request.headers.get("x-signature-ed25519");
       const timestamp = request.headers.get("x-signature-timestamp");
