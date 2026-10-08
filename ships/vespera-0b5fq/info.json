@@ -1,0 +1,135 @@
+{
+  "name": "Vespera",
+  "id": "vespera-0b5fq",
+  "submitter": "DRAOS",
+  "description": "Vespera is fully equipped deep-space powerhouse, part fortress, part explorer. Built for style and function, this corvette includes all utilities possible onboard, ready for adventure, survival, and total self-sufficiency. Looks like a UFO in flight",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 1719,
+  "score": 10,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Staff Builder",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Holo-Arena Game Table",
+      "value": 1
+    },
+    {
+      "label": "Exocraft Research Station",
+      "value": 1
+    },
+    {
+      "label": "Ship Research Station",
+      "value": 1
+    },
+    {
+      "label": "Exosuit Research Station",
+      "value": 1
+    },
+    {
+      "label": "Multi-Tool Research Station",
+      "value": 1
+    },
+    {
+      "label": "Utopia Build Station",
+      "value": 1
+    },
+    {
+      "label": "Stellar Extractor Room",
+      "value": 1
+    },
+    {
+      "label": "Autonomous Mining Unit",
+      "value": 1
+    },
+    {
+      "label": "Gas Harvester",
+      "value": 1
+    },
+    {
+      "label": "Oxygen Harvester",
+      "value": 1
+    },
+    {
+      "label": "Antimatter Reactor",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    },
+    {
+      "label": "Livestock Unit",
+      "value": 1
+    },
+    {
+      "label": "Automated Feeder",
+      "value": 1
+    },
+    {
+      "label": "Nip Plant",
+      "value": 1
+    },
+    {
+      "label": "Fishpond",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "d24c9e183cd72857aeb72db87af652588c5d880b90b9012a7faf2e14a3224172",
+  "downloads": 0,
+  "approvedAt": "2026-10-08T05:29:34.331Z"
+}
