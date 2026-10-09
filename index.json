@@ -3961,13 +3961,13 @@
   {
     "id": "loaded-dorito-demo-ship-jhm8x",
     "name": "Loaded Dorito Demo Ship",
-    "sha256": "46f04fe3aada9daff841ce6218cc8b940c56e0119e768c36e0b87f7ed09cdd68",
+    "sha256": "9c98f82f8b27b2b5abb718551ebb39c9897a595d80d38921c6769384c11cbcac",
     "submitter": "MiLf&CoOkIeS",
     "description": "This Ship is not 100% complete. Just testing out a new Idea. let me know what you think!",
     "patreonUrl": "",
     "youtubeUrl": "",
-    "imageCount": 3,
-    "objectCount": 443,
+    "imageCount": 2,
+    "objectCount": 468,
     "score": 8.2,
     "utilities": [
       {
@@ -4045,9 +4045,9 @@
     "downloads": 8,
     "approvedAt": "2026-10-06T03:51:12.523Z",
     "utilVersion": 3,
-    "version": 2,
-    "updatedAt": "2026-10-06T22:15:39.477Z",
-    "updateNote": "V 1.3 has added decor and corrections to panels"
+    "version": 3,
+    "updatedAt": "2026-10-09T03:10:44.587Z",
+    "updateNote": "Updating the front end and a few other area's"
   },
   {
     "id": "the-cutting-remark-0wpc4",
