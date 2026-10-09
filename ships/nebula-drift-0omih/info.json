@@ -1,0 +1,87 @@
+{
+  "name": "Nebula Drift",
+  "id": "nebula-drift-0omih",
+  "submitter": "MiLf&CoOkIeS",
+  "description": "DON'T GET STUCK IN THE TRACTOR BEAM!",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 468,
+  "score": 8.2,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 0.5
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Staff Builder",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Exosuit Research Station",
+      "value": 1
+    },
+    {
+      "label": "Multi-Tool Research Station",
+      "value": 1
+    },
+    {
+      "label": "Utopia Build Station",
+      "value": 1
+    },
+    {
+      "label": "Gas Harvester",
+      "value": 1
+    },
+    {
+      "label": "Oxygen Harvester",
+      "value": 1
+    },
+    {
+      "label": "Antimatter Reactor",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "977df18d1bdd343999e548782d5333bb72b6cc74d0f1ac10952fbef022cdaa5c",
+  "downloads": 0,
+  "approvedAt": "2026-10-09T03:30:12.800Z"
+}
