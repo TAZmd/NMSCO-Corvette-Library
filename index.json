@@ -4484,13 +4484,13 @@
   {
     "id": "nebula-drift-0omih",
     "name": "Nebula Drift",
-    "sha256": "977df18d1bdd343999e548782d5333bb72b6cc74d0f1ac10952fbef022cdaa5c",
+    "sha256": "9873950859fe7f27b8e3ed5de0bea6b142631b9a4487e548d38e84af0e0a60a3",
     "submitter": "MiLf&CoOkIeS",
     "description": "DON'T GET STUCK IN THE TRACTOR BEAM!",
     "patreonUrl": "",
     "youtubeUrl": "",
     "imageCount": 3,
-    "objectCount": 468,
+    "objectCount": 466,
     "score": 8.2,
     "utilities": [
       {
@@ -4567,7 +4567,10 @@
     ],
     "downloads": 6,
     "approvedAt": "2026-10-09T03:30:12.800Z",
-    "utilVersion": 3
+    "utilVersion": 3,
+    "version": 1,
+    "updatedAt": "2026-10-09T17:14:39.665Z",
+    "updateNote": "Taz identifyed an issue in first person. Problem should be resolved in first person"
   },
   {
     "id": "the-end-of-gravity-d5ekh",
