@@ -1,0 +1,59 @@
+{
+  "name": "Rum Runner",
+  "id": "rum-runner-v4dhb",
+  "submitter": "MiLf&CoOkIeS",
+  "description": "A great ship and fun to fly",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 595,
+  "score": 5.9,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Staff Builder",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "5984f6b4faa30997ec36149a94b767a0bd75b69165b2c61c7e3f665856f67442",
+  "downloads": 0,
+  "approvedAt": "2026-10-09T16:45:21.229Z"
+}
