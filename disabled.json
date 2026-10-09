@@ -139,5 +139,99 @@
     "disabledBy": "Dedienty (uploader)",
     "purgeAt": "2026-10-12T18:31:27.693Z",
     "noticeId": "1556735601703780353"
+  },
+  {
+    "id": "loaded-dorito-demo-ship-jhm8x",
+    "name": "Loaded Dorito Demo Ship",
+    "sha256": "9c98f82f8b27b2b5abb718551ebb39c9897a595d80d38921c6769384c11cbcac",
+    "submitter": "MiLf&CoOkIeS",
+    "description": "This Ship is not 100% complete. Just testing out a new Idea. let me know what you think!",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 2,
+    "objectCount": 468,
+    "score": 8.2,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 8,
+    "approvedAt": "2026-10-06T03:51:12.523Z",
+    "utilVersion": 3,
+    "version": 3,
+    "updatedAt": "2026-10-09T03:10:44.587Z",
+    "updateNote": "Updating the front end and a few other area's",
+    "disabledAt": "2026-10-09T03:21:47.014Z",
+    "disabledBy": "Dork/Hoser2 (uploader)",
+    "purgeAt": "2026-10-16T03:21:46.662Z"
   }
 ]
