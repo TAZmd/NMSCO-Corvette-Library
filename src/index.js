@@ -6219,7 +6219,7 @@ async function buildStats(env, shipId) {
     };
     const owner = await getSubmissionOwner(shipId, env);
     const lines = [
-      `Downloads in total: ${e.downloads || 0}`,
+      `Downloads in total: ${await sumDays(0)}`,
       `Counted today: ${await sumDays(dayNow)}`,
       `Counted last 7 days: ${await sumDays(dayNow - 6)}`,
       `Counted last 30 days: ${await sumDays(dayNow - 29)}`,
@@ -6229,7 +6229,7 @@ async function buildStats(env, shipId) {
     return { embeds: [{ title: shipLabel(e).slice(0, 200), description: lines.join("\n"), color: 0x3a6ea5 }] };
   }
 
-  const total = ships.reduce((a, e) => a + (e.downloads || 0), 0);
+  const total = await counterSum(env, "day", 0);
   const newWeek = ships.filter((e) => e.approvedAt && now - Date.parse(e.approvedAt) <= 7 * 86400000).length;
   const d24 = await counterSum(env, "hour", hourNow - 23);
   const d7 = await counterSum(env, "day", dayNow - 6);
