@@ -1,0 +1,47 @@
+{
+  "name": "The Farmer",
+  "id": "the-farmer-3mkom",
+  "submitter": "MiLf&CoOkIeS",
+  "description": "One of my earlier comedy ships",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 160,
+  "score": 5.3,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Staff Builder",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    },
+    {
+      "label": "Nip Plant",
+      "value": 1
+    }
+  ],
+  "imageCount": 2,
+  "sha256": "b2a8d5cb61cce3e5de59c72713f75ca4ae21332a5fb57369cd3c8140832c20bc",
+  "downloads": 0,
+  "approvedAt": "2026-10-09T16:31:42.496Z"
+}
