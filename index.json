@@ -5502,5 +5502,65 @@
     "downloads": 0,
     "approvedAt": "2026-10-10T01:07:13.541Z",
     "utilVersion": 3
+  },
+  {
+    "id": "mytiefighter-kbpuo",
+    "name": "mytiefighter",
+    "sha256": "ba3e63df8b6a9712ca95811c67d466206e9a5d7b6084939b38cff4c29b61f84a",
+    "submitter": "PhantomAbyss469",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 2,
+    "objectCount": 444,
+    "score": 5.7,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-10T01:08:09.490Z",
+    "utilVersion": 3
   }
 ]
