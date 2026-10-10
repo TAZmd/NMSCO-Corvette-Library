@@ -6062,5 +6062,77 @@
     "downloads": 2,
     "approvedAt": "2026-10-10T15:58:05.696Z",
     "utilVersion": 3
+  },
+  {
+    "id": "silver-wings-j9atx",
+    "name": "Silver Wings",
+    "sha256": "275b19fc6cbae4436d5f296e24db5ca062451f7a41a656368d521dc72f62e512",
+    "submitter": "Phantomdark30",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 1,
+    "objectCount": 353,
+    "score": 6.3,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-10T20:45:48.193Z",
+    "utilVersion": 3
   }
 ]
