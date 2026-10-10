@@ -5,7 +5,7 @@
   "description": "Dual bridge design. all amentinities. *i'm still finessing the design so any input is most welcome in the comments! Inspired by the Banu Merchantman from Star Citizen",
   "patreonUrl": "",
   "youtubeUrl": "",
-  "objectCount": 1420,
+  "objectCount": 1395,
   "score": 9.9,
   "utilities": [
     {
@@ -125,7 +125,10 @@
     }
   ],
   "imageCount": 3,
-  "sha256": "a9e12904b19802af8bcc29d6b5fc976a52bc75fc78287cdc382d390f816283dc",
+  "sha256": "55d3518c8f2eb8058c8074ab6a6409b34677df810e59b3695c3a6f34dac15b0e",
   "downloads": 0,
-  "approvedAt": "2026-10-09T20:08:51.061Z"
+  "approvedAt": "2026-10-09T20:08:51.061Z",
+  "version": 1,
+  "updatedAt": "2026-10-10T00:15:43.274Z",
+  "updateNote": "slight refinements to combat collision"
 }
