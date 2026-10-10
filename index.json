@@ -6013,5 +6013,54 @@
     "version": 1,
     "updatedAt": "2026-10-10T04:05:42.945Z",
     "updateNote": "Had an issue with the second cockpit exit area. Now clear."
+  },
+  {
+    "id": "cosmos-miner-b0c6r",
+    "name": "Cosmos Miner",
+    "sha256": "0dfea6c849b515721644430a59b51a937f191a551df787be0c43c02cb70b5b37",
+    "submitter": "TrackedLife",
+    "description": "Its my take on cosmos mining update its a bright ship fully loaded for mining PS/TP/Storage etc its got a 360 tractorB coverage at the back u can just chuck stuff in the genral direction and it sucks it in to discharge use R side went enjoy",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 2,
+    "objectCount": 239,
+    "score": 6.8,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-10T15:58:05.696Z",
+    "utilVersion": 3
   }
 ]
