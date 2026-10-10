@@ -139,5 +139,143 @@
     "disabledBy": "Dedienty (uploader)",
     "purgeAt": "2026-10-12T18:31:27.693Z",
     "noticeId": "1556735601703780353"
+  },
+  {
+    "id": "banu-merchant-4sr9l",
+    "name": "banu merchant",
+    "sha256": "55d3518c8f2eb8058c8074ab6a6409b34677df810e59b3695c3a6f34dac15b0e",
+    "submitter": "SOYSAUCE",
+    "description": "Dual bridge design. all amentinities. *i'm still finessing the design so any input is most welcome in the comments! Inspired by the Banu Merchantman from Star Citizen",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 1395,
+    "score": 9.9,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Holo-Arena Game Table",
+        "value": 1
+      },
+      {
+        "label": "Exocraft Research Station",
+        "value": 1
+      },
+      {
+        "label": "Ship Research Station",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Livestock Unit",
+        "value": 1
+      },
+      {
+        "label": "Automated Feeder",
+        "value": 1
+      },
+      {
+        "label": "Fishpond",
+        "value": 1
+      }
+    ],
+    "downloads": 7,
+    "approvedAt": "2026-10-09T20:08:51.061Z",
+    "utilVersion": 3,
+    "version": 1,
+    "updatedAt": "2026-10-10T00:15:43.274Z",
+    "updateNote": "slight refinements to combat collision",
+    "disabledAt": "2026-10-10T21:00:11.359Z",
+    "disabledBy": "soya (uploader)",
+    "purgeAt": "2026-10-17T21:00:10.934Z"
   }
 ]
