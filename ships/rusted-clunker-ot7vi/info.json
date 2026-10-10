@@ -2,10 +2,10 @@
   "name": "Rusted Clunker",
   "id": "rusted-clunker-ot7vi",
   "submitter": "MiLf&CoOkIeS",
-  "description": "Cockpit is under the bedroom chair. Please note if you have issues with exiting cockpit.",
+  "description": "Cockpit is in the trophy box behind the bedroom chair",
   "patreonUrl": "",
   "youtubeUrl": "",
-  "objectCount": 191,
+  "objectCount": 203,
   "score": 2.4,
   "utilities": [
     {
@@ -33,7 +33,10 @@
     }
   ],
   "imageCount": 3,
-  "sha256": "d8ab3152e0d52071e0b255c952cdf45b17dce16d454b9bd9fac20eabdbdbdf85",
+  "sha256": "0099e497ca703034241fea60a3062a8a3db5fa4c3086ed2dddf4190ea12f94b3",
   "downloads": 0,
-  "approvedAt": "2026-10-10T03:21:05.232Z"
+  "approvedAt": "2026-10-10T03:21:05.232Z",
+  "version": 1,
+  "updatedAt": "2026-10-10T04:05:42.945Z",
+  "updateNote": "Had an issue with the second cockpit exit area. Now clear."
 }
