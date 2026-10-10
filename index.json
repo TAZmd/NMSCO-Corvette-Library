@@ -5086,5 +5086,77 @@
     "downloads": 0,
     "approvedAt": "2026-10-10T00:49:14.172Z",
     "utilVersion": 3
+  },
+  {
+    "id": "arwing-h5omm",
+    "name": "Arwing",
+    "sha256": "8828023d79fdd7c665d7fd22ca87e4a71e3d56ad7947a7b7c6f056d7a6f7fc64",
+    "submitter": "PhantomAbyss469",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 833,
+    "score": 6.3,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Nip Plant",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-10T00:52:48.328Z",
+    "utilVersion": 3
   }
 ]
