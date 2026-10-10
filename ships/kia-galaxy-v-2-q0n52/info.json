@@ -1,0 +1,59 @@
+{
+  "name": "Kia Galaxy V.2",
+  "id": "kia-galaxy-v-2-q0n52",
+  "submitter": "Phantomdark30",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 296,
+  "score": 5.8,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 0.5
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Staff Builder",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    }
+  ],
+  "imageCount": 1,
+  "sha256": "9d6033f7903b4186cbcf563b9e0970781175fe48f20ac350a59a6983256925d8",
+  "downloads": 0,
+  "approvedAt": "2026-10-10T20:45:55.591Z"
+}
