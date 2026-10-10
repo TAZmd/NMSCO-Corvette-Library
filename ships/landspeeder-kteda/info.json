@@ -1,0 +1,27 @@
+{
+  "name": "Landspeeder",
+  "id": "landspeeder-kteda",
+  "submitter": "PhantomAbyss469",
+  "description": "Stand on hood look at handle bars to board",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 73,
+  "score": 3.2,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "4 Storage containers"
+    }
+  ],
+  "imageCount": 2,
+  "sha256": "5579f5a724063613aafdd09e9f954653e595d8c2cbce96dc716c0e40dfb3939c",
+  "downloads": 0,
+  "approvedAt": "2026-10-10T00:49:14.172Z"
+}
