@@ -1,0 +1,67 @@
+{
+  "name": "Sith Interceptor",
+  "id": "sith-interceptor-uhnzt",
+  "submitter": "PhantomAbyss469",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 266,
+  "score": 6,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 0.5
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Staff Builder",
+      "value": 1
+    },
+    {
+      "label": "Gas Harvester",
+      "value": 1
+    },
+    {
+      "label": "Oxygen Harvester",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "5068477e7bc77db49b7c7d38aebcb692a8657007896d4bb93e38de4c4fe62acf",
+  "downloads": 0,
+  "approvedAt": "2026-10-10T01:06:32.309Z"
+}
