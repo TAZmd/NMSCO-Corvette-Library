@@ -1,0 +1,71 @@
+{
+  "name": "Arcadia",
+  "id": "arcadia-rkq0m",
+  "submitter": "PhantomAbyss469",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 1282,
+  "score": 6.3,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "14 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 0.5
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Staff Builder",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    },
+    {
+      "label": "Nip Plant",
+      "value": 1
+    }
+  ],
+  "imageCount": 2,
+  "sha256": "eb87fedbccb3757e29ca35281e3e1103c3181550c3e1fe84898a85f858a632a9",
+  "downloads": 0,
+  "approvedAt": "2026-10-10T00:43:49.217Z"
+}
