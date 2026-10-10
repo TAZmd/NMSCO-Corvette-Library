@@ -5222,5 +5222,73 @@
     "downloads": 0,
     "approvedAt": "2026-10-10T00:54:14.281Z",
     "utilVersion": 3
+  },
+  {
+    "id": "laser-8wb36",
+    "name": "Laser",
+    "sha256": "1fda3c0de455cb9f933222d275e85a03f76d0fa399cb1caf51be41f4e0126c1b",
+    "submitter": "PhantomAbyss469",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 1712,
+    "score": 6.1,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Holo-Arena Game Table",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Nip Plant",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-10T00:54:27.604Z",
+    "utilVersion": 3
   }
 ]
