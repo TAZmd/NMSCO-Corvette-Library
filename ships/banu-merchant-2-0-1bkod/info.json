@@ -5,8 +5,8 @@
   "description": "Everything included. 2.0 version is 20% smaller and can leave stations now. many bug fixes, optimizations and tweaks.",
   "patreonUrl": "",
   "youtubeUrl": "",
-  "objectCount": 1180,
-  "score": 10,
+  "objectCount": 1179,
+  "score": 9.9,
   "utilities": [
     {
       "label": "Base Teleport Module",
@@ -120,8 +120,8 @@
       "value": 1
     },
     {
-      "label": "Nip Plant",
-      "value": 1
+      "label": "Plant Tray",
+      "value": 0.25
     },
     {
       "label": "Fishpond",
@@ -129,7 +129,10 @@
     }
   ],
   "imageCount": 1,
-  "sha256": "2709477144260e7dc574b7ecba51549635ac26b3582bacca4394eb10fa038304",
+  "sha256": "6263031a804b237bb0b2a516bcf9810e98d2b1a43dbe979f3dcd3e9bb99ccbf4",
   "downloads": 0,
-  "approvedAt": "2026-10-10T21:27:18.318Z"
+  "approvedAt": "2026-10-10T21:27:18.318Z",
+  "version": 1,
+  "updatedAt": "2026-10-11T23:31:48.790Z",
+  "updateNote": "fixed duplicate items"
 }
