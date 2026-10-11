@@ -6206,13 +6206,13 @@
   {
     "id": "banu-merchant-2-0-1bkod",
     "name": "banu merchant 2.0",
-    "sha256": "2709477144260e7dc574b7ecba51549635ac26b3582bacca4394eb10fa038304",
+    "sha256": "6263031a804b237bb0b2a516bcf9810e98d2b1a43dbe979f3dcd3e9bb99ccbf4",
     "submitter": "SOYSAUCE",
     "description": "Everything included. 2.0 version is 20% smaller and can leave stations now. many bug fixes, optimizations and tweaks.",
     "patreonUrl": "",
     "youtubeUrl": "",
     "imageCount": 1,
-    "objectCount": 1180,
+    "objectCount": 1179,
     "score": 9.9,
     "utilities": [
       {
@@ -6337,7 +6337,10 @@
     ],
     "downloads": 14,
     "approvedAt": "2026-10-10T21:27:18.318Z",
-    "utilVersion": 8
+    "utilVersion": 8,
+    "version": 1,
+    "updatedAt": "2026-10-11T23:31:48.790Z",
+    "updateNote": "fixed duplicate items"
   },
   {
     "id": "fenrir-orv46",
