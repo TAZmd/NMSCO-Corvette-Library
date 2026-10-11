@@ -5293,7 +5293,7 @@
     ],
     "downloads": 2,
     "approvedAt": "2026-10-10T01:06:02.566Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "sith-interceptor-uhnzt",
@@ -5361,7 +5361,7 @@
     ],
     "downloads": 4,
     "approvedAt": "2026-10-10T01:06:32.309Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "mentor-2kelt",
@@ -5429,7 +5429,7 @@
     ],
     "downloads": 2,
     "approvedAt": "2026-10-10T01:07:13.541Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "mytiefighter-kbpuo",
@@ -5489,7 +5489,7 @@
     ],
     "downloads": 1,
     "approvedAt": "2026-10-10T01:08:09.490Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "tiereaper-6-w2xqv",
@@ -5593,7 +5593,7 @@
     ],
     "downloads": 2,
     "approvedAt": "2026-10-10T01:08:22.510Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "ringedfighter-3-uk52u",
@@ -5605,7 +5605,7 @@
     "youtubeUrl": "",
     "imageCount": 3,
     "objectCount": 853,
-    "score": 7.4,
+    "score": 7.3,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -5691,13 +5691,13 @@
         "value": 1
       },
       {
-        "label": "Nip Plant",
-        "value": 1
+        "label": "Nip Plant Tray",
+        "value": 0.25
       }
     ],
     "downloads": 3,
     "approvedAt": "2026-10-10T01:08:52.864Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "normandy-2-qn6gm",
@@ -5709,7 +5709,7 @@
     "youtubeUrl": "",
     "imageCount": 3,
     "objectCount": 2988,
-    "score": 7.5,
+    "score": 7.4,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -5795,17 +5795,13 @@
         "value": 1
       },
       {
-        "label": "Nip Plant",
-        "value": 1
-      },
-      {
         "label": "Fishpond",
         "value": 1
       }
     ],
     "downloads": 10,
     "approvedAt": "2026-10-10T01:09:15.289Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "executioner-2-lemle",
@@ -5887,7 +5883,7 @@
         "value": 1
       },
       {
-        "label": "Nip Plant",
+        "label": "Nip Plant Tray",
         "value": 1
       },
       {
@@ -5897,7 +5893,7 @@
     ],
     "downloads": 10,
     "approvedAt": "2026-10-10T01:09:44.153Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "rusted-clunker-ot7vi",
@@ -5953,7 +5949,7 @@
     ],
     "downloads": 4,
     "approvedAt": "2026-10-10T03:21:05.232Z",
-    "utilVersion": 3,
+    "utilVersion": 6,
     "version": 2,
     "updatedAt": "2026-10-11T06:05:29.490Z",
     "updateNote": "Forgot some Tech inside the ship and remove the black base walls. Also added some deco and lights for the landing bay."
@@ -6005,7 +6001,7 @@
     ],
     "downloads": 4,
     "approvedAt": "2026-10-10T15:58:05.696Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "silver-wings-j9atx",
