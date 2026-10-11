@@ -4642,7 +4642,7 @@
     ],
     "downloads": 15,
     "approvedAt": "2026-10-09T03:30:12.800Z",
-    "utilVersion": 7,
+    "utilVersion": 8,
     "version": 1,
     "updatedAt": "2026-10-09T17:14:39.665Z",
     "updateNote": "Taz identifyed an issue in first person. Problem should be resolved in first person"
@@ -4709,7 +4709,7 @@
     ],
     "downloads": 4,
     "approvedAt": "2026-10-09T11:53:42.332Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "the-farmer-3mkom",
@@ -4751,13 +4751,13 @@
         "value": 1
       },
       {
-        "label": "Nip Plant Tray",
+        "label": "Plant Tray",
         "value": 1
       }
     ],
     "downloads": 3,
     "approvedAt": "2026-10-09T16:31:42.496Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "rum-runner-v4dhb",
@@ -4817,7 +4817,7 @@
     ],
     "downloads": 2,
     "approvedAt": "2026-10-09T16:45:21.229Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "scavenger-gyclz",
@@ -4921,7 +4921,7 @@
     ],
     "downloads": 7,
     "approvedAt": "2026-10-10T00:43:40.459Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "arcadia-rkq0m",
@@ -4987,13 +4987,13 @@
         "value": 1
       },
       {
-        "label": "Nip Plant Tray",
+        "label": "Plant Tray",
         "value": 0.5
       }
     ],
     "downloads": 3,
     "approvedAt": "2026-10-10T00:43:49.217Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "landspeeder-kteda",
@@ -5021,7 +5021,7 @@
     ],
     "downloads": 2,
     "approvedAt": "2026-10-10T00:49:14.172Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "arwing-h5omm",
@@ -5087,13 +5087,13 @@
         "value": 1
       },
       {
-        "label": "Nip Plant Tray",
+        "label": "Plant Tray",
         "value": 1
       }
     ],
     "downloads": 1,
     "approvedAt": "2026-10-10T00:52:48.328Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "flying-fox-o3sfu",
@@ -5157,7 +5157,7 @@
     ],
     "downloads": 2,
     "approvedAt": "2026-10-10T00:54:14.281Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "laser-8wb36",
@@ -5221,7 +5221,7 @@
     ],
     "downloads": 9,
     "approvedAt": "2026-10-10T00:54:27.604Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "talon-2-ud0c8",
