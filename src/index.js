@@ -72,7 +72,7 @@ function linkFields(youtubeUrl, patreonUrl) {
 }
 
 const ENGINE_SUPPORTED = 1;
-const CATALOG_URL = "https://raw.githubusercontent.com/TAZmd/NMSCO-Corvette-Library/main/utility-catalog.json";
+const CATALOG_URL = "https://raw.githubusercontent.com/TAZmd/TAZmd-NMS-Corvette-Optimizer-version-check/main/utility-catalog.json";
 const CATALOG_TTL_MS = 12 * 60 * 60 * 1000;
 const ENGINE_OPS = new Set([
   "const", "has", "count", "chain", "add", "sub", "mul", "div", "min", "max", "clamp", "if",
