@@ -4642,7 +4642,7 @@
     ],
     "downloads": 15,
     "approvedAt": "2026-10-09T03:30:12.800Z",
-    "utilVersion": 6,
+    "utilVersion": 7,
     "version": 1,
     "updatedAt": "2026-10-09T17:14:39.665Z",
     "updateNote": "Taz identifyed an issue in first person. Problem should be resolved in first person"
@@ -4709,7 +4709,7 @@
     ],
     "downloads": 4,
     "approvedAt": "2026-10-09T11:53:42.332Z",
-    "utilVersion": 6
+    "utilVersion": 7
   },
   {
     "id": "the-farmer-3mkom",
@@ -4757,7 +4757,7 @@
     ],
     "downloads": 3,
     "approvedAt": "2026-10-09T16:31:42.496Z",
-    "utilVersion": 6
+    "utilVersion": 7
   },
   {
     "id": "rum-runner-v4dhb",
@@ -4817,7 +4817,7 @@
     ],
     "downloads": 2,
     "approvedAt": "2026-10-09T16:45:21.229Z",
-    "utilVersion": 6
+    "utilVersion": 7
   },
   {
     "id": "scavenger-gyclz",
@@ -4921,7 +4921,7 @@
     ],
     "downloads": 7,
     "approvedAt": "2026-10-10T00:43:40.459Z",
-    "utilVersion": 6
+    "utilVersion": 7
   },
   {
     "id": "arcadia-rkq0m",
@@ -4993,7 +4993,7 @@
     ],
     "downloads": 3,
     "approvedAt": "2026-10-10T00:43:49.217Z",
-    "utilVersion": 6
+    "utilVersion": 7
   },
   {
     "id": "landspeeder-kteda",
@@ -5021,7 +5021,7 @@
     ],
     "downloads": 2,
     "approvedAt": "2026-10-10T00:49:14.172Z",
-    "utilVersion": 6
+    "utilVersion": 7
   },
   {
     "id": "arwing-h5omm",
@@ -5093,7 +5093,7 @@
     ],
     "downloads": 1,
     "approvedAt": "2026-10-10T00:52:48.328Z",
-    "utilVersion": 6
+    "utilVersion": 7
   },
   {
     "id": "flying-fox-o3sfu",
@@ -5157,7 +5157,7 @@
     ],
     "downloads": 2,
     "approvedAt": "2026-10-10T00:54:14.281Z",
-    "utilVersion": 6
+    "utilVersion": 7
   },
   {
     "id": "laser-8wb36",
@@ -5221,7 +5221,7 @@
     ],
     "downloads": 9,
     "approvedAt": "2026-10-10T00:54:27.604Z",
-    "utilVersion": 6
+    "utilVersion": 7
   },
   {
     "id": "talon-2-ud0c8",
