@@ -360,13 +360,13 @@
         "value": 1
       },
       {
-        "label": "Nip Plant Tray",
+        "label": "Plant Tray",
         "value": 1
       }
     ],
     "downloads": 4,
     "approvedAt": "2026-10-01T06:31:57.699Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "starliner-rv-k3rf0",
@@ -432,7 +432,7 @@
     ],
     "downloads": 4,
     "approvedAt": "2026-10-01T10:10:34.400Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "hexagonia-auux7",
@@ -486,7 +486,7 @@
     ],
     "downloads": 9,
     "approvedAt": "2026-10-01T10:23:40.868Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "aeronix-0n1h5",
@@ -528,7 +528,7 @@
     ],
     "downloads": 9,
     "approvedAt": "2026-10-01T10:29:09.643Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "night-forge-off1x",
@@ -590,7 +590,7 @@
     ],
     "downloads": 2,
     "approvedAt": "2026-10-01T11:14:09.399Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "aero-flash-yzll3",
@@ -604,7 +604,7 @@
     "utilities": [],
     "downloads": 2,
     "approvedAt": "2026-10-01T11:14:30.907Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "night-forge-v2-h6xtc",
@@ -666,7 +666,7 @@
     ],
     "downloads": 3,
     "approvedAt": "2026-10-01T11:15:14.697Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "cargo-hauler-02-w0zz7",
@@ -774,13 +774,13 @@
         "value": 1
       },
       {
-        "label": "Nip Plant Tray",
+        "label": "Plant Tray",
         "value": 1
       }
     ],
     "downloads": 8,
     "approvedAt": "2026-10-01T11:25:31.873Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "storm-carrier-775bc",
@@ -890,7 +890,7 @@
     ],
     "downloads": 17,
     "approvedAt": "2026-10-01T11:41:48.249Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "zainap-kf06l",
@@ -936,7 +936,7 @@
     ],
     "downloads": 7,
     "approvedAt": "2026-10-01T11:48:06.102Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "obsidian-crown-v2-4lte3",
