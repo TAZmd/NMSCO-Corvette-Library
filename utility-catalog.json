@@ -1,6 +1,6 @@
 {
   "engine": 1,
-  "catalogVersion": 6,
+  "catalogVersion": 7,
   "tiers": {
     "redFactor": 0.5,
     "orangeFactor": 0.75,
@@ -61,7 +61,9 @@
         "op": "chain",
         "levels": [
           [
-            "TELEPORTER"
+            "TELEPORTER",
+            "TELEPORTER_F",
+            "FRE_ROOM_TELEPO"
           ]
         ]
       }
@@ -186,7 +188,8 @@
         "op": "chain",
         "levels": [
           [
-            "B_WALL_KITC0"
+            "B_WALL_KITC0",
+            "FRE_ROOM_COOK"
           ],
           [
             "COOKER"
@@ -412,7 +415,8 @@
         "op": "chain",
         "levels": [
           [
-            "DRESSING_TABLE"
+            "DRESSING_TABLE",
+            "FRE_ROOM_DRESS"
           ]
         ]
       }
@@ -479,7 +483,8 @@
                           {
                             "op": "count",
                             "ids": [
-                              "B_WALL_PLAN0"
+                              "B_WALL_PLAN0",
+                              "FRE_ROOM_PLANT1"
                             ]
                           }
                         ]
@@ -491,7 +496,8 @@
                           {
                             "op": "count",
                             "ids": [
-                              "PLANTERMEGA"
+                              "PLANTERMEGA",
+                              "FRE_ROOM_PLANT0"
                             ]
                           }
                         ]
@@ -1563,6 +1569,61 @@
         "^B_MAG_1X1"
       ],
       "score": 6.0
+    },
+    {
+      "ids": [
+        "^FRE_ROOM_TELEPO"
+      ],
+      "score": 1.5
+    },
+    {
+      "ids": [
+        "^TELEPORTER_F"
+      ],
+      "score": 1.5
+    },
+    {
+      "ids": [
+        "^FRE_ROOM_DRESS"
+      ],
+      "score": 0.1
+    },
+    {
+      "ids": [
+        "^FRE_ROOM_COOK"
+      ],
+      "score": 0.2
+    },
+    {
+      "ids": [
+        "^FRE_ROOM_PLANT0",
+        "^NIPPLANT",
+        "^NIPPLANT",
+        "^NIPPLANT",
+        "^NIPPLANT"
+      ],
+      "score": 0.1
+    },
+    {
+      "ids": [
+        "^FRE_ROOM_PLANT1",
+        "^NIPPLANT",
+        "^NIPPLANT"
+      ],
+      "score": 0.1
+    },
+    {
+      "ids": [
+        "^FRE_ROOM_COOK",
+        "^FRE_ROOM_DRESS",
+        "^FRE_ROOM_TELEPO",
+        "^FRE_ROOM_PLANT0",
+        "^NIPPLANT",
+        "^NIPPLANT",
+        "^NIPPLANT",
+        "^NIPPLANT"
+      ],
+      "score": 1.9
     }
   ]
 }
