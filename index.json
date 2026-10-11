@@ -6659,5 +6659,97 @@
     "downloads": 1,
     "approvedAt": "2026-10-11T03:25:09.273Z",
     "utilVersion": 3
+  },
+  {
+    "id": "millennium-falcon-50h3a",
+    "name": "Millennium Falcon",
+    "sha256": "475ebe1534fa6de8174c35cfa20f75b654fb254d76e7563d421bc3321caa6b89",
+    "submitter": "Owl-Anders",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "https://youtu.be/1bhn7hzcm50",
+    "imageCount": 3,
+    "objectCount": 2257,
+    "score": 8.4,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-11T06:19:10.813Z",
+    "utilVersion": 3
   }
 ]
