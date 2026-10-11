@@ -1034,7 +1034,7 @@
     ],
     "downloads": 11,
     "approvedAt": "2026-10-01T11:49:32.940Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "federal-corvette-v3-g2ycd",
@@ -1138,7 +1138,7 @@
     "approvedAt": "2026-10-01T11:50:53.164Z",
     "version": 2,
     "updatedAt": "2026-10-06T12:04:52.159Z",
-    "utilVersion": 7,
+    "utilVersion": 8,
     "updateNote": "Added 3 Missing Utilities, Signal Booster, Health Station, Hazard Protection Unit."
   },
   {
@@ -1237,7 +1237,7 @@
     ],
     "downloads": 16,
     "approvedAt": "2026-10-01T11:59:46.557Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "quadjumper-gekp7",
@@ -1296,7 +1296,7 @@
     ],
     "downloads": 8,
     "approvedAt": "2026-10-01T12:51:36.503Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "chimera-x-salvager-a0lao",
@@ -1407,7 +1407,7 @@
     ],
     "downloads": 29,
     "approvedAt": "2026-10-02T07:31:42.082Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "thai-fly-by-h70uy",
@@ -1451,7 +1451,7 @@
     ],
     "downloads": 10,
     "approvedAt": "2026-10-02T18:18:39.025Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "the-hawking-0s1u3",
@@ -1467,7 +1467,7 @@
     "utilities": [],
     "downloads": 5,
     "approvedAt": "2026-10-02T19:12:48.234Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "go-cart-y3uto",
@@ -1488,7 +1488,7 @@
     ],
     "downloads": 3,
     "approvedAt": "2026-10-02T20:14:34.499Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "banshee-medivac-rjf9k",
@@ -1548,7 +1548,7 @@
     ],
     "downloads": 9,
     "approvedAt": "2026-10-03T11:32:01.468Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "basilisk-stealth-bomber-ql699",
@@ -1652,7 +1652,7 @@
     ],
     "downloads": 5,
     "approvedAt": "2026-10-03T11:32:14.094Z",
-    "utilVersion": 7
+    "utilVersion": 8
   },
   {
     "id": "black-wasp-bike-xepbc",
