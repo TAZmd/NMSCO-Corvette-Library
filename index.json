@@ -3762,7 +3762,7 @@
     ],
     "downloads": 4,
     "approvedAt": "2026-10-05T02:03:47.342Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "vipergx-h7nhm",
@@ -3850,7 +3850,7 @@
     ],
     "downloads": 11,
     "approvedAt": "2026-10-05T02:04:18.731Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "sable-aoexc",
@@ -3898,7 +3898,7 @@
     ],
     "downloads": 9,
     "approvedAt": "2026-10-05T02:07:07.158Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "ragnarok-xv-2-k27kz",
@@ -3998,7 +3998,7 @@
     ],
     "downloads": 21,
     "approvedAt": "2026-10-05T02:29:29.751Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "adfx-02-morgan-2crkd",
@@ -4023,7 +4023,7 @@
     ],
     "downloads": 8,
     "approvedAt": "2026-10-05T16:08:07.350Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "the-cutting-remark-0wpc4",
@@ -4035,7 +4035,7 @@
     "youtubeUrl": "https://www.tiktok.com/@pastulliotheharmonious/video/7693611857906519310",
     "imageCount": 1,
     "objectCount": 2083,
-    "score": 5.7,
+    "score": 7.2,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -4043,6 +4043,10 @@
       },
       {
         "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
         "value": 1
       },
       {
@@ -4079,7 +4083,7 @@
     ],
     "downloads": 9,
     "approvedAt": "2026-10-06T15:35:45.145Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "space-brick-vedux",
@@ -4179,7 +4183,7 @@
     ],
     "downloads": 7,
     "approvedAt": "2026-10-07T15:43:16.580Z",
-    "utilVersion": 3,
+    "utilVersion": 6,
     "version": 1,
     "updatedAt": "2026-10-07T15:52:53.273Z",
     "updateNote": "slight tweaks to colossus"
@@ -4194,7 +4198,7 @@
     "youtubeUrl": "",
     "imageCount": 3,
     "objectCount": 1719,
-    "score": 10,
+    "score": 9.9,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -4308,8 +4312,8 @@
         "value": 1
       },
       {
-        "label": "Nip Plant",
-        "value": 1
+        "label": "Nip Plant Tray",
+        "value": 0.25
       },
       {
         "label": "Fishpond",
@@ -4318,7 +4322,7 @@
     ],
     "downloads": 35,
     "approvedAt": "2026-10-08T05:29:34.331Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "cover-art-voyager-7zsbu",
@@ -4410,7 +4414,7 @@
     ],
     "downloads": 10,
     "approvedAt": "2026-10-08T05:46:12.785Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "uscss-golem-5q10a",
@@ -4422,7 +4426,7 @@
     "youtubeUrl": "https://www.youtube.com/watch?v=OWDyl35YXMM",
     "imageCount": 3,
     "objectCount": 1329,
-    "score": 10,
+    "score": 9.9,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -4536,8 +4540,8 @@
         "value": 1
       },
       {
-        "label": "Nip Plant",
-        "value": 1
+        "label": "Nip Plant Tray",
+        "value": 0.5
       },
       {
         "label": "Fishpond",
@@ -4546,7 +4550,7 @@
     ],
     "downloads": 52,
     "approvedAt": "2026-10-08T18:38:22.011Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "nebula-drift-0omih",
