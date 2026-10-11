@@ -5839,15 +5839,19 @@
   {
     "id": "rusted-clunker-ot7vi",
     "name": "Rusted Clunker",
-    "sha256": "0099e497ca703034241fea60a3062a8a3db5fa4c3086ed2dddf4190ea12f94b3",
+    "sha256": "14f8d6a763ea05abd81ba12779783e21894bfc3ab792c791705e1c296bb5c325",
     "submitter": "MiLf&CoOkIeS",
     "description": "Cockpit is in the trophy box behind the bedroom chair",
     "patreonUrl": "",
     "youtubeUrl": "",
     "imageCount": 3,
     "objectCount": 203,
-    "score": 2.4,
+    "score": 4.5,
     "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
       {
         "label": "Scanner Room",
         "value": 1
@@ -5864,20 +5868,32 @@
         "value": 1
       },
       {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
         "label": "Nutrition Unit",
         "value": 1
       },
       {
         "label": "Weapon Rack",
         "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
       }
     ],
     "downloads": 3,
     "approvedAt": "2026-10-10T03:21:05.232Z",
     "utilVersion": 3,
-    "version": 1,
-    "updatedAt": "2026-10-10T04:05:42.945Z",
-    "updateNote": "Had an issue with the second cockpit exit area. Now clear."
+    "version": 2,
+    "updatedAt": "2026-10-11T06:05:29.490Z",
+    "updateNote": "Forgot some Tech inside the ship and remove the black base walls. Also added some deco and lights for the landing bay."
   },
   {
     "id": "cosmos-miner-b0c6r",
