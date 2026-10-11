@@ -1,6 +1,6 @@
 {
   "engine": 1,
-  "catalogVersion": 4,
+  "catalogVersion": 6,
   "tiers": {
     "redFactor": 0.5,
     "orangeFactor": 0.75,
@@ -87,7 +87,8 @@
         "op": "chain",
         "levels": [
           [
-            "BUILDTERMINAL"
+            "BUILDTERMINAL",
+            "FRE_ROOM_SHOP"
           ]
         ]
       }
@@ -469,6 +470,18 @@
                         "op": "count",
                         "ids": [
                           "PLANTER"
+                        ]
+                      },
+                      {
+                        "op": "mul",
+                        "args": [
+                          2,
+                          {
+                            "op": "count",
+                            "ids": [
+                              "B_WALL_PLAN0"
+                            ]
+                          }
                         ]
                       },
                       {
@@ -1515,6 +1528,41 @@
         "^NIPPLANT"
       ],
       "score": 0.1
+    },
+    {
+      "ids": [
+        "^B_WALL_PLAN0",
+        "^NIPPLANT",
+        "^NIPPLANT"
+      ],
+      "score": 0.1
+    },
+    {
+      "ids": [
+        "^B_WALL_PLAN0",
+        "^NIPPLANT"
+      ],
+      "score": 0.0
+    },
+    {
+      "ids": [
+        "^B_WALL_PLAN0",
+        "^B_WALL_PLAN0",
+        "^NIPPLANT",
+        "^NIPPLANT",
+        "^NIPPLANT",
+        "^NIPPLANT"
+      ],
+      "score": 0.1
+    },
+    {
+      "ids": [
+        "^FRE_ROOM_SHOP",
+        "^TELEPORTER",
+        "^FRE_ROOM_SCAN",
+        "^B_MAG_1X1"
+      ],
+      "score": 6.0
     }
   ]
 }
