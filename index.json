@@ -6814,5 +6814,62 @@
     "downloads": 12,
     "approvedAt": "2026-10-11T06:19:10.813Z",
     "utilVersion": 8
+  },
+  {
+    "id": "dump-truck-yy8-7xf6x",
+    "name": "Dump Truck YY8",
+    "sha256": "58bd8101054fe3c7f507f4e8696b1689487d31388aa54c0cc78fb49ede3fa1a5",
+    "submitter": "Mal",
+    "description": "Micro Cockpit, may be a little buggy but usually just drops you on the table. tractor beams work and drop items into truck bed. venting works too. its big, its chunky, its a giant flying truck. hope you get a kick out of it.",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 382,
+    "score": 7,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Plant Tray",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-11T19:27:15.075Z",
+    "utilVersion": 3
   }
 ]
