@@ -2468,7 +2468,7 @@
     ],
     "downloads": 23,
     "approvedAt": "2026-10-03T12:16:04.241Z",
-    "utilVersion": 2
+    "utilVersion": 6
   },
   {
     "id": "warthog-specops-fn95m",
@@ -2528,7 +2528,7 @@
     ],
     "downloads": 10,
     "approvedAt": "2026-10-03T12:16:16.098Z",
-    "utilVersion": 2
+    "utilVersion": 6
   },
   {
     "id": "sith-fury-interceptor-v3za7",
@@ -2540,10 +2540,14 @@
     "youtubeUrl": "",
     "imageCount": 2,
     "objectCount": 4160,
-    "score": 5.1,
+    "score": 6.6,
     "utilities": [
       {
         "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
         "value": 1
       },
       {
@@ -2608,7 +2612,7 @@
     ],
     "downloads": 27,
     "approvedAt": "2026-10-04T15:21:04.949Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "chimera-smuggler-r6rm4",
@@ -2720,7 +2724,7 @@
     ],
     "downloads": 11,
     "approvedAt": "2026-10-04T15:50:00.793Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "gryphon-heavy-transport-aygkn",
@@ -2820,7 +2824,7 @@
     ],
     "downloads": 19,
     "approvedAt": "2026-10-04T15:50:10.454Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "sc-moonti-jec0x",
@@ -2876,7 +2880,7 @@
     ],
     "downloads": 13,
     "approvedAt": "2026-10-04T17:50:36.385Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "asterion-the-celestial-ark-dcuwb",
@@ -2932,7 +2936,7 @@
     ],
     "downloads": 10,
     "approvedAt": "2026-10-04T18:01:20.822Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "tornado-6om39",
@@ -2953,7 +2957,7 @@
     ],
     "downloads": 5,
     "approvedAt": "2026-10-04T18:40:19.543Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "atlas-star-ship-ke8ir",
@@ -3021,7 +3025,7 @@
     ],
     "downloads": 19,
     "approvedAt": "2026-10-04T20:23:03.873Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "switch-blade-cqrfr",
@@ -3105,7 +3109,7 @@
     ],
     "downloads": 8,
     "approvedAt": "2026-10-04T20:32:34.784Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "white-sabbath-92cmp",
