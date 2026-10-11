@@ -1033,7 +1033,8 @@
       }
     ],
     "downloads": 11,
-    "approvedAt": "2026-10-01T11:49:32.940Z"
+    "approvedAt": "2026-10-01T11:49:32.940Z",
+    "utilVersion": 6
   },
   {
     "id": "federal-corvette-v3-g2ycd",
@@ -1137,7 +1138,7 @@
     "approvedAt": "2026-10-01T11:50:53.164Z",
     "version": 2,
     "updatedAt": "2026-10-06T12:04:52.159Z",
-    "utilVersion": 3,
+    "utilVersion": 6,
     "updateNote": "Added 3 Missing Utilities, Signal Booster, Health Station, Hazard Protection Unit."
   },
   {
@@ -1235,7 +1236,8 @@
       }
     ],
     "downloads": 16,
-    "approvedAt": "2026-10-01T11:59:46.557Z"
+    "approvedAt": "2026-10-01T11:59:46.557Z",
+    "utilVersion": 6
   },
   {
     "id": "quadjumper-gekp7",
@@ -1293,7 +1295,8 @@
       }
     ],
     "downloads": 8,
-    "approvedAt": "2026-10-01T12:51:36.503Z"
+    "approvedAt": "2026-10-01T12:51:36.503Z",
+    "utilVersion": 6
   },
   {
     "id": "chimera-x-salvager-a0lao",
@@ -1304,7 +1307,7 @@
     "youtubeUrl": "https://www.youtube.com/watch?v=-qcwJ4JiD2M",
     "imageCount": 3,
     "objectCount": 824,
-    "score": 8.8,
+    "score": 9.2,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -1366,6 +1369,14 @@
         "value": 1
       },
       {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
         "label": "Utopia Build Station",
         "value": 1
       },
@@ -1396,7 +1407,7 @@
     ],
     "downloads": 28,
     "approvedAt": "2026-10-02T07:31:42.082Z",
-    "utilVersion": 2
+    "utilVersion": 6
   },
   {
     "id": "thai-fly-by-h70uy",
@@ -1440,7 +1451,7 @@
     ],
     "downloads": 10,
     "approvedAt": "2026-10-02T18:18:39.025Z",
-    "utilVersion": 2
+    "utilVersion": 6
   },
   {
     "id": "the-hawking-0s1u3",
@@ -1456,7 +1467,7 @@
     "utilities": [],
     "downloads": 5,
     "approvedAt": "2026-10-02T19:12:48.234Z",
-    "utilVersion": 2
+    "utilVersion": 6
   },
   {
     "id": "go-cart-y3uto",
@@ -1477,7 +1488,7 @@
     ],
     "downloads": 3,
     "approvedAt": "2026-10-02T20:14:34.499Z",
-    "utilVersion": 2
+    "utilVersion": 6
   },
   {
     "id": "banshee-medivac-rjf9k",
@@ -1489,7 +1500,7 @@
     "youtubeUrl": "https://www.youtube.com/watch?v=-eryOW9UR9g",
     "imageCount": 3,
     "objectCount": 565,
-    "score": 6.1,
+    "score": 6,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -1533,15 +1544,11 @@
       {
         "label": "Health Station",
         "value": 1
-      },
-      {
-        "label": "Nip Plant",
-        "value": 1
       }
     ],
     "downloads": 9,
     "approvedAt": "2026-10-03T11:32:01.468Z",
-    "utilVersion": 2
+    "utilVersion": 6
   },
   {
     "id": "basilisk-stealth-bomber-ql699",
@@ -1553,7 +1560,7 @@
     "youtubeUrl": "https://www.youtube.com/watch?v=ieyphp_pZ50",
     "imageCount": 2,
     "objectCount": 447,
-    "score": 7.2,
+    "score": 7.5,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -1607,6 +1614,14 @@
         "value": 1
       },
       {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
         "label": "Utopia Build Station",
         "value": 1
       },
@@ -1637,7 +1652,7 @@
     ],
     "downloads": 5,
     "approvedAt": "2026-10-03T11:32:14.094Z",
-    "utilVersion": 2
+    "utilVersion": 6
   },
   {
     "id": "black-wasp-bike-xepbc",
