@@ -4638,7 +4638,7 @@
     ],
     "downloads": 15,
     "approvedAt": "2026-10-09T03:30:12.800Z",
-    "utilVersion": 3,
+    "utilVersion": 6,
     "version": 1,
     "updatedAt": "2026-10-09T17:14:39.665Z",
     "updateNote": "Taz identifyed an issue in first person. Problem should be resolved in first person"
@@ -4705,7 +4705,7 @@
     ],
     "downloads": 4,
     "approvedAt": "2026-10-09T11:53:42.332Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "the-farmer-3mkom",
@@ -4747,13 +4747,13 @@
         "value": 1
       },
       {
-        "label": "Nip Plant",
+        "label": "Nip Plant Tray",
         "value": 1
       }
     ],
     "downloads": 3,
     "approvedAt": "2026-10-09T16:31:42.496Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "rum-runner-v4dhb",
@@ -4813,7 +4813,7 @@
     ],
     "downloads": 2,
     "approvedAt": "2026-10-09T16:45:21.229Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "scavenger-gyclz",
@@ -4825,7 +4825,7 @@
     "youtubeUrl": "",
     "imageCount": 3,
     "objectCount": 730,
-    "score": 8.9,
+    "score": 8.8,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -4913,15 +4913,11 @@
       {
         "label": "Automated Feeder",
         "value": 1
-      },
-      {
-        "label": "Nip Plant",
-        "value": 1
       }
     ],
     "downloads": 7,
     "approvedAt": "2026-10-10T00:43:40.459Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "arcadia-rkq0m",
@@ -4933,7 +4929,7 @@
     "youtubeUrl": "",
     "imageCount": 2,
     "objectCount": 1282,
-    "score": 6.3,
+    "score": 6.2,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -4987,13 +4983,13 @@
         "value": 1
       },
       {
-        "label": "Nip Plant",
-        "value": 1
+        "label": "Nip Plant Tray",
+        "value": 0.5
       }
     ],
     "downloads": 3,
     "approvedAt": "2026-10-10T00:43:49.217Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "landspeeder-kteda",
@@ -5021,7 +5017,7 @@
     ],
     "downloads": 2,
     "approvedAt": "2026-10-10T00:49:14.172Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "arwing-h5omm",
@@ -5087,13 +5083,13 @@
         "value": 1
       },
       {
-        "label": "Nip Plant",
+        "label": "Nip Plant Tray",
         "value": 1
       }
     ],
     "downloads": 1,
     "approvedAt": "2026-10-10T00:52:48.328Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "flying-fox-o3sfu",
@@ -5157,7 +5153,7 @@
     ],
     "downloads": 2,
     "approvedAt": "2026-10-10T00:54:14.281Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "laser-8wb36",
@@ -5169,7 +5165,7 @@
     "youtubeUrl": "",
     "imageCount": 3,
     "objectCount": 1712,
-    "score": 6.1,
+    "score": 6,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -5217,15 +5213,11 @@
       {
         "label": "Appearance Modifier",
         "value": 1
-      },
-      {
-        "label": "Nip Plant",
-        "value": 1
       }
     ],
     "downloads": 9,
     "approvedAt": "2026-10-10T00:54:27.604Z",
-    "utilVersion": 3
+    "utilVersion": 6
   },
   {
     "id": "talon-2-ud0c8",
