@@ -4125,6 +4125,21 @@ async function handleCommentsList(request, env) {
       ).bind(me, ship, rows[0].id).run();
     }
     const cnt = await env.DB.prepare("SELECT n FROM comment_counts WHERE ship = ?").bind(ship).first();
+    let isOwner = !!me && rows.some((r) => r.owner_id === me);
+    if (me && !isOwner) {
+      try {
+        const o2 = await getSubmissionOwner(ship, env);
+        isOwner = !!(o2 && o2.discordId === me);
+      } catch (e) {}
+    }
+    const reactMap = {};
+    if (rows.length) {
+      const ids = rows.map((r) => r.id);
+      const rr = await env.DB.prepare(
+        "SELECT comment_id, reaction FROM comment_reactions WHERE comment_id IN (" + ids.map(() => "?").join(",") + ")"
+      ).bind(...ids).all();
+      for (const x of rr.results || []) reactMap[x.comment_id] = x.reaction;
+    }
     let canPost = false;
     if (me) {
       const dl = await env.DB.prepare("SELECT 1 AS x FROM ship_downloaders WHERE discord_id = ? AND ship = ?").bind(me, ship).first();
@@ -4139,6 +4154,7 @@ async function handleCommentsList(request, env) {
     return json({
       ok: true,
       canPost,
+      isOwner,
       total: cnt ? cnt.n : 0,
       hasMore,
       comments: rows.map((r) => ({
@@ -4146,11 +4162,52 @@ async function handleCommentsList(request, env) {
         name: r.author_name || "Unknown",
         text: r.body,
         at: r.at,
-        isAuthor: !!r.owner_id && r.owner_id === r.author_id
+        isAuthor: !!r.owner_id && r.owner_id === r.author_id,
+        reaction: reactMap[r.id] || ""
       }))
     });
   } catch (err) {
     console.error("handleCommentsList failed: " + (err && err.message ? err.message : String(err)));
+    return json({ ok: false, error: "Server error." }, 500);
+  }
+}
+
+const COMMENT_REACTIONS = new Set(["heart", "up", "neutral"]);
+
+async function handleCommentReact(request, env) {
+  try {
+    const body = await readJsonBody(request);
+    if (!body) return json({ ok: false, error: "Invalid request." }, 400);
+    const gate = await requireUserSession(env, body.installId, body.discordSession);
+    if (gate.response) return gate.response;
+    const ship = (body.ship || "").toString().trim();
+    if (!/^[a-z0-9-]{1,120}$/.test(ship)) return json({ ok: false, error: "Invalid request." }, 400);
+    const id = Math.floor(Number(body.id));
+    if (!Number.isFinite(id) || id <= 0) return json({ ok: false, error: "Invalid request." }, 400);
+    const reaction = (body.reaction || "").toString();
+    if (reaction && !COMMENT_REACTIONS.has(reaction)) return json({ ok: false, error: "Invalid request." }, 400);
+    await ensureD1(env);
+    const row = await env.DB.prepare("SELECT owner_id, author_id FROM comments WHERE id = ? AND ship = ?").bind(id, ship).first();
+    if (!row) return json({ ok: false, error: "Could not find this comment." }, 404);
+    let isOwner = !!row.owner_id && row.owner_id === gate.discordId;
+    if (!isOwner) {
+      try {
+        const o = await getSubmissionOwner(ship, env);
+        isOwner = !!(o && o.discordId === gate.discordId);
+      } catch (e) {}
+    }
+    if (!isOwner) return json({ ok: false, error: "Only the owner of this Corvette can react." }, 403);
+    if (row.author_id === gate.discordId) return json({ ok: false, error: "You cannot react to your own comment." }, 400);
+    if (!reaction) {
+      await env.DB.prepare("DELETE FROM comment_reactions WHERE comment_id = ?").bind(id).run();
+    } else {
+      await env.DB.prepare(
+        "INSERT INTO comment_reactions (comment_id, ship, reaction, at) VALUES (?, ?, ?, ?) ON CONFLICT(comment_id) DO UPDATE SET reaction = excluded.reaction, at = excluded.at"
+      ).bind(id, ship, reaction, Date.now()).run();
+    }
+    return json({ ok: true, reaction });
+  } catch (err) {
+    console.error("handleCommentReact failed: " + (err && err.message ? err.message : String(err)));
     return json({ ok: false, error: "Server error." }, 500);
   }
 }
@@ -4301,28 +4358,155 @@ async function handleCommentsRead(request, env) {
   }
 }
 
-async function handleCommentDeleteButton(interaction, env, idStr) {
+function commentDeleteEmbed(embed, title, color) {
+  return { ...embed, color, title: title.slice(0, 250) };
+}
+
+function commentSupervisorComponents(id, disabled) {
+  return [
+    {
+      type: 1,
+      components: [
+        { type: 2, style: 3, label: "Restore", custom_id: `crestore:${id}`, disabled: !!disabled },
+        { type: 2, style: 4, label: "Delete permanently", custom_id: `cpurge:${id}`, disabled: !!disabled }
+      ]
+    }
+  ];
+}
+
+async function postCommentDeletedToSupervisor(env, id, row, who) {
+  try {
+    if (!env.ADMIN_CHANNEL_ID) return false;
+    const resp = await discordApi(`/channels/${env.ADMIN_CHANNEL_ID}/messages`, env, {
+      method: "POST",
+      body: JSON.stringify({
+        allowed_mentions: { parse: [] },
+        embeds: [
+          {
+            title: `Comment deleted by ${who}: ${row.ship_name || row.ship}`.slice(0, 250),
+            description: (row.body || "").slice(0, 2000),
+            color: 0xe89a2f,
+            fields: [
+              { name: "Author", value: `${row.author_name || "Unknown"} (<@${row.author_id}>)`.slice(0, 200), inline: true },
+              { name: "Ship ID", value: String(row.ship).slice(0, 120), inline: true },
+              { name: "Deleted by", value: who.slice(0, 100), inline: true }
+            ],
+            footer: { text: `Comment ${id}` }
+          }
+        ],
+        components: commentSupervisorComponents(id, false)
+      })
+    });
+    if (!resp.ok) console.error("comment supervisor post failed: " + resp.status + " " + (await resp.text()).slice(0, 200));
+    return resp.ok;
+  } catch (err) {
+    console.error("comment supervisor post error: " + (err && err.message ? err.message : String(err)));
+    return false;
+  }
+}
+
+async function handleCommentDeleteButton(interaction, env, ctx, idStr) {
   if (!isReviewer(interaction, env)) return ephemeral("Only reviewers can delete comments.");
   const id = parseInt(idStr, 10);
   const message = interaction.message;
   const embed = message && message.embeds ? message.embeds[0] : null;
   if (!Number.isFinite(id) || !embed) return ephemeral("Could not find this comment.");
-  await ensureD1(env);
-  const row = await env.DB.prepare("SELECT ship FROM comments WHERE id = ?").bind(id).first();
-  if (row) {
-    await env.DB.batch([
-      env.DB.prepare("DELETE FROM comments WHERE id = ?").bind(id),
-      env.DB.prepare("UPDATE comment_counts SET n = MAX(n - 1, 0) WHERE ship = ?").bind(row.ship)
-    ]);
-  }
   const clicker = interaction.member?.user || interaction.user;
   const who = clicker ? clicker.username || "a reviewer" : "a reviewer";
+  const supervisor = isSupervisor(interaction, env);
+  await ensureD1(env);
+  const row = await env.DB.prepare("SELECT * FROM comments WHERE id = ?").bind(id).first();
+  if (!row) {
+    return json({
+      type: InteractionResponseType.UPDATE_MESSAGE,
+      data: { embeds: [commentDeleteEmbed(embed, `Already deleted: ${embed.title || ""}`, 0xe05555)], components: [] }
+    });
+  }
+  if (supervisor) {
+    await env.DB.batch([
+      env.DB.prepare("DELETE FROM comments WHERE id = ?").bind(id),
+      env.DB.prepare("DELETE FROM comment_reactions WHERE comment_id = ?").bind(id),
+      env.DB.prepare("UPDATE comment_counts SET n = MAX(n - 1, 0) WHERE ship = ?").bind(row.ship)
+    ]);
+    return json({
+      type: InteractionResponseType.UPDATE_MESSAGE,
+      data: { embeds: [commentDeleteEmbed(embed, `Deleted by ${who}: ${embed.title || ""}`, 0xe05555)], components: [] }
+    });
+  }
+  if (!env.ADMIN_CHANNEL_ID) {
+    return ephemeral("The supervisor channel is not set up, so this comment was not deleted.");
+  }
+  const reactRow = await env.DB.prepare("SELECT reaction FROM comment_reactions WHERE comment_id = ?").bind(id).first();
+  await env.DB.batch([
+    env.DB.prepare(
+      "INSERT OR REPLACE INTO comments_deleted (id, ship, data, reaction, deleted_by, deleted_at) VALUES (?, ?, ?, ?, ?, ?)"
+    ).bind(id, row.ship, JSON.stringify(row), reactRow ? reactRow.reaction : "", who, Date.now()),
+    env.DB.prepare("DELETE FROM comments WHERE id = ?").bind(id),
+    env.DB.prepare("DELETE FROM comment_reactions WHERE comment_id = ?").bind(id),
+    env.DB.prepare("UPDATE comment_counts SET n = MAX(n - 1, 0) WHERE ship = ?").bind(row.ship)
+  ]);
+  if (ctx && ctx.waitUntil) ctx.waitUntil(postCommentDeletedToSupervisor(env, id, row, who));
+  else await postCommentDeletedToSupervisor(env, id, row, who);
   return json({
     type: InteractionResponseType.UPDATE_MESSAGE,
     data: {
-      embeds: [{ ...embed, color: 0xe05555, title: `Deleted by ${who}: ${embed.title || ""}`.slice(0, 250) }],
+      embeds: [commentDeleteEmbed(embed, `Deleted by ${who}, sent to supervisor: ${embed.title || ""}`, 0xe89a2f)],
       components: []
     }
+  });
+}
+
+async function handleCommentSupervisorButton(interaction, env, action, idStr) {
+  if (!isSupervisor(interaction, env)) return ephemeral("Only a supervisor can use these buttons.");
+  const id = parseInt(idStr, 10);
+  const message = interaction.message;
+  const embed = message && message.embeds ? message.embeds[0] : null;
+  if (!Number.isFinite(id) || !embed) return ephemeral("Could not find this comment.");
+  const clicker = interaction.member?.user || interaction.user;
+  const who = clicker ? clicker.username || "a supervisor" : "a supervisor";
+  await ensureD1(env);
+  const del = await env.DB.prepare("SELECT * FROM comments_deleted WHERE id = ?").bind(id).first();
+  const base = String(embed.title || "").replace(/^(Restored|Deleted permanently|Already handled)[^:]*: /, "");
+  if (!del) {
+    return json({
+      type: InteractionResponseType.UPDATE_MESSAGE,
+      data: { embeds: [commentDeleteEmbed(embed, `Already handled: ${base}`, 0x808080)], components: [] }
+    });
+  }
+  if (action === "cpurge") {
+    await env.DB.prepare("DELETE FROM comments_deleted WHERE id = ?").bind(id).run();
+    return json({
+      type: InteractionResponseType.UPDATE_MESSAGE,
+      data: { embeds: [commentDeleteEmbed(embed, `Deleted permanently by ${who}: ${base}`, 0xe05555)], components: [] }
+    });
+  }
+  let data;
+  try {
+    data = JSON.parse(del.data);
+  } catch (e) {
+    return ephemeral("The saved comment is damaged and cannot be restored.");
+  }
+  const cols = ["id", "ship", "ship_name", "owner_id", "author_id", "author_name", "body", "at"];
+  const taken = await env.DB.prepare("SELECT 1 AS x FROM comments WHERE id = ?").bind(id).first();
+  const useCols = taken ? cols.filter((c) => c !== "id") : cols;
+  const ins = await env.DB.prepare(
+    `INSERT INTO comments (${useCols.join(", ")}) VALUES (${useCols.map(() => "?").join(", ")})`
+  ).bind(...useCols.map((c) => (data[c] === undefined ? (c === "at" ? Date.now() : "") : data[c]))).run();
+  const newId = ins.meta.last_row_id;
+  const stmts = [
+    env.DB.prepare("INSERT INTO comment_counts (ship, n) VALUES (?, 1) ON CONFLICT(ship) DO UPDATE SET n = n + 1").bind(del.ship),
+    env.DB.prepare("DELETE FROM comments_deleted WHERE id = ?").bind(id)
+  ];
+  if (del.reaction) {
+    stmts.push(
+      env.DB.prepare("INSERT OR REPLACE INTO comment_reactions (comment_id, ship, reaction, at) VALUES (?, ?, ?, ?)")
+        .bind(newId, del.ship, del.reaction, Date.now())
+    );
+  }
+  await env.DB.batch(stmts);
+  return json({
+    type: InteractionResponseType.UPDATE_MESSAGE,
+    data: { embeds: [commentDeleteEmbed(embed, `Restored by ${who}: ${base}`, 0x4caf50)], components: [] }
   });
 }
 
@@ -4589,6 +4773,8 @@ async function ensureD1(env) {
     env.DB.prepare("CREATE INDEX IF NOT EXISTS comments_ship ON comments (ship, id)"),
     env.DB.prepare("CREATE INDEX IF NOT EXISTS comments_author ON comments (author_id, id)"),
     env.DB.prepare("CREATE INDEX IF NOT EXISTS comments_owner ON comments (owner_id, id)"),
+    env.DB.prepare("CREATE TABLE IF NOT EXISTS comments_deleted (id INTEGER PRIMARY KEY, ship TEXT NOT NULL, data TEXT NOT NULL, reaction TEXT NOT NULL DEFAULT '', deleted_by TEXT NOT NULL DEFAULT '', deleted_at INTEGER NOT NULL)"),
+    env.DB.prepare("CREATE TABLE IF NOT EXISTS comment_reactions (comment_id INTEGER PRIMARY KEY, ship TEXT NOT NULL, reaction TEXT NOT NULL, at INTEGER NOT NULL)"),
     env.DB.prepare("CREATE TABLE IF NOT EXISTS comment_counts (ship TEXT PRIMARY KEY, n INTEGER NOT NULL) WITHOUT ROWID"),
     env.DB.prepare("CREATE TABLE IF NOT EXISTS comment_reads (discord_id TEXT NOT NULL, ship TEXT NOT NULL, last_id INTEGER NOT NULL, PRIMARY KEY (discord_id, ship)) WITHOUT ROWID"),
     env.DB.prepare("CREATE TABLE IF NOT EXISTS ship_downloaders (discord_id TEXT NOT NULL, ship TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (discord_id, ship)) WITHOUT ROWID")
@@ -4814,6 +5000,7 @@ const IP_GATED_PATHS = new Set([
   "/my-dismiss",
   "/comments-list",
   "/comment-post",
+  "/comment-react",
   "/comments-unread",
   "/comments-read",
   "/my-update"
@@ -5123,6 +5310,8 @@ async function deleteShipFiles(id, entry, env) {
       await ensureD1(env);
       await env.DB.batch([
         env.DB.prepare("DELETE FROM dl_seen WHERE ship = ?").bind(id),
+        env.DB.prepare("DELETE FROM comment_reactions WHERE ship = ?").bind(id),
+        env.DB.prepare("DELETE FROM comments_deleted WHERE ship = ?").bind(id),
         env.DB.prepare("DELETE FROM comments WHERE ship = ?").bind(id),
         env.DB.prepare("DELETE FROM comment_counts WHERE ship = ?").bind(id),
         env.DB.prepare("DELETE FROM comment_reads WHERE ship = ?").bind(id),
@@ -7028,7 +7217,8 @@ async function handleComponent(interaction, env, ctx) {
     }
   }
   if ((action === "enable" || action === "purge") && slug) return handleDisabledButton(interaction, env, ctx, action, slug);
-  if (action === "cdel" && slug) return handleCommentDeleteButton(interaction, env, slug);
+  if (action === "cdel" && slug) return handleCommentDeleteButton(interaction, env, ctx, slug);
+  if ((action === "crestore" || action === "cpurge") && slug) return handleCommentSupervisorButton(interaction, env, action, slug);
   const isFinal = action === "reject" || action === "rejban";
 
   if (!clicker || !(isFinal ? isSupervisor(interaction, env) : isReviewer(interaction, env))) {
@@ -7249,6 +7439,7 @@ export default {
       if (url.pathname === "/comment-counts") return handleCommentCounts(request, env);
       if (url.pathname === "/comments-list") return handleCommentsList(request, env);
       if (url.pathname === "/comment-post") return handleCommentPost(request, env, ctx);
+      if (url.pathname === "/comment-react") return handleCommentReact(request, env);
       if (url.pathname === "/comments-unread") return handleCommentsUnread(request, env);
       if (url.pathname === "/comments-read") return handleCommentsRead(request, env);
       if (url.pathname === "/my-update") return handleMyUpdate(request, env);
