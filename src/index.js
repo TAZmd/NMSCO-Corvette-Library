@@ -7267,7 +7267,8 @@ async function handleComponent(interaction, env, ctx) {
   const supervisorMode = !!env.ADMIN_CHANNEL_ID && channelId === env.ADMIN_CHANNEL_ID;
   const comps = (disabled) => approvalComponents(slug, disabled, supervisorMode);
   const retitle = (title, color) =>
-    message.embeds.map((e, i) => (i === 0 ? { ...e, title, ...(color !== undefined ? { color } : {}) } : e));
+    message.embeds.map((e, i) => (i === 0 ? { ...e, title: String(title).slice(0, 250), ...(color !== undefined ? { color } : {}) } : e));
+  const byName = clicker && clicker.username ? clicker.username : "a reviewer";
 
   if (action === "tosup" || action === "timeout") {
     ctx.waitUntil(
@@ -7338,7 +7339,7 @@ async function handleComponent(interaction, env, ctx) {
           }
         }
         const payload = result.ok
-          ? { embeds: retitle(`Rejected${banNote} - ${embed.title}`, 0x8b2020), components: [] }
+          ? { embeds: retitle(`Rejected by ${byName}${banNote} - ${embed.title}`, 0x8b2020), components: [] }
           : {
               embeds: message.embeds.map((e, i) => (i === 0 ? { ...e, color: 0xe89a2f, title: `Reject failed - try again - ${embed.title}`, description: `Error: ${result.error}` } : e)),
               components: comps(false)
@@ -7368,7 +7369,7 @@ async function handleComponent(interaction, env, ctx) {
         }
         console.log(JSON.stringify({ event: "approve-result", slug, ok: result.ok, error: result.error || "" }));
         const payload = result.ok
-          ? { embeds: retitle(`Approved - ${embed.title}`, 0x2d7a2d), components: [] }
+          ? { embeds: retitle(`Approved by ${byName} - ${embed.title}`, 0x2d7a2d), components: [] }
           : {
               embeds: message.embeds.map((e, i) => (i === 0 ? { ...e, color: 0xe05555, title: `Approve failed - try again - ${embed.title}`, description: `Error: ${result.error}` } : e)),
               components: comps(false)
