@@ -5,8 +5,8 @@
   "description": "Cockpit is in the trophy box behind the bedroom chair",
   "patreonUrl": "",
   "youtubeUrl": "",
-  "objectCount": 203,
-  "score": 4.5,
+  "objectCount": 212,
+  "score": 7.6,
   "utilities": [
     {
       "label": "Base Teleport Module",
@@ -14,6 +14,14 @@
     },
     {
       "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
       "value": 1
     },
     {
@@ -46,13 +54,17 @@
     {
       "label": "Signal Booster",
       "value": 1
+    },
+    {
+      "label": "Fishpond",
+      "value": 1
     }
   ],
   "imageCount": 3,
-  "sha256": "14f8d6a763ea05abd81ba12779783e21894bfc3ab792c791705e1c296bb5c325",
+  "sha256": "deca12dbf1ba3f459cca707d5b8c1e8bb6f371cd92e7ee59164c40d3a21eed9b",
   "downloads": 0,
   "approvedAt": "2026-10-10T03:21:05.232Z",
-  "version": 2,
-  "updatedAt": "2026-10-11T06:05:29.490Z",
-  "updateNote": "Forgot some Tech inside the ship and remove the black base walls. Also added some deco and lights for the landing bay."
+  "version": 3,
+  "updatedAt": "2026-10-12T06:09:47.964Z",
+  "updateNote": "Added tractor beam with storage habs shrunk down into the side thruster body \"tested and works good\", fish pond so the sink looks like it has water, trade term and deco."
 }
