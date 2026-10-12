@@ -4405,6 +4405,11 @@ async function postCommentDeletedToSupervisor(env, id, row, who) {
   }
 }
 
+function clickerName(clicker, interaction, fallback) {
+  const nick = interaction && interaction.member && interaction.member.nick;
+  return nick || (clicker && (clicker.global_name || clicker.username)) || fallback;
+}
+
 async function handleCommentDeleteButton(interaction, env, ctx, idStr) {
   if (!isReviewer(interaction, env)) return ephemeral("Only reviewers can delete comments.");
   const id = parseInt(idStr, 10);
@@ -4412,7 +4417,7 @@ async function handleCommentDeleteButton(interaction, env, ctx, idStr) {
   const embed = message && message.embeds ? message.embeds[0] : null;
   if (!Number.isFinite(id) || !embed) return ephemeral("Could not find this comment.");
   const clicker = interaction.member?.user || interaction.user;
-  const who = clicker ? clicker.username || "a reviewer" : "a reviewer";
+  const who = clickerName(clicker, interaction, "a reviewer");
   const supervisor = isSupervisor(interaction, env);
   await ensureD1(env);
   const row = await env.DB.prepare("SELECT * FROM comments WHERE id = ?").bind(id).first();
@@ -4463,7 +4468,7 @@ async function handleCommentSupervisorButton(interaction, env, action, idStr) {
   const embed = message && message.embeds ? message.embeds[0] : null;
   if (!Number.isFinite(id) || !embed) return ephemeral("Could not find this comment.");
   const clicker = interaction.member?.user || interaction.user;
-  const who = clicker ? clicker.username || "a supervisor" : "a supervisor";
+  const who = clickerName(clicker, interaction, "a supervisor");
   await ensureD1(env);
   const del = await env.DB.prepare("SELECT * FROM comments_deleted WHERE id = ?").bind(id).first();
   const base = String(embed.title || "").replace(/^(Restored|Deleted permanently|Already handled)[^:]*: /, "");
@@ -5739,7 +5744,7 @@ async function handleRestoreCommand(interaction, env, ctx) {
   for (const o of interaction.data.options || []) opts[o.name] = o.value;
   const shipId = (opts.ship || "").toString().trim();
   if (!shipId) return ephemeral("Pick a ship first.");
-  const who = clicker && clicker.username ? clicker.username : "a supervisor";
+  const who = clickerName(clicker, interaction, "a supervisor");
   ctx.waitUntil(
     (async () => {
       let content;
@@ -5848,7 +5853,7 @@ async function handleLinkCommand(interaction, env, ctx) {
   const resolved = interaction.data.resolved && interaction.data.resolved.users ? interaction.data.resolved.users[userId] : null;
   const target = { id: userId, name: resolved ? (resolved.global_name || resolved.username || "").toString().slice(0, 60) : "" };
   const needsLookup = !opts.user && !resolved;
-  const who = clicker && clicker.username ? clicker.username : "a supervisor";
+  const who = clickerName(clicker, interaction, "a supervisor");
   ctx.waitUntil(
     (async () => {
       let content = "";
@@ -5923,7 +5928,7 @@ async function handleDisableCommand(interaction, env, ctx) {
   for (const o of interaction.data.options || []) opts[o.name] = o.value;
   const id = (opts.ship || "").toString().trim();
   if (!id) return ephemeral("Pick a ship first.");
-  const who = clicker && clicker.username ? clicker.username : "a reviewer";
+  const who = clickerName(clicker, interaction, "a reviewer");
   ctx.waitUntil(
     (async () => {
       let content;
@@ -6278,7 +6283,7 @@ async function sendToSupervisor(env, slug, embed, clicker, note) {
   } catch (e) {
     console.error("could not read images for " + slug);
   }
-  const who = clicker && clicker.username ? clicker.username : "a reviewer";
+  const who = clickerName(clicker, undefined, "a reviewer");
   const clean = {
     title: embed.title,
     color: 0xe89a2f,
@@ -6962,7 +6967,7 @@ async function handleDeleteCommand(interaction, env, ctx) {
     (async () => {
       let content;
       try {
-        content = await runDelete(query, env, clicker && clicker.username ? clicker.username : "a supervisor");
+        content = await runDelete(query, env, clickerName(clicker, interaction, "a supervisor"));
       } catch (err) {
         console.error("handleDeleteCommand failed: " + (err && err.message ? err.message : String(err)));
         content = "Could not delete that ship - check logs.";
@@ -7010,7 +7015,7 @@ async function handleBanCommand(interaction, env) {
   if (!parts.length) {
     return ephemeral("No Discord user or app installation was stored for this ship (guest upload or older upload), so nobody was banned. Run /ban again with also_ip set to true if you want to ban the connection.");
   }
-  await notifyAdmin(env, `Ban by ${clicker && clicker.username ? clicker.username : "a supervisor"}: **${owner.label}**${owner.discordId ? ` <@${owner.discordId}>` : ""} - banned: ${parts.join(" + ")}.${ipHint(banIpKey)}`);
+  await notifyAdmin(env, `Ban by ${clickerName(clicker, interaction, "a supervisor")}: **${owner.label}**${owner.discordId ? ` <@${owner.discordId}>` : ""} - banned: ${parts.join(" + ")}.${ipHint(banIpKey)}`);
   return ephemeral(`Banned the submitter of "${owner.label}" (${parts.join(" + ")}). They can no longer upload, open the library or count downloads. Use /unban to undo.`);
 }
 
@@ -7032,7 +7037,7 @@ async function handleUnbanCommand(interaction, env) {
     } catch (e) {}
   }
   await env.DELETE_CODES.delete(key);
-  await notifyAdmin(env, `${key.startsWith("lock:") ? "Lock" : "Ban"} removed by ${clicker && clicker.username ? clicker.username : "a supervisor"}: ${unbanLabel || key.split(":").slice(0, 2).join(":")}.`);
+  await notifyAdmin(env, `${key.startsWith("lock:") ? "Lock" : "Ban"} removed by ${clickerName(clicker, interaction, "a supervisor")}: ${unbanLabel || key.split(":").slice(0, 2).join(":")}.`);
   return ephemeral(key.startsWith("lock:") ? "Lock removed. The visitor starts fresh." : "Ban removed. The visitor starts fresh.");
 }
 
@@ -7268,7 +7273,7 @@ async function handleComponent(interaction, env, ctx) {
   const comps = (disabled) => approvalComponents(slug, disabled, supervisorMode);
   const retitle = (title, color) =>
     message.embeds.map((e, i) => (i === 0 ? { ...e, title: String(title).slice(0, 250), ...(color !== undefined ? { color } : {}) } : e));
-  const byName = clicker && clicker.username ? clicker.username : "a reviewer";
+  const byName = clickerName(clicker, interaction, "a reviewer");
 
   if (action === "tosup" || action === "timeout") {
     ctx.waitUntil(
@@ -7278,7 +7283,7 @@ async function handleComponent(interaction, env, ctx) {
           note = await applyTimeout(slug, env);
           if (note.startsWith("Submitter got")) {
             const ow = await getSubmissionOwner(slug, env);
-            await notifyAdmin(env, `Timeout 24h by ${clicker && clicker.username ? clicker.username : "a reviewer"}: **${ow && ow.label ? ow.label : embed.title}**${ow && ow.discordId ? ` <@${ow.discordId}>` : ""}.`);
+            await notifyAdmin(env, `Timeout 24h by ${clickerName(clicker, interaction, "a reviewer")}: **${ow && ow.label ? ow.label : embed.title}**${ow && ow.discordId ? ` <@${ow.discordId}>` : ""}.`);
           }
         }
         const sent = await sendToSupervisor(env, slug, embed, clicker, note);
@@ -7324,7 +7329,7 @@ async function handleComponent(interaction, env, ctx) {
         const result = await rejectPending(slug, env);
         if (result.ok && action === "rejban" && banNote.startsWith(" and banned")) {
           const rbIp = banNote.includes("connection IP") && ownerRec ? ownerRec.ipKey : null;
-          await notifyAdmin(env, `Reject and ban by ${clicker && clicker.username ? clicker.username : "a supervisor"}: **${embed.title}**${ownerRec && ownerRec.discordId ? ` <@${ownerRec.discordId}>` : ""} - banned${banNote.slice(11)}.${ipHint(rbIp)}`);
+          await notifyAdmin(env, `Reject and ban by ${clickerName(clicker, interaction, "a supervisor")}: **${embed.title}**${ownerRec && ownerRec.discordId ? ` <@${ownerRec.discordId}>` : ""} - banned${banNote.slice(11)}.${ipHint(rbIp)}`);
         }
         if (result.ok && ownerRec) await uploaderBump(env, ownerStatKey(ownerRec), "rejected", "");
         if (result.ok && action === "reject" && ownerRec && ownerRec.discordId && env.DELETE_CODES) {
