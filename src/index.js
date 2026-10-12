@@ -7216,12 +7216,26 @@ function pathOfUrl(u) {
 function withKeptAttachments(message, payload) {
   const atts = Array.isArray(message.attachments) ? message.attachments : [];
   if (atts.length === 0) return payload;
+  const ordered = atts
+    .slice()
+    .sort((x, y) => String(x.filename).localeCompare(String(y.filename), undefined, { numeric: true }));
+  let next = 0;
+  let matched = 0;
   const embeds = (payload.embeds || []).map((e) => {
     const img = e && e.image && e.image.url;
     if (!img) return e;
-    const hit = atts.find((a) => a.url && pathOfUrl(a.url) === pathOfUrl(img));
-    return hit ? { ...e, image: { url: `attachment://${hit.filename}` } } : e;
+    if (/^attachment:\/\//.test(img)) {
+      matched++;
+      return e;
+    }
+    const byUrl = ordered.find((a) => a.url && pathOfUrl(a.url) === pathOfUrl(img));
+    const hit = byUrl || (next < ordered.length ? ordered[next] : null);
+    next++;
+    if (!hit) return e;
+    matched++;
+    return { ...e, image: { url: `attachment://${hit.filename}` } };
   });
+  console.log(JSON.stringify({ event: "keep-attachments", attachments: atts.length, embedImages: next, matched }));
   return { ...payload, embeds, attachments: atts.map((a) => ({ id: a.id, filename: a.filename })) };
 }
 
