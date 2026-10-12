@@ -7205,6 +7205,26 @@ async function handleCommand(interaction, env, ctx) {
   return json({ type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, data: { content: "Unknown command.", flags: 64 } });
 }
 
+function pathOfUrl(u) {
+  try {
+    return new URL(u).pathname;
+  } catch (e) {
+    return "";
+  }
+}
+
+function withKeptAttachments(message, payload) {
+  const atts = Array.isArray(message.attachments) ? message.attachments : [];
+  if (atts.length === 0) return payload;
+  const embeds = (payload.embeds || []).map((e) => {
+    const img = e && e.image && e.image.url;
+    if (!img) return e;
+    const hit = atts.find((a) => a.url && pathOfUrl(a.url) === pathOfUrl(img));
+    return hit ? { ...e, image: { url: `attachment://${hit.filename}` } } : e;
+  });
+  return { ...payload, embeds, attachments: atts.map((a) => ({ id: a.id, filename: a.filename })) };
+}
+
 async function handleComponent(interaction, env, ctx) {
   const customId = interaction.data.custom_id;
   const clicker = interaction.member?.user || interaction.user;
@@ -7274,6 +7294,7 @@ async function handleComponent(interaction, env, ctx) {
   const retitle = (title, color) =>
     message.embeds.map((e, i) => (i === 0 ? { ...e, title: String(title).slice(0, 250), ...(color !== undefined ? { color } : {}) } : e));
   const byName = clickerName(clicker, interaction, "a reviewer");
+  const keepAtt = (payload) => withKeptAttachments(message, payload);
 
   if (action === "tosup" || action === "timeout") {
     ctx.waitUntil(
@@ -7291,12 +7312,12 @@ async function handleComponent(interaction, env, ctx) {
         const payload = sent
           ? { embeds: retitle(`${label} - ${embed.title}`, 0xe89a2f), components: [] }
           : { embeds: retitle(`Could not send to supervisor - try again - ${embed.title}`, 0xe05555), components: comps(false) };
-        await editApprovalMessage(env, message.id, payload, channelId);
+        await editApprovalMessage(env, message.id, keepAtt(payload), channelId);
       })()
     );
     return json({
       type: InteractionResponseType.UPDATE_MESSAGE,
-      data: { embeds: retitle(`Sending to supervisor - ${embed.title}`), components: comps(true) }
+      data: keepAtt({ embeds: retitle(`Sending to supervisor - ${embed.title}`), components: comps(true) })
     });
   }
 
@@ -7349,12 +7370,12 @@ async function handleComponent(interaction, env, ctx) {
               embeds: message.embeds.map((e, i) => (i === 0 ? { ...e, color: 0xe89a2f, title: `Reject failed - try again - ${embed.title}`, description: `Error: ${result.error}` } : e)),
               components: comps(false)
             };
-        await editApprovalMessage(env, message.id, payload, channelId);
+        await editApprovalMessage(env, message.id, keepAtt(payload), channelId);
       })()
     );
     return json({
       type: InteractionResponseType.UPDATE_MESSAGE,
-      data: { embeds: retitle(`Rejecting - ${embed.title}`), components: comps(true) }
+      data: keepAtt({ embeds: retitle(`Rejecting - ${embed.title}`), components: comps(true) })
     });
   }
 
@@ -7379,12 +7400,12 @@ async function handleComponent(interaction, env, ctx) {
               embeds: message.embeds.map((e, i) => (i === 0 ? { ...e, color: 0xe05555, title: `Approve failed - try again - ${embed.title}`, description: `Error: ${result.error}` } : e)),
               components: comps(false)
             };
-        await editApprovalMessage(env, message.id, payload, channelId);
+        await editApprovalMessage(env, message.id, keepAtt(payload), channelId);
       })()
     );
     return json({
       type: InteractionResponseType.UPDATE_MESSAGE,
-      data: { embeds: retitle(`Publishing - ${embed.title}`), components: comps(true) }
+      data: keepAtt({ embeds: retitle(`Publishing - ${embed.title}`), components: comps(true) })
     });
   }
 
