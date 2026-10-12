@@ -6218,14 +6218,14 @@
   {
     "id": "banu-merchant-2-0-1bkod",
     "name": "banu merchant 2.0",
-    "sha256": "6263031a804b237bb0b2a516bcf9810e98d2b1a43dbe979f3dcd3e9bb99ccbf4",
+    "sha256": "480fafdc65b78c317ab261050be05c2c2fc74de05dba254106ff9890788cfb2d",
     "submitter": "SOYSAUCE",
     "description": "Everything included. 2.0 version is 20% smaller and can leave stations now. many bug fixes, optimizations and tweaks.",
     "patreonUrl": "",
     "youtubeUrl": "",
-    "imageCount": 1,
+    "imageCount": 3,
     "objectCount": 1179,
-    "score": 9.9,
+    "score": 10,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -6340,7 +6340,7 @@
       },
       {
         "label": "Plant Tray",
-        "value": 0.25
+        "value": 1
       },
       {
         "label": "Fishpond",
@@ -6349,10 +6349,10 @@
     ],
     "downloads": 23,
     "approvedAt": "2026-10-10T21:27:18.318Z",
-    "utilVersion": 8,
-    "version": 1,
-    "updatedAt": "2026-10-11T23:31:48.790Z",
-    "updateNote": "fixed duplicate items"
+    "utilVersion": 9,
+    "version": 2,
+    "updatedAt": "2026-10-12T20:19:20.905Z",
+    "updateNote": "fixed character collosion in tractor beam rooms. recolor :)"
   },
   {
     "id": "fenrir-orv46",
