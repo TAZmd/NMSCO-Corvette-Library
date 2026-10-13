@@ -4995,7 +4995,7 @@ async function recordDownloadStat(env, id, installId, ip) {
 const DL_DAY_LIMIT_GUEST = 25;
 const DL_DAY_LIMIT_USER = 50;
 const DL_DAY_LIMIT_IP_USER = 100;
-const DL_TEMPO_LIMIT = 10;
+const DL_TEMPO_LIMIT = 15;
 const DL_TEMPO_WINDOW_MS = 10 * 60 * 1000;
 const DL_PATTERN_INSTALLS = 4;
 const FRONT_LIMIT_PER_MIN = 120;
