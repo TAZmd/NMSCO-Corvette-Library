@@ -6886,5 +6886,105 @@
     "downloads": 6,
     "approvedAt": "2026-10-11T19:27:15.075Z",
     "utilVersion": 3
+  },
+  {
+    "id": "omen-of-the-dragon-66gsv",
+    "name": "Omen of the Dragon",
+    "sha256": "64556cdda75783a8e9bde67885a51011421e7eeb4b8d202c66faacfc07844748",
+    "submitter": "Cx2Dragon",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 2,
+    "objectCount": 415,
+    "score": 8.7,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-13T03:38:43.207Z",
+    "utilVersion": 9
   }
 ]
