@@ -3766,7 +3766,7 @@
     ],
     "downloads": 6,
     "approvedAt": "2026-10-05T02:03:47.342Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "vipergx-h7nhm",
@@ -3854,7 +3854,7 @@
     ],
     "downloads": 14,
     "approvedAt": "2026-10-05T02:04:18.731Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "sable-aoexc",
@@ -3902,7 +3902,7 @@
     ],
     "downloads": 11,
     "approvedAt": "2026-10-05T02:07:07.158Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "ragnarok-xv-2-k27kz",
@@ -4002,7 +4002,7 @@
     ],
     "downloads": 23,
     "approvedAt": "2026-10-05T02:29:29.751Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "adfx-02-morgan-2crkd",
@@ -4027,7 +4027,7 @@
     ],
     "downloads": 10,
     "approvedAt": "2026-10-05T16:08:07.350Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "the-cutting-remark-0wpc4",
@@ -4087,7 +4087,7 @@
     ],
     "downloads": 10,
     "approvedAt": "2026-10-06T15:35:45.145Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "space-brick-vedux",
@@ -4187,7 +4187,7 @@
     ],
     "downloads": 8,
     "approvedAt": "2026-10-07T15:43:16.580Z",
-    "utilVersion": 8,
+    "utilVersion": 9,
     "version": 1,
     "updatedAt": "2026-10-07T15:52:53.273Z",
     "updateNote": "slight tweaks to colossus"
@@ -4202,7 +4202,7 @@
     "youtubeUrl": "",
     "imageCount": 3,
     "objectCount": 1719,
-    "score": 9.9,
+    "score": 10,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -4317,7 +4317,7 @@
       },
       {
         "label": "Plant Tray",
-        "value": 0.25
+        "value": 1
       },
       {
         "label": "Fishpond",
@@ -4326,7 +4326,7 @@
     ],
     "downloads": 45,
     "approvedAt": "2026-10-08T05:29:34.331Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "cover-art-voyager-7zsbu",
@@ -4418,7 +4418,7 @@
     ],
     "downloads": 11,
     "approvedAt": "2026-10-08T05:46:12.785Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "uscss-golem-5q10a",
@@ -4430,7 +4430,7 @@
     "youtubeUrl": "https://www.youtube.com/watch?v=OWDyl35YXMM",
     "imageCount": 3,
     "objectCount": 1329,
-    "score": 9.9,
+    "score": 10,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -4545,7 +4545,7 @@
       },
       {
         "label": "Plant Tray",
-        "value": 0.5
+        "value": 1
       },
       {
         "label": "Fishpond",
@@ -4554,7 +4554,7 @@
     ],
     "downloads": 66,
     "approvedAt": "2026-10-08T18:38:22.011Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "nebula-drift-0omih",
