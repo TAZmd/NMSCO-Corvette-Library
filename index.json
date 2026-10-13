@@ -5297,7 +5297,7 @@
     ],
     "downloads": 4,
     "approvedAt": "2026-10-10T01:06:02.566Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "sith-interceptor-uhnzt",
@@ -5365,7 +5365,7 @@
     ],
     "downloads": 6,
     "approvedAt": "2026-10-10T01:06:32.309Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "mentor-2kelt",
@@ -5433,7 +5433,7 @@
     ],
     "downloads": 3,
     "approvedAt": "2026-10-10T01:07:13.541Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "mytiefighter-kbpuo",
@@ -5493,7 +5493,7 @@
     ],
     "downloads": 3,
     "approvedAt": "2026-10-10T01:08:09.490Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "tiereaper-6-w2xqv",
@@ -5597,7 +5597,7 @@
     ],
     "downloads": 3,
     "approvedAt": "2026-10-10T01:08:22.510Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "ringedfighter-3-uk52u",
@@ -5609,7 +5609,7 @@
     "youtubeUrl": "",
     "imageCount": 3,
     "objectCount": 853,
-    "score": 7.3,
+    "score": 7.4,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -5696,12 +5696,12 @@
       },
       {
         "label": "Plant Tray",
-        "value": 0.25
+        "value": 1
       }
     ],
     "downloads": 3,
     "approvedAt": "2026-10-10T01:08:52.864Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "normandy-2-qn6gm",
@@ -5805,7 +5805,7 @@
     ],
     "downloads": 17,
     "approvedAt": "2026-10-10T01:09:15.289Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "executioner-2-lemle",
@@ -5897,7 +5897,7 @@
     ],
     "downloads": 15,
     "approvedAt": "2026-10-10T01:09:44.153Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "rusted-clunker-ot7vi",
@@ -5965,7 +5965,7 @@
     ],
     "downloads": 8,
     "approvedAt": "2026-10-10T03:21:05.232Z",
-    "utilVersion": 8,
+    "utilVersion": 9,
     "version": 3,
     "updatedAt": "2026-10-12T06:09:47.964Z",
     "updateNote": "Added tractor beam with storage habs shrunk down into the side thruster body \"tested and works good\", fish pond so the sink looks like it has water, trade term and deco."
@@ -6017,7 +6017,7 @@
     ],
     "downloads": 5,
     "approvedAt": "2026-10-10T15:58:05.696Z",
-    "utilVersion": 8
+    "utilVersion": 9
   },
   {
     "id": "silver-wings-j9atx",
