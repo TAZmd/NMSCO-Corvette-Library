@@ -4782,7 +4782,9 @@ async function ensureD1(env) {
     env.DB.prepare("CREATE TABLE IF NOT EXISTS comment_reactions (comment_id INTEGER PRIMARY KEY, ship TEXT NOT NULL, reaction TEXT NOT NULL, at INTEGER NOT NULL)"),
     env.DB.prepare("CREATE TABLE IF NOT EXISTS comment_counts (ship TEXT PRIMARY KEY, n INTEGER NOT NULL) WITHOUT ROWID"),
     env.DB.prepare("CREATE TABLE IF NOT EXISTS comment_reads (discord_id TEXT NOT NULL, ship TEXT NOT NULL, last_id INTEGER NOT NULL, PRIMARY KEY (discord_id, ship)) WITHOUT ROWID"),
-    env.DB.prepare("CREATE TABLE IF NOT EXISTS ship_downloaders (discord_id TEXT NOT NULL, ship TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (discord_id, ship)) WITHOUT ROWID")
+    env.DB.prepare("CREATE TABLE IF NOT EXISTS ship_downloaders (discord_id TEXT NOT NULL, ship TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (discord_id, ship)) WITHOUT ROWID"),
+    env.DB.prepare("CREATE TABLE IF NOT EXISTS dl_log (ship TEXT NOT NULL, at INTEGER NOT NULL, iid TEXT NOT NULL, iph TEXT NOT NULL, ip TEXT NOT NULL)"),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS dl_log_ship_at ON dl_log (ship, at)")
   ]);
   d1SchemaReady = true;
 }
@@ -5202,6 +5204,26 @@ async function handleDownloadRequest(request, env, ctx) {
     }
   }
 
+  if (env.DB) {
+    ctx.waitUntil(
+      (async () => {
+        try {
+          await ensureD1(env);
+          const nowMs = Date.now();
+          const stmts = [
+            env.DB.prepare("INSERT INTO dl_log (ship, at, iid, iph, ip) VALUES (?, ?, ?, ?, ?)").bind(id, nowMs, idHash, ipHash || "none", callerIp)
+          ];
+          if (Math.random() < 0.01) {
+            stmts.push(env.DB.prepare("DELETE FROM dl_log WHERE at < ?").bind(nowMs - 30 * 86400000));
+          }
+          await env.DB.batch(stmts);
+        } catch (err) {
+          console.error("download log failed: " + (err && err.message ? err.message : String(err)));
+        }
+      })()
+    );
+  }
+
   ctx.waitUntil(
     recordDownloadStat(env, id, installId, callerIp).catch((err) => {
       console.error("recordDownloadStat failed: " + (err && err.message ? err.message : String(err)));
@@ -5320,7 +5342,8 @@ async function deleteShipFiles(id, entry, env) {
         env.DB.prepare("DELETE FROM comments WHERE ship = ?").bind(id),
         env.DB.prepare("DELETE FROM comment_counts WHERE ship = ?").bind(id),
         env.DB.prepare("DELETE FROM comment_reads WHERE ship = ?").bind(id),
-        env.DB.prepare("DELETE FROM ship_downloaders WHERE ship = ?").bind(id)
+        env.DB.prepare("DELETE FROM ship_downloaders WHERE ship = ?").bind(id),
+        env.DB.prepare("DELETE FROM dl_log WHERE ship = ?").bind(id)
       ]);
     } catch (err) {
       console.error("d1 cleanup failed: " + (err && err.message ? err.message : String(err)));
@@ -6420,7 +6443,43 @@ async function buildStats(env, shipId) {
       `Online since: ${e.approvedAt ? e.approvedAt.slice(0, 10) : "unknown"}${e.disabledAt ? " (offline now)" : ""}`
     ];
     if (owner && owner.discordId) lines.push(`Uploader: <@${owner.discordId}>`);
-    return { embeds: [{ title: shipLabel(e).slice(0, 200), description: lines.join("\n"), color: 0x3a6ea5 }] };
+    const fields = [];
+    try {
+      const since = now - 14 * 86400000;
+      const tot = await env.DB.prepare(
+        "SELECT COUNT(*) AS n, COUNT(DISTINCT iid) AS ids, COUNT(DISTINCT iph) AS ips FROM dl_log WHERE ship = ? AND at >= ?"
+      ).bind(shipId, since).first();
+      if (!tot || !tot.n) {
+        fields.push({ name: "Download log (14 days)", value: "Nothing logged yet." });
+      } else {
+        fields.push({
+          name: "Download log (14 days)",
+          value: `Downloads: ${tot.n}\nDifferent installations: ${tot.ids}\nDifferent connections: ${tot.ips}`
+        });
+        const topIds = await env.DB.prepare(
+          "SELECT iid, COUNT(*) AS n, COUNT(DISTINCT at / 86400000) AS days, MAX(at) AS last FROM dl_log WHERE ship = ? AND at >= ? GROUP BY iid ORDER BY n DESC LIMIT 10"
+        ).bind(shipId, since).all();
+        const idLines = (topIds.results || []).map(
+          (r) => `\`${String(r.iid).slice(0, 4)}\` ${r.n}x, ${r.days} day${r.days === 1 ? "" : "s"}, last <t:${Math.floor(r.last / 1000)}:R>`
+        );
+        if (idLines.length) fields.push({ name: "Top 10 installations (code)", value: idLines.join("\n").slice(0, 1020) });
+        const topIps = await env.DB.prepare(
+          "SELECT iph, COUNT(*) AS n, COUNT(DISTINCT at / 86400000) AS days, COUNT(DISTINCT iid) AS installs, MAX(at) AS last FROM dl_log WHERE ship = ? AND at >= ? GROUP BY iph ORDER BY n DESC LIMIT 10"
+        ).bind(shipId, since).all();
+        const ipLines = (topIps.results || []).map(
+          (r) => `\`${String(r.iph).slice(0, 6)}\` ${r.n}x, ${r.days} day${r.days === 1 ? "" : "s"}, ${r.installs} install${r.installs === 1 ? "" : "s"}, last <t:${Math.floor(r.last / 1000)}:R>`
+        );
+        if (ipLines.length) fields.push({ name: "Top 10 connections (IP code)", value: ipLines.join("\n").slice(0, 1020) });
+      }
+    } catch (err) {
+      console.error("download log read failed: " + (err && err.message ? err.message : String(err)));
+    }
+    const embed = { title: shipLabel(e).slice(0, 200), description: lines.join("\n"), color: 0x3a6ea5 };
+    if (fields.length) {
+      embed.fields = fields;
+      embed.footer = { text: "Real IP: Cloudflare, D1, table dl_log, column ip (search with the IP code in column iph)" };
+    }
+    return { embeds: [embed] };
   }
 
   const total = await counterSum(env, "day", 0);
