@@ -6634,9 +6634,22 @@ async function buildBotCheck(env) {
     blocks.push("The bot has the Administrator right, so it has every right in every channel.");
     return blocks.join("\n");
   }
-  const targets = [["Approvals channel", env.APPROVAL_CHANNEL_ID], ["Supervisor channel", env.ADMIN_CHANNEL_ID]];
+  const allTargets = [
+    ["Approvals channel", env.APPROVAL_CHANNEL_ID],
+    ["Supervisor channel", env.ADMIN_CHANNEL_ID],
+    ["New Corvette channel", env.ANNOUNCE_CHANNEL_ID],
+    ["Staff channel", env.CHECK_CHANNEL_ID],
+    ["Comments channel", env.COMMENT_CHANNEL_ID],
+    ["Remove channel", env.REMOVE_CHANNEL_ID]
+  ];
+  const seenIds = new Set();
+  const targets = [];
+  for (const [label, id] of allTargets) {
+    if (!id || seenIds.has(id)) continue;
+    seenIds.add(id);
+    targets.push([label, id]);
+  }
   for (const [label, id] of targets) {
-    if (!id) continue;
     const chResp = await discordApi(`/channels/${id}`, env, { method: "GET" });
     if (!chResp.ok) {
       blocks.push(`${label}: could not read it (${chResp.status}). The bot may not see this channel.`);
@@ -6644,12 +6657,12 @@ async function buildBotCheck(env) {
     }
     const ch = await chResp.json();
     const overwrites = ch.permission_overwrites || [];
-    const lines = [`${label}:`];
+    const missing = [];
     for (const [pname, bit] of BOT_PERMS) {
       const r = explainBotPerm(bit, base, overwrites, roleIds, guildId, me.id, nameOf);
-      lines.push(r.has ? `  OK  ${pname}` : `  MISSING  ${pname} - ${r.why}`);
+      if (!r.has) missing.push(`  MISSING  ${pname} - ${r.why}`);
     }
-    blocks.push(lines.join("\n"));
+    blocks.push(missing.length ? [`${label}:`, ...missing].join("\n") : `${label}: all OK`);
   }
   return blocks.join("\n\n").slice(0, 1900);
 }
