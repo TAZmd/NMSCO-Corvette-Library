@@ -6003,10 +6003,43 @@ async function scanSubmissionOwners(env) {
   return out;
 }
 
+async function buildDownloadsByCode(env, code) {
+  if (!env.DB) return "";
+  try {
+    await ensureD1(env);
+    const since = Date.now() - 14 * 86400000;
+    const tot = await env.DB.prepare(
+      "SELECT COUNT(*) AS n, COUNT(DISTINCT iid) AS ids FROM dl_log WHERE substr(iid, 1, 4) = ? AND at >= ?"
+    ).bind(code, since).first();
+    if (!tot || !tot.n) return "";
+    const ships = await env.DB.prepare(
+      "SELECT ship, COUNT(*) AS n, COUNT(DISTINCT at / 86400000) AS days, MAX(at) AS last FROM dl_log WHERE substr(iid, 1, 4) = ? AND at >= ? GROUP BY ship ORDER BY n DESC LIMIT 12"
+    ).bind(code, since).all();
+    const ips = await env.DB.prepare(
+      "SELECT DISTINCT substr(iph, 1, 6) AS c FROM dl_log WHERE substr(iid, 1, 4) = ? AND at >= ? LIMIT 5"
+    ).bind(code, since).all();
+    const names = new Map();
+    try {
+      for (const e of await readIndexList(env)) names.set(e.id, shipLabel(e));
+    } catch (e) {}
+    const lines = (ships.results || []).map(
+      (r) => `- ${String(names.get(r.ship) || r.ship).slice(0, 60)} - ${r.n}x, ${r.days} day${r.days === 1 ? "" : "s"}, last <t:${Math.floor(r.last / 1000)}:R>`
+    );
+    const head = [`Downloads in the last 14 days (code ${code}): ${tot.n} in total`];
+    if (tot.ids > 1) head.push(`Note: ${tot.ids} different installations share this code.`);
+    const ipList = (ips.results || []).map((r) => r.c).join(", ");
+    if (ipList) head.push(`IP codes: ${ipList}`);
+    return head.join("\n") + "\n" + lines.join("\n");
+  } catch (e) {
+    return "";
+  }
+}
+
 async function buildUsersLookup(env, uopts) {
   if (!env.DELETE_CODES) return "Storage is not available.";
   const owners = await scanSubmissionOwners(env);
   let keys = [];
+  let dlCode = "";
   if (uopts.ship) {
     const id = uopts.ship.toString().trim();
     const rec = owners.find((o) => o.slug === id);
@@ -6035,7 +6068,11 @@ async function buildUsersLookup(env, uopts) {
       } catch (e) {}
     }
     keys = [...set].slice(0, 3);
-    if (!keys.length) return `Nothing found for code ${code}.`;
+    dlCode = code;
+    if (!keys.length) {
+      const only = await buildDownloadsByCode(env, code);
+      return only || `Nothing found for code ${code}.`;
+    }
   }
   const indexIds = new Set((await readIndexList(env)).map((e) => e.id));
   let disabledMap = new Map();
@@ -6084,6 +6121,10 @@ async function buildUsersLookup(env, uopts) {
     });
     const counts = stat ? `Sent ${stat.submitted}, approved ${stat.approved}, rejected ${stat.rejected}` : "No upload counts yet";
     blocks.push(`${who}${flag}${extra}\n${counts}\nShips on file (${mine.length}):\n${lines.join("\n") || "- none"}`);
+  }
+  if (dlCode) {
+    const dlBlock = await buildDownloadsByCode(env, dlCode);
+    if (dlBlock) blocks.push(dlBlock);
   }
   return blocks.join("\n\n").slice(0, 1900);
 }
