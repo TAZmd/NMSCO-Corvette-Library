@@ -6003,6 +6003,15 @@ async function scanSubmissionOwners(env) {
   return out;
 }
 
+function fmtGap(ms) {
+  const m = Math.max(0, Math.round(ms / 60000));
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h >= 48) return `${Math.floor(h / 24)}d`;
+  const mm = m % 60;
+  return mm ? `${h}h ${mm}m` : `${h}h`;
+}
+
 async function buildDownloadsByCode(env, code) {
   if (!env.DB) return "";
   try {
@@ -6017,23 +6026,38 @@ async function buildDownloadsByCode(env, code) {
       return `No downloads found for code ${code} in the last 14 days. The log holds ${all.n} downloads from ${all.ids} installations, since <t:${Math.floor(all.first / 1000)}:f>.`;
     }
     const ships = await env.DB.prepare(
-      "SELECT ship, COUNT(*) AS n, COUNT(DISTINCT at / 86400000) AS days, MAX(at) AS last FROM dl_log WHERE substr(iid, 1, 4) = ? AND at >= ? GROUP BY ship ORDER BY n DESC LIMIT 12"
+      "SELECT ship, COUNT(*) AS n, COUNT(DISTINCT at / 86400000) AS days FROM dl_log WHERE substr(iid, 1, 4) = ? AND at >= ? GROUP BY ship ORDER BY n DESC LIMIT 5"
     ).bind(code, since).all();
     const ips = await env.DB.prepare(
       "SELECT DISTINCT substr(iph, 1, 6) AS c FROM dl_log WHERE substr(iid, 1, 4) = ? AND at >= ? LIMIT 5"
+    ).bind(code, since).all();
+    const recent = await env.DB.prepare(
+      "SELECT ship, at FROM dl_log WHERE substr(iid, 1, 4) = ? AND at >= ? ORDER BY at DESC LIMIT 13"
     ).bind(code, since).all();
     const names = new Map();
     try {
       for (const e of await readIndexList(env)) names.set(e.id, shipLabel(e));
     } catch (e) {}
-    const lines = (ships.results || []).map(
-      (r) => `- ${String(names.get(r.ship) || r.ship).slice(0, 60)} - ${r.n}x, ${r.days} day${r.days === 1 ? "" : "s"}, last <t:${Math.floor(r.last / 1000)}:R>`
-    );
+    const nameOf = (id) => String(names.get(id) || id).slice(0, 28);
     const head = [`Downloads in the last 14 days (code ${code}): ${tot.n} in total`];
     if (tot.ids > 1) head.push(`Note: ${tot.ids} different installations share this code.`);
     const ipList = (ips.results || []).map((r) => r.c).join(", ");
     if (ipList) head.push(`IP codes: ${ipList}`);
-    return head.join("\n") + "\n" + lines.join("\n");
+    const perShip = (ships.results || []).map(
+      (r) => `- ${nameOf(r.ship)} - ${r.n}x, ${r.days} day${r.days === 1 ? "" : "s"}`
+    );
+    const rows = recent.results || [];
+    const shown = rows.slice(0, 12);
+    const timeLines = shown.map((r, i) => {
+      const older = rows[i + 1];
+      const gap = older ? ` (${fmtGap(r.at - older.at)} after the one before)` : "";
+      return `- ${nameOf(r.ship)} - <t:${Math.floor(r.at / 1000)}:d> <t:${Math.floor(r.at / 1000)}:T>${gap}`;
+    });
+    return [
+      head.join("\n"),
+      "Per ship:\n" + perShip.join("\n"),
+      "Times (newest first, in your own time zone):\n" + timeLines.join("\n")
+    ].join("\n");
   } catch (e) {
     console.error("buildDownloadsByCode failed: " + (e && e.message ? e.message : String(e)));
     return `Could not read the download log: ${e && e.message ? e.message : String(e)}`.slice(0, 300);
@@ -6131,7 +6155,7 @@ async function buildUsersLookup(env, uopts) {
     const dlBlock = await buildDownloadsByCode(env, dlCode);
     if (dlBlock) blocks.push(dlBlock);
   }
-  return blocks.join("\n\n").slice(0, 1900);
+  return blocks.join("\n\n").slice(0, 1990);
 }
 
 async function handleRegister(url, env) {
