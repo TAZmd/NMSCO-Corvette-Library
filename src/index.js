@@ -6011,7 +6011,11 @@ async function buildDownloadsByCode(env, code) {
     const tot = await env.DB.prepare(
       "SELECT COUNT(*) AS n, COUNT(DISTINCT iid) AS ids FROM dl_log WHERE substr(iid, 1, 4) = ? AND at >= ?"
     ).bind(code, since).first();
-    if (!tot || !tot.n) return "";
+    if (!tot || !tot.n) {
+      const all = await env.DB.prepare("SELECT COUNT(*) AS n, COUNT(DISTINCT iid) AS ids, MIN(at) AS first FROM dl_log").first();
+      if (!all || !all.n) return `The download log is empty for code ${code}. Nothing has been logged yet.`;
+      return `No downloads found for code ${code} in the last 14 days. The log holds ${all.n} downloads from ${all.ids} installations, since <t:${Math.floor(all.first / 1000)}:f>.`;
+    }
     const ships = await env.DB.prepare(
       "SELECT ship, COUNT(*) AS n, COUNT(DISTINCT at / 86400000) AS days, MAX(at) AS last FROM dl_log WHERE substr(iid, 1, 4) = ? AND at >= ? GROUP BY ship ORDER BY n DESC LIMIT 12"
     ).bind(code, since).all();
@@ -6031,7 +6035,8 @@ async function buildDownloadsByCode(env, code) {
     if (ipList) head.push(`IP codes: ${ipList}`);
     return head.join("\n") + "\n" + lines.join("\n");
   } catch (e) {
-    return "";
+    console.error("buildDownloadsByCode failed: " + (e && e.message ? e.message : String(e)));
+    return `Could not read the download log: ${e && e.message ? e.message : String(e)}`.slice(0, 300);
   }
 }
 
