@@ -6990,14 +6990,14 @@
   {
     "id": "gold-sabbath-lvu1e",
     "name": "Gold Sabbath",
-    "sha256": "1d607b64e5f33bd55d690753d131e7d51b4a05ec48dccc978e03bc643e9b58ff",
+    "sha256": "beddfe6bd45c80e293e5f411d6d16f7ffd6d48cd304b4c4e8c9f32560294cf15",
     "submitter": "Phantomdark30",
     "description": "",
     "patreonUrl": "",
     "youtubeUrl": "",
     "imageCount": 1,
     "objectCount": 1856,
-    "score": 9.2,
+    "score": 9.3,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -7071,6 +7071,10 @@
         "value": 1
       },
       {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
         "label": "Autonomous Mining Unit",
         "value": 1
       },
@@ -7101,6 +7105,9 @@
     ],
     "downloads": 0,
     "approvedAt": "2026-10-15T03:03:45.454Z",
-    "utilVersion": 9
+    "utilVersion": 9,
+    "version": 1,
+    "updatedAt": "2026-10-15T03:42:08.997Z",
+    "updateNote": "I added a stellar Extractor to the ship"
   }
 ]
