@@ -5,8 +5,8 @@
   "description": "",
   "patreonUrl": "",
   "youtubeUrl": "",
-  "objectCount": 1856,
-  "score": 9.3,
+  "objectCount": 1861,
+  "score": 9.4,
   "utilities": [
     {
       "label": "Base Teleport Module",
@@ -80,10 +80,6 @@
       "value": 1
     },
     {
-      "label": "Stellar Extractor Room",
-      "value": 1
-    },
-    {
       "label": "Autonomous Mining Unit",
       "value": 1
     },
@@ -104,6 +100,14 @@
       "value": 1
     },
     {
+      "label": "Livestock Unit",
+      "value": 1
+    },
+    {
+      "label": "Automated Feeder",
+      "value": 1
+    },
+    {
       "label": "Plant Tray",
       "value": 1
     },
@@ -113,10 +117,10 @@
     }
   ],
   "imageCount": 1,
-  "sha256": "beddfe6bd45c80e293e5f411d6d16f7ffd6d48cd304b4c4e8c9f32560294cf15",
+  "sha256": "63613f085e525f3dabf59cabe1badc03917652d7bdece48f100a8863b09645ab",
   "downloads": 0,
   "approvedAt": "2026-10-15T03:03:45.454Z",
-  "version": 1,
-  "updatedAt": "2026-10-15T03:42:08.997Z",
-  "updateNote": "I added a stellar Extractor to the ship"
+  "version": 2,
+  "updatedAt": "2026-10-16T04:57:46.134Z",
+  "updateNote": "added missing hull parts"
 }
