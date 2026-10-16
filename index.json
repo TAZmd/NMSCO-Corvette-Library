@@ -7220,5 +7220,117 @@
     "version": 1,
     "updatedAt": "2026-10-16T18:08:28.715Z",
     "updateNote": "Missing a door I accidentally deleted while in the anomaly."
+  },
+  {
+    "id": "royal-naboo-fighter-ob36u",
+    "name": "Royal Naboo Fighter",
+    "sha256": "9aba10f05b08f7e6ca3d36da8abfc0d619071ccecffd67df570198c425723a45",
+    "submitter": "PhantomAbyss469",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 2712,
+    "score": 9,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Livestock Unit",
+        "value": 1
+      },
+      {
+        "label": "Automated Feeder",
+        "value": 1
+      },
+      {
+        "label": "Plant Tray",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-16T22:13:11.270Z",
+    "utilVersion": 9
   }
 ]
