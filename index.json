@@ -7165,13 +7165,13 @@
   {
     "id": "saud-kruger-dolphin-6jkxa",
     "name": "Saud Kruger: Dolphin",
-    "sha256": "5590e5205acb20f9974896682788fa33f66f88e55d94c4d42bf895a9f393620c",
+    "sha256": "4d3a09929c6b249158d5f9fc7311fb82a7536b6300ab0bb7650aa92ecdc09717",
     "submitter": "QuantumPickleJar",
     "description": "All the way from the year 3300, it's Saud Kruger's entry level starliner for any aspiring cruise ship pilot out there, the Dolphin. Access the ship from the boarding ramps on either side of the fuselage. Features two passenger and captain cabins.",
     "patreonUrl": "",
     "youtubeUrl": "",
     "imageCount": 3,
-    "objectCount": 947,
+    "objectCount": 948,
     "score": 4.4,
     "utilities": [
       {
@@ -7216,6 +7216,9 @@
     ],
     "downloads": 1,
     "approvedAt": "2026-10-16T17:12:44.277Z",
-    "utilVersion": 9
+    "utilVersion": 9,
+    "version": 1,
+    "updatedAt": "2026-10-16T18:08:28.715Z",
+    "updateNote": "Missing a door I accidentally deleted while in the anomaly."
   }
 ]
