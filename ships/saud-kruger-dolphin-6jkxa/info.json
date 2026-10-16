@@ -1,0 +1,55 @@
+{
+  "name": "Saud Kruger: Dolphin",
+  "id": "saud-kruger-dolphin-6jkxa",
+  "submitter": "QuantumPickleJar",
+  "description": "All the way from the year 3300, it's Saud Kruger's entry level starliner for any aspiring cruise ship pilot out there, the Dolphin. Access the ship from the boarding ramps on either side of the fuselage. Features two passenger and captain cabins.",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 947,
+  "score": 4.4,
+  "utilities": [
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "11 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 0.5
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Holo-Arena Game Table",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "5590e5205acb20f9974896682788fa33f66f88e55d94c4d42bf895a9f393620c",
+  "downloads": 0,
+  "approvedAt": "2026-10-16T17:12:44.277Z"
+}
