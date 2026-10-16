@@ -1,0 +1,47 @@
+{
+  "name": "Ambatronus",
+  "id": "ambatronus-odcxw",
+  "submitter": "ngidal",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 132,
+  "score": 6.8,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    }
+  ],
+  "imageCount": 1,
+  "sha256": "28c5fd508b9648b9b62a10c82edaa2ed7620975ffe4044a32e24dc4c4115cb5a",
+  "downloads": 0,
+  "approvedAt": "2026-10-16T09:43:29.206Z"
+}
