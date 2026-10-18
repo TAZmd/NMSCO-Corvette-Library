@@ -7599,5 +7599,77 @@
     "downloads": 0,
     "approvedAt": "2026-10-18T18:55:57.116Z",
     "utilVersion": 9
+  },
+  {
+    "id": "valhalla-class-explorer-30z5p",
+    "name": "Valhalla Class Explorer",
+    "sha256": "2b661a347e20b33f7c546e1bcdfbab7bacfbb3370000d1d77e3fed0109ef0382",
+    "submitter": "Edgerunner",
+    "description": "My first hybrid build. Tractor Beams, Teleport, Scanners, Storage etc. included. Has 2 sidebay power windows and front window.",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 342,
+    "score": 7.7,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "9 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-18T18:56:18.526Z",
+    "utilVersion": 9
   }
 ]
