@@ -5,7 +5,7 @@
   "description": "Cockpit is under the chair and is from sonic the hedgehog.",
   "patreonUrl": "",
   "youtubeUrl": "",
-  "objectCount": 177,
+  "objectCount": 142,
   "score": 1.5,
   "utilities": [
     {
@@ -14,7 +14,10 @@
     }
   ],
   "imageCount": 1,
-  "sha256": "ce313fd8db547f9c6cecc28bfa587637e8de5a6023aa8a9c1be63d3be5eff8bd",
+  "sha256": "f1fdcb318f348261fa8101cd08aafd918cca2abfeadcb762fdb1079bc0c1ab79",
   "downloads": 0,
-  "approvedAt": "2026-10-04T18:40:19.543Z"
+  "approvedAt": "2026-10-04T18:40:19.543Z",
+  "version": 1,
+  "updatedAt": "2026-10-19T19:50:40.092Z",
+  "updateNote": "image and more parts."
 }
