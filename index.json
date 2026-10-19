@@ -7671,5 +7671,21 @@
     "downloads": 11,
     "approvedAt": "2026-10-18T18:56:18.526Z",
     "utilVersion": 9
+  },
+  {
+    "id": "nautilus-steampunk-motorized-bike-6n194",
+    "name": "Nautilus Steampunk motorized Bike",
+    "sha256": "43e05c7e755490230c52a26242d2a2b1662f9ceb6ae80615cc9ac324dbfb3472",
+    "submitter": "Bowser",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 1,
+    "objectCount": 95,
+    "score": 0,
+    "utilities": [],
+    "downloads": 0,
+    "approvedAt": "2026-10-19T01:10:23.181Z",
+    "utilVersion": 9
   }
 ]
