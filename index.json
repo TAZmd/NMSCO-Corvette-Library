@@ -2945,13 +2945,13 @@
   {
     "id": "tornado-6om39",
     "name": "Tornado",
-    "sha256": "ce313fd8db547f9c6cecc28bfa587637e8de5a6023aa8a9c1be63d3be5eff8bd",
+    "sha256": "f1fdcb318f348261fa8101cd08aafd918cca2abfeadcb762fdb1079bc0c1ab79",
     "submitter": "Bowser",
     "description": "Cockpit is under the chair and is from sonic the hedgehog.",
     "patreonUrl": "",
     "youtubeUrl": "",
     "imageCount": 1,
-    "objectCount": 177,
+    "objectCount": 142,
     "score": 1.5,
     "utilities": [
       {
@@ -2961,7 +2961,10 @@
     ],
     "downloads": 6,
     "approvedAt": "2026-10-04T18:40:19.543Z",
-    "utilVersion": 9
+    "utilVersion": 9,
+    "version": 1,
+    "updatedAt": "2026-10-19T19:50:40.092Z",
+    "updateNote": "image and more parts."
   },
   {
     "id": "atlas-star-ship-ke8ir",
