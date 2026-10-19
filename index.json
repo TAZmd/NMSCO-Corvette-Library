@@ -7603,14 +7603,14 @@
   {
     "id": "valhalla-class-explorer-30z5p",
     "name": "Valhalla Class Explorer",
-    "sha256": "2b661a347e20b33f7c546e1bcdfbab7bacfbb3370000d1d77e3fed0109ef0382",
+    "sha256": "e80d381ffc142ce6a55f334d784f264c6ccb79d1688717c70b5d410c5cf1a0c9",
     "submitter": "Edgerunner",
     "description": "My first hybrid build. Tractor Beams, Teleport, Scanners, Storage etc. included. Has 2 sidebay power windows and front window.",
     "patreonUrl": "",
     "youtubeUrl": "",
     "imageCount": 3,
     "objectCount": 342,
-    "score": 7.7,
+    "score": 6.2,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -7618,10 +7618,6 @@
       },
       {
         "label": "Scanner Room",
-        "value": 1
-      },
-      {
-        "label": "Galactic Trade Terminal",
         "value": 1
       },
       {
@@ -7670,7 +7666,10 @@
     ],
     "downloads": 11,
     "approvedAt": "2026-10-18T18:56:18.526Z",
-    "utilVersion": 9
+    "utilVersion": 9,
+    "version": 1,
+    "updatedAt": "2026-10-19T02:43:53.827Z",
+    "updateNote": "json edits (power doors, electric lines, and thruster light bulbs removed for realism)"
   },
   {
     "id": "nautilus-steampunk-motorized-bike-6n194",
