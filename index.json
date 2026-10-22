@@ -3913,14 +3913,14 @@
   {
     "id": "ragnarok-xv-2-k27kz",
     "name": "Ragnarok XV.2",
-    "sha256": "50c71f69bbf1d0d0c7368bd9bdf7b4e844774a39dfd0e931abc1b5e7ec3ab42e",
+    "sha256": "abbc899f62ec50c2137eb96e1df879926147431f33b62789a98a3cb25e9c3374",
     "submitter": "Phantomdark30",
     "description": "",
     "patreonUrl": "",
     "youtubeUrl": "",
     "imageCount": 1,
-    "objectCount": 2515,
-    "score": 7.8,
+    "objectCount": 2516,
+    "score": 9.3,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -3932,6 +3932,10 @@
       },
       {
         "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
         "value": 1
       },
       {
@@ -4025,9 +4029,9 @@
     "downloads": 40,
     "approvedAt": "2026-10-05T02:29:29.751Z",
     "utilVersion": 9,
-    "version": 1,
-    "updatedAt": "2026-10-22T15:04:45.983Z",
-    "updateNote": "Added fishing pool livestock feeder and antimatter and fixed save point inside swarm trophy"
+    "version": 2,
+    "updatedAt": "2026-10-22T15:23:18.684Z",
+    "updateNote": "forgot to add tractor beam"
   },
   {
     "id": "adfx-02-morgan-2crkd",
