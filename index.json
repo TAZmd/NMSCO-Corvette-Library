@@ -7632,14 +7632,14 @@
   {
     "id": "valhalla-class-explorer-30z5p",
     "name": "Valhalla Class Explorer",
-    "sha256": "e80d381ffc142ce6a55f334d784f264c6ccb79d1688717c70b5d410c5cf1a0c9",
+    "sha256": "0c5a10d9c4bc87f10c10f77bf2d501b0d99b357b249f0bf0713b47443e2c9281",
     "submitter": "Edgerunner",
     "description": "My first hybrid build. Tractor Beams, Teleport, Scanners, Storage etc. included. Has 2 sidebay power windows and front window.",
     "patreonUrl": "",
     "youtubeUrl": "",
     "imageCount": 3,
-    "objectCount": 342,
-    "score": 6.2,
+    "objectCount": 351,
+    "score": 6.5,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -7658,6 +7658,10 @@
       },
       {
         "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
         "value": 1
       },
       {
@@ -7689,6 +7693,10 @@
         "value": 1
       },
       {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
         "label": "Antimatter Reactor",
         "value": 1
       }
@@ -7696,9 +7704,9 @@
     "downloads": 18,
     "approvedAt": "2026-10-18T18:56:18.526Z",
     "utilVersion": 9,
-    "version": 1,
-    "updatedAt": "2026-10-19T02:43:53.827Z",
-    "updateNote": "json edits (power doors, electric lines, and thruster light bulbs removed for realism)"
+    "version": 2,
+    "updatedAt": "2026-10-22T20:21:41.627Z",
+    "updateNote": "Added power shield windows at the bow, added oxygen harvester above weapon terminal, added refiner unit below storage containers"
   },
   {
     "id": "nautilus-steampunk-motorized-bike-6n194",
