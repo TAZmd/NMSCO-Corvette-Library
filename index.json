@@ -7632,7 +7632,7 @@
   {
     "id": "valhalla-class-explorer-30z5p",
     "name": "Valhalla Class Explorer",
-    "sha256": "0c5a10d9c4bc87f10c10f77bf2d501b0d99b357b249f0bf0713b47443e2c9281",
+    "sha256": "e6772e77a331cbe82870c6f11668a379c5913020eaf2716c347bdccbebee3a41",
     "submitter": "Edgerunner",
     "description": "My first hybrid build. Tractor Beams, Teleport, Scanners, Storage etc. included. Has 2 sidebay power windows and front window.",
     "patreonUrl": "",
@@ -7704,9 +7704,9 @@
     "downloads": 18,
     "approvedAt": "2026-10-18T18:56:18.526Z",
     "utilVersion": 9,
-    "version": 2,
-    "updatedAt": "2026-10-22T20:21:41.627Z",
-    "updateNote": "Added power shield windows at the bow, added oxygen harvester above weapon terminal, added refiner unit below storage containers"
+    "version": 3,
+    "updatedAt": "2026-10-22T21:12:05.300Z",
+    "updateNote": "Meshed Right Window in front for better aesthetic"
   },
   {
     "id": "nautilus-steampunk-motorized-bike-6n194",
