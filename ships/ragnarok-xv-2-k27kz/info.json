@@ -5,8 +5,8 @@
   "description": "",
   "patreonUrl": "",
   "youtubeUrl": "",
-  "objectCount": 2508,
-  "score": 7.4,
+  "objectCount": 2515,
+  "score": 7.8,
   "utilities": [
     {
       "label": "Base Teleport Module",
@@ -88,12 +88,31 @@
       "value": 1
     },
     {
+      "label": "Antimatter Reactor",
+      "value": 1
+    },
+    {
       "label": "Appearance Modifier",
+      "value": 1
+    },
+    {
+      "label": "Livestock Unit",
+      "value": 1
+    },
+    {
+      "label": "Automated Feeder",
+      "value": 1
+    },
+    {
+      "label": "Fishpond",
       "value": 1
     }
   ],
   "imageCount": 1,
-  "sha256": "a59b1dd738e3b0caa7dcb4b6e0a75d9e21b1b22262390363a9c946bf64a22aaa",
+  "sha256": "50c71f69bbf1d0d0c7368bd9bdf7b4e844774a39dfd0e931abc1b5e7ec3ab42e",
   "downloads": 0,
-  "approvedAt": "2026-10-05T02:29:29.751Z"
+  "approvedAt": "2026-10-05T02:29:29.751Z",
+  "version": 1,
+  "updatedAt": "2026-10-22T15:04:45.983Z",
+  "updateNote": "Added fishing pool livestock feeder and antimatter and fixed save point inside swarm trophy"
 }
