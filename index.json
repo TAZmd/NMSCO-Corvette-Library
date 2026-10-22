@@ -1144,7 +1144,7 @@
   {
     "id": "the-360-harvester-1c9on",
     "name": "The 360 Harvester",
-    "sha256": "98055e924b7a84b4c7662f8e3cedb74147945b261eeb8cc48127dee486e21116",
+    "sha256": "eb26412d4f80a19a30b53c7407bce714f6ca426b7115982b1a0eae2f5fd488a7",
     "submitter": "TAZmd",
     "patreonUrl": "https://www.youtube.com/watch?v=2MXVTlUryac",
     "imageCount": 3,
@@ -1237,7 +1237,10 @@
     ],
     "downloads": 25,
     "approvedAt": "2026-10-01T11:59:46.557Z",
-    "utilVersion": 9
+    "utilVersion": 9,
+    "version": 1,
+    "updatedAt": "2026-10-22T09:20:34.068Z",
+    "updateNote": "Botanical Pod got rescaled by game so had to fix scale. They blocked Research Stations."
   },
   {
     "id": "quadjumper-gekp7",
