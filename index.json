@@ -7859,5 +7859,141 @@
     "downloads": 30,
     "approvedAt": "2026-10-20T12:13:37.487Z",
     "utilVersion": 9
+  },
+  {
+    "id": "astral-elegance-rudxf",
+    "name": "Astral Elegance",
+    "sha256": "f2de3c0ea41182cf75cff2de53d4ab24f19e98e234c25c881fd887ee24d4d3f7",
+    "submitter": "TAZmd",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "https://youtu.be/5mKe5-D3Mwc",
+    "imageCount": 3,
+    "objectCount": 986,
+    "score": 10,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "20 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Holo-Arena Game Table",
+        "value": 1
+      },
+      {
+        "label": "Exocraft Research Station",
+        "value": 1
+      },
+      {
+        "label": "Ship Research Station",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Gas Harvester",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Livestock Unit",
+        "value": 1
+      },
+      {
+        "label": "Automated Feeder",
+        "value": 1
+      },
+      {
+        "label": "Plant Tray",
+        "value": 1
+      },
+      {
+        "label": "Fishpond",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-24T04:16:24.079Z",
+    "utilVersion": 9
   }
 ]
