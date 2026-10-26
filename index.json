@@ -7995,5 +7995,49 @@
     "downloads": 26,
     "approvedAt": "2026-10-24T04:16:24.079Z",
     "utilVersion": 9
+  },
+  {
+    "id": "millennium-falcon-mk-2-4dy9d",
+    "name": "Millennium Falcon MK.2",
+    "sha256": "679474aadc866a6f5c69ea008c2b8008d3cbf28c8817e151252657f5afe0dc59",
+    "submitter": "Owl-Anders",
+    "description": "May have issues leaving space station. Just warp.",
+    "patreonUrl": "",
+    "youtubeUrl": "https://youtu.be/gHOTDBRP1qs?si=Z29-VKvrWmZ5OE-q",
+    "imageCount": 1,
+    "objectCount": 1957,
+    "score": 2.6,
+    "utilities": [
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-26T01:11:53.655Z",
+    "utilVersion": 9
   }
 ]
