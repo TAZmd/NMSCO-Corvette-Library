@@ -8039,5 +8039,41 @@
     "downloads": 0,
     "approvedAt": "2026-10-26T01:11:53.655Z",
     "utilVersion": 9
+  },
+  {
+    "id": "millennium-falcon-mk-1-4l3cv",
+    "name": "Millennium Falcon MK.1",
+    "sha256": "684fafca88c0acd924c276a89d5b39c2ef209a4e7e77a8d8ecad758ad4c0289f",
+    "submitter": "Owl-Anders",
+    "description": "May have issues leaving space stations. Just warp.",
+    "patreonUrl": "",
+    "youtubeUrl": "https://youtu.be/gHOTDBRP1qs?si=Z29-VKvrWmZ5OE-q",
+    "imageCount": 1,
+    "objectCount": 1096,
+    "score": 2.3,
+    "utilities": [
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-10-26T01:12:00.285Z",
+    "utilVersion": 9
   }
 ]
