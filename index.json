@@ -8183,5 +8183,21 @@
     "downloads": 6,
     "approvedAt": "2026-10-26T01:12:06.247Z",
     "utilVersion": 9
+  },
+  {
+    "id": "nms-big-wheel-for-adults-pgfnq",
+    "name": "NMS Big Wheel for Adults",
+    "sha256": "23aeed54b966335b07d09aa343bc3d10aaee60c0078b625553393e5d23928293",
+    "submitter": "MiLf&CoOkIeS",
+    "description": "No Tech, only fun and laughs! Stand on the back tire and look at the wheel to enter.",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 203,
+    "score": 0,
+    "utilities": [],
+    "downloads": 0,
+    "approvedAt": "2026-10-27T21:47:33.557Z",
+    "utilVersion": 9
   }
 ]
