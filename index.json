@@ -8203,14 +8203,14 @@
   {
     "id": "iron-bastion-176gd",
     "name": "Iron Bastion",
-    "sha256": "ff62f92ef1e3a30b7de92ad03809002be1bf05d8fc8e45c8e74579830ca04268",
+    "sha256": "51cecbe24a61537ea8fe72be5b3653e15409d0c08985546eda0669ac61177c68",
     "submitter": "MiLf&CoOkIeS",
     "description": "",
     "patreonUrl": "",
     "youtubeUrl": "",
     "imageCount": 3,
-    "objectCount": 586,
-    "score": 8.4,
+    "objectCount": 597,
+    "score": 8.9,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -8256,6 +8256,14 @@
         "value": 1
       },
       {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
         "label": "Signal Booster",
         "value": 1
       },
@@ -8269,6 +8277,10 @@
       },
       {
         "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
         "value": 1
       },
       {
@@ -8298,6 +8310,9 @@
     ],
     "downloads": 3,
     "approvedAt": "2026-10-27T23:54:23.295Z",
-    "utilVersion": 9
+    "utilVersion": 9,
+    "version": 1,
+    "updatedAt": "2026-10-28T00:37:16.253Z",
+    "updateNote": "Added missing Tech"
   }
 ]
