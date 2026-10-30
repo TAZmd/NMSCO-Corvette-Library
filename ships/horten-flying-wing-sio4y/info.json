@@ -1,0 +1,43 @@
+{
+  "name": "Horten Flying Wing",
+  "id": "horten-flying-wing-sio4y",
+  "submitter": "boracicalarm433",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 454,
+  "score": 2.6,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "4 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    }
+  ],
+  "imageCount": 2,
+  "sha256": "7f03a69da832be67e0d9ccb886d18334b6eb98ed8b8e142b4bab3808e8c30c3e",
+  "downloads": 0,
+  "approvedAt": "2026-10-30T01:34:23.832Z"
+}
