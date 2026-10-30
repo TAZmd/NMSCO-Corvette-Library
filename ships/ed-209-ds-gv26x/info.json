@@ -1,0 +1,24 @@
+{
+  "name": "ED-209/DS",
+  "id": "ed-209-ds-gv26x",
+  "submitter": "4gotAboutDre / ForgotAbtDre",
+  "description": "You have 20 seconds to comply. * Spider sold separately.",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 73,
+  "score": 3,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "dac463def5ac4631c1d48960cce0c488c85320c800bdaef6fad13c651ba61333",
+  "downloads": 0,
+  "approvedAt": "2026-10-30T03:22:00.669Z"
+}
