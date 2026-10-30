@@ -2924,6 +2924,38 @@ async function ghDeleteFile(path, message, env) {
   });
 }
 
+function shipShownVersion(e) {
+  if (!e || !e.version) return 1;
+  return e.vFix ? e.version : e.version + 1;
+}
+
+async function migrateShipVersionsOnce(env) {
+  if (!env.DELETE_CODES) return;
+  const done = await env.DELETE_CODES.get("migr:shipver2");
+  if (done) return;
+  const shards = await readIndexShards(env);
+  let allOk = true;
+  for (const sh of shards) {
+    let changed = false;
+    for (const e of sh.list) {
+      if (e.version >= 1 && !e.vFix) {
+        e.version = e.version + 1;
+        e.vFix = true;
+        changed = true;
+      }
+    }
+    if (changed) {
+      try {
+        await writeShard(env, sh, "Shift ship versions so the original is v1");
+      } catch (err) {
+        allOk = false;
+        console.error("version migration failed for " + sh.path + ": " + (err && err.message ? err.message : String(err)));
+      }
+    }
+  }
+  if (allOk) await env.DELETE_CODES.put("migr:shipver2", "1");
+}
+
 async function promoteUpdate(slug, stagedInfo, shipBytes, images, env) {
   const id = stagedInfo.updateOf;
   const found = await findInIndex(env, id);
@@ -2934,7 +2966,7 @@ async function promoteUpdate(slug, stagedInfo, shipBytes, images, env) {
   const newName = (stagedInfo.newName || "").toString().trim();
   const photosChanged = stagedInfo.photosChanged === true && Array.isArray(images) && images.length >= 1;
   const note = (stagedInfo.updateNote || "").toString();
-  const version = noFile ? entry.version || 0 : (entry.version || 0) + 1;
+  const version = noFile ? entry.version || 0 : shipShownVersion(entry) + 1;
   const nowIso = new Date().toISOString();
   const photoName = (i) => (i === 0 ? "preview.png" : `preview${i + 1}.png`);
   let shipHash = entry.sha256;
@@ -3000,6 +3032,7 @@ async function promoteUpdate(slug, stagedInfo, shipBytes, images, env) {
     entry.score = stagedInfo.score;
     entry.utilities = stagedInfo.utilities;
     entry.version = version;
+    entry.vFix = true;
     entry.updatedAt = nowIso;
     entry.updateNote = note;
     entry.utilVersion = utilCatalogVersion();
@@ -5630,7 +5663,7 @@ async function runUpdate(env, clicker, shipId, att, newNameRaw, extra = {}) {
     check = inspectShipText(objectsText);
   }
 
-  const version = hasFile ? (entry.version || 0) + 1 : entry.version || 0;
+  const version = hasFile ? shipShownVersion(entry) + 1 : entry.version ? shipShownVersion(entry) : 0;
   const slug = `upd-${Math.random().toString(36).slice(2, 8)}-${shipId}`.slice(0, 80);
   const info = {
     name: entry.name, id: slug, updateOf: shipId, version,
@@ -5657,7 +5690,7 @@ async function runUpdate(env, clicker, shipId, att, newNameRaw, extra = {}) {
   await uploaderBump(env, userBanKey(clicker.id), "submitted", label);
   await env.DELETE_CODES.put(`upd:${shipId}`, slug, { expirationTtl: 14 * 86400 });
 
-  const current = entry.version ? `v${entry.version}` : "the original version";
+  const current = entry.version ? `v${shipShownVersion(entry)}` : "the original version";
   const metaFields = [];
   if (newDescription !== undefined) {
     metaFields.push({ name: "New instructions", value: (newDescription || "(empty)").slice(0, 900), inline: false });
@@ -6003,72 +6036,10 @@ async function scanSubmissionOwners(env) {
   return out;
 }
 
-function fmtGap(ms) {
-  const m = Math.max(0, Math.round(ms / 60000));
-  if (m < 60) return `${m}m`;
-  const h = Math.floor(m / 60);
-  if (h >= 48) return `${Math.floor(h / 24)}d`;
-  const mm = m % 60;
-  return mm ? `${h}h ${mm}m` : `${h}h`;
-}
-
-async function buildDownloadsByCode(env, code) {
-  if (!env.DB) return "";
-  try {
-    await ensureD1(env);
-    const since = Date.now() - 14 * 86400000;
-    const tot = await env.DB.prepare(
-      "SELECT COUNT(*) AS n, COUNT(DISTINCT iid) AS ids FROM dl_log WHERE substr(iid, 1, 4) = ? AND at >= ?"
-    ).bind(code, since).first();
-    if (!tot || !tot.n) {
-      const all = await env.DB.prepare("SELECT COUNT(*) AS n, COUNT(DISTINCT iid) AS ids, MIN(at) AS first FROM dl_log").first();
-      if (!all || !all.n) return `The download log is empty for code ${code}. Nothing has been logged yet.`;
-      return `No downloads found for code ${code} in the last 14 days. The log holds ${all.n} downloads from ${all.ids} installations, since <t:${Math.floor(all.first / 1000)}:f>.`;
-    }
-    const ships = await env.DB.prepare(
-      "SELECT ship, COUNT(*) AS n, COUNT(DISTINCT at / 86400000) AS days FROM dl_log WHERE substr(iid, 1, 4) = ? AND at >= ? GROUP BY ship ORDER BY n DESC LIMIT 5"
-    ).bind(code, since).all();
-    const ips = await env.DB.prepare(
-      "SELECT DISTINCT substr(iph, 1, 6) AS c FROM dl_log WHERE substr(iid, 1, 4) = ? AND at >= ? LIMIT 5"
-    ).bind(code, since).all();
-    const recent = await env.DB.prepare(
-      "SELECT ship, at FROM dl_log WHERE substr(iid, 1, 4) = ? AND at >= ? ORDER BY at DESC LIMIT 13"
-    ).bind(code, since).all();
-    const names = new Map();
-    try {
-      for (const e of await readIndexList(env)) names.set(e.id, shipLabel(e));
-    } catch (e) {}
-    const nameOf = (id) => String(names.get(id) || id).slice(0, 28);
-    const head = [`Downloads in the last 14 days (code ${code}): ${tot.n} in total`];
-    if (tot.ids > 1) head.push(`Note: ${tot.ids} different installations share this code.`);
-    const ipList = (ips.results || []).map((r) => r.c).join(", ");
-    if (ipList) head.push(`IP codes: ${ipList}`);
-    const perShip = (ships.results || []).map(
-      (r) => `- ${nameOf(r.ship)} - ${r.n}x, ${r.days} day${r.days === 1 ? "" : "s"}`
-    );
-    const rows = recent.results || [];
-    const shown = rows.slice(0, 12);
-    const timeLines = shown.map((r, i) => {
-      const older = rows[i + 1];
-      const gap = older ? ` (${fmtGap(r.at - older.at)} after the one before)` : "";
-      return `- ${nameOf(r.ship)} - <t:${Math.floor(r.at / 1000)}:d> <t:${Math.floor(r.at / 1000)}:T>${gap}`;
-    });
-    return [
-      head.join("\n"),
-      "Per ship:\n" + perShip.join("\n"),
-      "Times (newest first, in your own time zone):\n" + timeLines.join("\n")
-    ].join("\n");
-  } catch (e) {
-    console.error("buildDownloadsByCode failed: " + (e && e.message ? e.message : String(e)));
-    return `Could not read the download log: ${e && e.message ? e.message : String(e)}`.slice(0, 300);
-  }
-}
-
 async function buildUsersLookup(env, uopts) {
   if (!env.DELETE_CODES) return "Storage is not available.";
   const owners = await scanSubmissionOwners(env);
   let keys = [];
-  let dlCode = "";
   if (uopts.ship) {
     const id = uopts.ship.toString().trim();
     const rec = owners.find((o) => o.slug === id);
@@ -6097,11 +6068,7 @@ async function buildUsersLookup(env, uopts) {
       } catch (e) {}
     }
     keys = [...set].slice(0, 3);
-    dlCode = code;
-    if (!keys.length) {
-      const only = await buildDownloadsByCode(env, code);
-      return only || `Nothing found for code ${code}.`;
-    }
+    if (!keys.length) return `Nothing found for code ${code}.`;
   }
   const indexIds = new Set((await readIndexList(env)).map((e) => e.id));
   let disabledMap = new Map();
@@ -6151,11 +6118,7 @@ async function buildUsersLookup(env, uopts) {
     const counts = stat ? `Sent ${stat.submitted}, approved ${stat.approved}, rejected ${stat.rejected}` : "No upload counts yet";
     blocks.push(`${who}${flag}${extra}\n${counts}\nShips on file (${mine.length}):\n${lines.join("\n") || "- none"}`);
   }
-  if (dlCode) {
-    const dlBlock = await buildDownloadsByCode(env, dlCode);
-    if (dlBlock) blocks.push(dlBlock);
-  }
-  return blocks.join("\n\n").slice(0, 1990);
+  return blocks.join("\n\n").slice(0, 1900);
 }
 
 async function handleRegister(url, env) {
@@ -7571,6 +7534,9 @@ async function handleComponent(interaction, env, ctx) {
 
 export default {
   async scheduled(event, env, ctx) {
+    ctx.waitUntil(
+      migrateShipVersionsOnce(env).catch((err) => console.error("migrateShipVersionsOnce failed: " + (err && err.message ? err.message : String(err))))
+    );
     ctx.waitUntil(
       runPurgeDue(env).catch((err) => console.error("runPurgeDue failed: " + (err && err.message ? err.message : String(err))))
     );
