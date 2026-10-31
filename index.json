@@ -1136,10 +1136,11 @@
     ],
     "downloads": 133,
     "approvedAt": "2026-10-01T11:50:53.164Z",
-    "version": 2,
+    "version": 3,
     "updatedAt": "2026-10-06T12:04:52.159Z",
     "utilVersion": 9,
-    "updateNote": "Added 3 Missing Utilities, Signal Booster, Health Station, Hazard Protection Unit."
+    "updateNote": "Added 3 Missing Utilities, Signal Booster, Health Station, Hazard Protection Unit.",
+    "vFix": true
   },
   {
     "id": "the-360-harvester-1c9on",
@@ -1238,9 +1239,10 @@
     "downloads": 38,
     "approvedAt": "2026-10-01T11:59:46.557Z",
     "utilVersion": 9,
-    "version": 1,
+    "version": 2,
     "updatedAt": "2026-10-22T09:20:34.068Z",
-    "updateNote": "Botanical Pod got rescaled by game so had to fix scale. They blocked Research Stations."
+    "updateNote": "Botanical Pod got rescaled by game so had to fix scale. They blocked Research Stations.",
+    "vFix": true
   },
   {
     "id": "quadjumper-gekp7",
@@ -2965,9 +2967,10 @@
     "downloads": 7,
     "approvedAt": "2026-10-04T18:40:19.543Z",
     "utilVersion": 9,
-    "version": 1,
+    "version": 2,
     "updatedAt": "2026-10-19T19:50:40.092Z",
-    "updateNote": "image and more parts."
+    "updateNote": "image and more parts.",
+    "vFix": true
   },
   {
     "id": "atlas-star-ship-ke8ir",
@@ -4029,9 +4032,10 @@
     "downloads": 69,
     "approvedAt": "2026-10-05T02:29:29.751Z",
     "utilVersion": 9,
-    "version": 2,
+    "version": 3,
     "updatedAt": "2026-10-22T15:23:18.684Z",
-    "updateNote": "forgot to add tractor beam"
+    "updateNote": "forgot to add tractor beam",
+    "vFix": true
   },
   {
     "id": "adfx-02-morgan-2crkd",
@@ -4217,9 +4221,10 @@
     "downloads": 18,
     "approvedAt": "2026-10-07T15:43:16.580Z",
     "utilVersion": 9,
-    "version": 1,
+    "version": 2,
     "updatedAt": "2026-10-07T15:52:53.273Z",
-    "updateNote": "slight tweaks to colossus"
+    "updateNote": "slight tweaks to colossus",
+    "vFix": true
   },
   {
     "id": "vespera-0b5fq",
@@ -4672,9 +4677,10 @@
     "downloads": 32,
     "approvedAt": "2026-10-09T03:30:12.800Z",
     "utilVersion": 9,
-    "version": 1,
+    "version": 2,
     "updatedAt": "2026-10-09T17:14:39.665Z",
-    "updateNote": "Taz identifyed an issue in first person. Problem should be resolved in first person"
+    "updateNote": "Taz identifyed an issue in first person. Problem should be resolved in first person",
+    "vFix": true
   },
   {
     "id": "the-end-of-gravity-d5ekh",
@@ -5995,9 +6001,10 @@
     "downloads": 25,
     "approvedAt": "2026-10-10T03:21:05.232Z",
     "utilVersion": 9,
-    "version": 3,
+    "version": 4,
     "updatedAt": "2026-10-12T06:09:47.964Z",
-    "updateNote": "Added tractor beam with storage habs shrunk down into the side thruster body \"tested and works good\", fish pond so the sink looks like it has water, trade term and deco."
+    "updateNote": "Added tractor beam with storage habs shrunk down into the side thruster body \"tested and works good\", fish pond so the sink looks like it has water, trade term and deco.",
+    "vFix": true
   },
   {
     "id": "cosmos-miner-b0c6r",
@@ -6379,9 +6386,10 @@
     "downloads": 93,
     "approvedAt": "2026-10-10T21:27:18.318Z",
     "utilVersion": 9,
-    "version": 2,
+    "version": 3,
     "updatedAt": "2026-10-12T20:19:20.905Z",
-    "updateNote": "fixed character collosion in tractor beam rooms. recolor :)"
+    "updateNote": "fixed character collosion in tractor beam rooms. recolor :)",
+    "vFix": true
   },
   {
     "id": "fenrir-orv46",
@@ -7139,9 +7147,10 @@
     "downloads": 39,
     "approvedAt": "2026-10-15T03:03:45.454Z",
     "utilVersion": 9,
-    "version": 2,
+    "version": 3,
     "updatedAt": "2026-10-16T04:57:46.134Z",
-    "updateNote": "added missing hull parts"
+    "updateNote": "added missing hull parts",
+    "vFix": true
   },
   {
     "id": "ambatronus-odcxw",
@@ -7246,9 +7255,10 @@
     "downloads": 9,
     "approvedAt": "2026-10-16T17:12:44.277Z",
     "utilVersion": 9,
-    "version": 1,
+    "version": 2,
     "updatedAt": "2026-10-16T18:08:28.715Z",
-    "updateNote": "Missing a door I accidentally deleted while in the anomaly."
+    "updateNote": "Missing a door I accidentally deleted while in the anomaly.",
+    "vFix": true
   },
   {
     "id": "royal-naboo-fighter-ob36u",
@@ -7465,9 +7475,10 @@
     "downloads": 40,
     "approvedAt": "2026-10-17T03:00:09.254Z",
     "utilVersion": 9,
-    "version": 1,
+    "version": 2,
     "updatedAt": "2026-10-17T04:48:44.530Z",
-    "updateNote": "Fixed a issue with the power door"
+    "updateNote": "Fixed a issue with the power door",
+    "vFix": true
   },
   {
     "id": "chimera-salvager-qq91x",
@@ -7704,9 +7715,10 @@
     "downloads": 30,
     "approvedAt": "2026-10-18T18:56:18.526Z",
     "utilVersion": 9,
-    "version": 3,
+    "version": 4,
     "updatedAt": "2026-10-22T21:12:05.300Z",
-    "updateNote": "Meshed Right Window in front for better aesthetic"
+    "updateNote": "Meshed Right Window in front for better aesthetic",
+    "vFix": true
   },
   {
     "id": "nautilus-steampunk-motorized-bike-6n194",
@@ -8311,9 +8323,10 @@
     "downloads": 40,
     "approvedAt": "2026-10-27T23:54:23.295Z",
     "utilVersion": 9,
-    "version": 1,
+    "version": 2,
     "updatedAt": "2026-10-28T00:37:16.253Z",
-    "updateNote": "Added missing Tech"
+    "updateNote": "Added missing Tech",
+    "vFix": true
   },
   {
     "id": "horten-flying-wing-sio4y",
