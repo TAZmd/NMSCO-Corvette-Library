@@ -1,12 +1,12 @@
 {
-  "name": "Ambatronus",
+  "name": "Ambatronus 2.0",
   "id": "ambatronus-odcxw",
   "submitter": "ngidal",
   "description": "",
   "patreonUrl": "",
   "youtubeUrl": "",
-  "objectCount": 132,
-  "score": 6.8,
+  "objectCount": 154,
+  "score": 7.9,
   "utilities": [
     {
       "label": "Base Teleport Module",
@@ -38,10 +38,45 @@
     {
       "label": "Nutrition Unit",
       "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Holo-Arena Game Table",
+      "value": 1
+    },
+    {
+      "label": "Stellar Extractor Room",
+      "value": 1
+    },
+    {
+      "label": "Antimatter Reactor",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    },
+    {
+      "label": "Livestock Unit",
+      "value": 1
     }
   ],
   "imageCount": 1,
-  "sha256": "28c5fd508b9648b9b62a10c82edaa2ed7620975ffe4044a32e24dc4c4115cb5a",
+  "sha256": "d705df7f6c7c33990e4f56695ad026ac7a1b219b45ffdc3afbec86a6be952a67",
   "downloads": 0,
-  "approvedAt": "2026-10-16T09:43:29.206Z"
+  "approvedAt": "2026-10-16T09:43:29.206Z",
+  "version": 2,
+  "updatedAt": "2026-11-01T12:31:04.168Z",
+  "updateNote": "slight appearance update, additional to some utilities"
 }
