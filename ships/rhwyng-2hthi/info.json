@@ -1,0 +1,51 @@
+{
+  "name": "Rhwyng",
+  "id": "rhwyng-2hthi",
+  "submitter": "Made by Freedomsmith from Discord.",
+  "description": "Comissioned & edited by Weiyv ( Me )",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 165,
+  "score": 5.6,
+  "utilities": [
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    }
+  ],
+  "imageCount": 2,
+  "sha256": "fef0cfba315ae543f5355d3faa4c5c428bda015d6d6b2e5458d5153275214b52",
+  "downloads": 0,
+  "approvedAt": "2026-11-01T20:50:02.923Z"
+}
