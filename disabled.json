@@ -206,5 +206,60 @@
     "disabledBy": "Edgerunner (uploader)",
     "purgeAt": "2026-11-06T02:45:06.410Z",
     "noticeId": "1565557142675783711"
+  },
+  {
+    "id": "rhwyng-ir70p",
+    "name": "Rhwyng",
+    "sha256": "9f2421f98c97f92e2b55743557ebdf8615fed35151618be09f74a2c8e41c1b84",
+    "submitter": "Freedomsmith",
+    "description": "Comissioned by me, made by Freedomsmith.",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 1,
+    "objectCount": 164,
+    "score": 5.6,
+    "utilities": [
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      }
+    ],
+    "downloads": 6,
+    "approvedAt": "2026-10-30T17:27:07.267Z",
+    "utilVersion": 9,
+    "disabledAt": "2026-11-01T20:16:46.918Z",
+    "disabledBy": "Weiyv | 302000471078 (uploader)",
+    "purgeAt": "2026-11-08T20:16:46.481Z"
   }
 ]
