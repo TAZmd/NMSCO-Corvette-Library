@@ -1,0 +1,55 @@
+{
+  "name": "MGBS Sulaco",
+  "id": "mgbs-sulaco-1x5z8",
+  "submitter": "nebula",
+  "description": "because of the fin, the entrance is reachable either by using jetpack from below, or from the top of the corvette, there's a service opening in front of the top phase beam. requires some practice to get in from below.",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 235,
+  "score": 5.8,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "74245ef7f48e3823c57f9e50e168f53fe66a8d3a30b18c176638dd8527a49561",
+  "downloads": 0,
+  "approvedAt": "2026-11-02T20:19:46.854Z"
+}
