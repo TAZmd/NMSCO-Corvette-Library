@@ -8636,5 +8636,57 @@
     "downloads": 1,
     "approvedAt": "2026-11-02T20:19:46.854Z",
     "utilVersion": 9
+  },
+  {
+    "id": "cobra-mk4-bqc1g",
+    "name": "Cobra Mk4",
+    "sha256": "65e2b733e515ca72c267120f284bc8c6edaa86ac982683555468bf239569e45b",
+    "submitter": "QuantumPickleJar",
+    "description": "A early-game multirole ship that'll do just about anything you need (but only just), behold the Cobra MK4! Enter from the ramp under the nose or the door betweeen the engines.",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 437,
+    "score": 5.6,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Holo-Arena Game Table",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-11-02T22:05:06.443Z",
+    "utilVersion": 9
   }
 ]
