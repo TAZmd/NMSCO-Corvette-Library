@@ -8532,11 +8532,11 @@
   {
     "id": "rhwyng-2hthi",
     "name": "Rhwyng",
-    "sha256": "fef0cfba315ae543f5355d3faa4c5c428bda015d6d6b2e5458d5153275214b52",
+    "sha256": "4abe576608d9f42c06350f80e67f3905745b4a9e521d30050c59c0927e86f1d7",
     "submitter": "Made by Freedomsmith from Discord.",
     "description": "Comissioned & edited by Weiyv ( Me )",
     "patreonUrl": "",
-    "youtubeUrl": "",
+    "youtubeUrl": "https://youtube.com/watch?v=xaslFm5pkxA",
     "imageCount": 2,
     "objectCount": 165,
     "score": 5.6,
@@ -8579,7 +8579,11 @@
     ],
     "downloads": 6,
     "approvedAt": "2026-11-01T20:50:02.923Z",
-    "utilVersion": 9
+    "utilVersion": 9,
+    "version": 2,
+    "vFix": true,
+    "updatedAt": "2026-11-03T20:56:20.751Z",
+    "updateNote": "needed to make some small adjustments on the inside... & added a video link & a better thumbnail."
   },
   {
     "id": "mgbs-sulaco-1x5z8",
