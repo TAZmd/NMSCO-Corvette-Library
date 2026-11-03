@@ -4859,6 +4859,60 @@ async function notifyAdmin(env, content) {
   }
 }
 
+async function notifyDownloadAbuse(env, content, ban) {
+  try {
+    let components;
+    if (env.DELETE_CODES && ban && (ban.ipKey || ban.idKey || ban.userKey)) {
+      const token = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+      await env.DELETE_CODES.put(`dlalert:${token}`, JSON.stringify(ban), { expirationTtl: 7 * 24 * 60 * 60 });
+      components = [{ type: 1, components: [{ type: 2, style: 4, label: "Ban this connection", custom_id: `dlban:${token}` }] }];
+    }
+    await discordApi(`/channels/${env.ADMIN_CHANNEL_ID || env.APPROVAL_CHANNEL_ID}/messages`, env, {
+      method: "POST",
+      body: JSON.stringify({ content, components, allowed_mentions: { parse: [] } })
+    });
+  } catch (err) {
+    console.error("notifyDownloadAbuse failed: " + (err && err.message ? err.message : String(err)));
+    await notifyAdmin(env, content);
+  }
+}
+
+async function handleDownloadBanButton(interaction, env, token) {
+  const clicker = interaction.member?.user || interaction.user;
+  if (!clicker || !isSupervisor(interaction, env)) return ephemeral("Only a supervisor can ban.");
+  const raw = env.DELETE_CODES ? await env.DELETE_CODES.get(`dlalert:${token}`) : null;
+  if (!raw) return ephemeral("This ban button has expired (older than 7 days). Nobody was banned.");
+  let ban;
+  try {
+    ban = JSON.parse(raw);
+  } catch (e) {
+    return ephemeral("Could not read the ban data. Nobody was banned.");
+  }
+  const parts = [];
+  if (ban.ipKey) {
+    await addBan(env, ban.ipKey, ban.label, "download abuse (IP)");
+    parts.push("connection (IP)");
+  }
+  if (ban.idKey) {
+    await addBan(env, ban.idKey, ban.label, "download abuse");
+    parts.push("app installation");
+  }
+  if (ban.userKey) {
+    await addBan(env, ban.userKey, ban.label, "download abuse");
+    parts.push("Discord user");
+  }
+  if (!parts.length) return ephemeral("Nothing to ban for this alert.");
+  const original = (interaction.message && interaction.message.content) || "";
+  return json({
+    type: InteractionResponseType.UPDATE_MESSAGE,
+    data: {
+      content: `${original}\n**Banned by ${clickerName(clicker, interaction, "a supervisor")}:** ${parts.join(" + ")}. Use /unban to undo.`,
+      components: [],
+      allowed_mentions: { parse: [] }
+    }
+  });
+}
+
 const COMMENT_ABUSE_WINDOW_MS = 30 * 60 * 1000;
 const COMMENT_ABUSE_LIMIT = 5;
 const ALERT_WINDOW_MS = 30 * 60 * 1000;
@@ -5109,6 +5163,7 @@ async function handleDownloadRequest(request, env, ctx) {
     return json({ allowed: false, banned: true });
   }
   let dlUser = null;
+  const dlBanLabel = `Download abuse ${code}`;
   if (body.discordSession && discordLoginReady(env) && env.DB) {
     try {
       const sess = await resolveDiscordSession(env, (body.discordSession || "").toString(), idHash);
@@ -5121,6 +5176,7 @@ async function handleDownloadRequest(request, env, ctx) {
     console.log(JSON.stringify({ event: "denied-ban", kind: "discord", code, ship: id }));
     return json({ allowed: false, banned: true });
   }
+  const dlBan = { ipKey: ipBan, idKey: `ban:id:${idHash}`, userKey: dlUser ? userBanKey(dlUser) : null, label: dlBanLabel };
   const lockRaw = await env.DELETE_CODES.get(`lock:id:${idHash}`);
   if (lockRaw) {
     try {
@@ -5140,7 +5196,7 @@ async function handleDownloadRequest(request, env, ctx) {
       if (await firstAlert(`dltempo/${ipHash}`)) {
         await rememberIp(env, callerIp, ipBan);
         const who = dlUser ? `<@${dlUser}>` : `app installation ${code}`;
-        await notifyAdmin(env, `Download tempo: one connection asked for more than ${DL_TEMPO_LIMIT} downloads in 10 minutes (${who}). Paused for ${Math.ceil(wait / 60)} minutes.${ipHint(ipBan)}`);
+        await notifyDownloadAbuse(env, `Download tempo: one connection asked for more than ${DL_TEMPO_LIMIT} downloads in 10 minutes (${who}). Paused for ${Math.ceil(wait / 60)} minutes.${ipHint(ipBan)}`, dlBan);
       }
       return json({ allowed: false, banned: false, seconds: wait, reason: "tempo" });
     }
@@ -5164,7 +5220,7 @@ async function handleDownloadRequest(request, env, ctx) {
       if (await firstAlert(`dlip/${ipHash}`)) {
         await rememberIp(env, callerIp, ipBan);
         const dlPerson = dlUser ? `<@${dlUser}>` : (await describeKey(env, `ban:id:${idHash}`)) || `app installation ${code}`;
-        await notifyAdmin(env, `Download spam: more than ${TICKET_IP_LIMIT_PER_HOUR} downloads in 1 hour from one connection (${dlPerson}). Blocked for 10 minutes.${ipHint(ipBan)}`);
+        await notifyDownloadAbuse(env, `Download spam: more than ${TICKET_IP_LIMIT_PER_HOUR} downloads in 1 hour from one connection (${dlPerson}). Blocked for 10 minutes.${ipHint(ipBan)}`, dlBan);
         console.log(JSON.stringify({ event: "download-spam", ip: callerIp, code }));
       }
       return json({ allowed: false, banned: false, seconds: 600 });
@@ -5197,7 +5253,7 @@ async function handleDownloadRequest(request, env, ctx) {
           const text = hitUser
             ? `Daily limit reached: <@${dlUser}> used ${usedUser} of ${DL_DAY_LIMIT_USER} downloads today.`
             : `Daily limit reached: one connection used ${usedIp} of ${limitIp} downloads today (${dlUser ? `logged in as <@${dlUser}>` : "not logged in"}).`;
-          await notifyAdmin(env, `${text}${ipHint(ipBan)}`);
+          await notifyDownloadAbuse(env, `${text}${ipHint(ipBan)}`, dlBan);
         }
         return json({
           allowed: false,
@@ -5220,7 +5276,7 @@ async function handleDownloadRequest(request, env, ctx) {
       const cnt = await env.DB.prepare("SELECT COUNT(*) AS n FROM counters WHERE k GLOB ?").bind(`dli:${ipHash}:${day}:*`).first();
       if (cnt && cnt.n >= DL_PATTERN_INSTALLS && (await firstAlert(`dlpat/${ipHash}`, 86400000))) {
         await rememberIp(env, callerIp, ipBan);
-        await notifyAdmin(env, `Possible scraper: one connection used ${cnt.n} different app installations for downloads today.${ipHint(ipBan)}`);
+        await notifyDownloadAbuse(env, `Possible scraper: one connection used ${cnt.n} different app installations for downloads today.${ipHint(ipBan)}`, dlBan);
       }
     } catch (err) {
       console.error("daily limit check failed: " + (err && err.message ? err.message : String(err)));
@@ -7360,6 +7416,7 @@ async function handleComponent(interaction, env, ctx) {
       }
     }
   }
+  if (action === "dlban" && slug) return handleDownloadBanButton(interaction, env, slug);
   if ((action === "enable" || action === "purge") && slug) return handleDisabledButton(interaction, env, ctx, action, slug);
   if (action === "cdel" && slug) return handleCommentDeleteButton(interaction, env, ctx, slug);
   if ((action === "crestore" || action === "cpurge") && slug) return handleCommentSupervisorButton(interaction, env, action, slug);
