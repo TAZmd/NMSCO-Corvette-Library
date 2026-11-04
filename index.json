@@ -8692,5 +8692,29 @@
     "downloads": 8,
     "approvedAt": "2026-11-02T22:05:06.443Z",
     "utilVersion": 9
+  },
+  {
+    "id": "tsf-1-ndmm7",
+    "name": "TSF - 1",
+    "sha256": "a01ee5f9f7ce494cbcec712a30cd17b27c724f98d49c46669d68f038477ded0b",
+    "submitter": "MiLf&CoOkIeS",
+    "description": "Jump on the back to enter the cockpit.",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 2,
+    "objectCount": 99,
+    "score": 1.7,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-11-04T01:25:17.080Z",
+    "utilVersion": 9
   }
 ]
