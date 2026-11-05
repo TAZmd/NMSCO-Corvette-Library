@@ -5,11 +5,15 @@
   "description": "Jump on the back to enter the cockpit.",
   "patreonUrl": "",
   "youtubeUrl": "",
-  "objectCount": 99,
-  "score": 1.7,
+  "objectCount": 117,
+  "score": 3.2,
   "utilities": [
     {
       "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
       "value": 1
     },
     {
@@ -17,7 +21,10 @@
     }
   ],
   "imageCount": 3,
-  "sha256": "a01ee5f9f7ce494cbcec712a30cd17b27c724f98d49c46669d68f038477ded0b",
+  "sha256": "a6606e58373f08e8dfc2c73d6415eb37ef1cdd1acbd1e7ff783b52ca9c9dd2a3",
   "downloads": 0,
-  "approvedAt": "2026-11-04T01:25:17.080Z"
+  "approvedAt": "2026-11-04T01:25:17.080Z",
+  "version": 2,
+  "updatedAt": "2026-11-05T05:51:56.935Z",
+  "updateNote": "Added scanner room, extra motor to extend the ship and changed some of the body"
 }
