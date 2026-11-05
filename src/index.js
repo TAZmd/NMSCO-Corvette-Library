@@ -2067,6 +2067,10 @@ const REJECT_LIMIT = 10;
 const MAX_PENDING_ITEMS = 100;
 const BLOCKED_MESSAGE = "It appears that you are blocked from using this feature. If you think this is a mistake, please contact the owner or staff.";
 
+function isSuperAdminId(env, discordId) {
+  return !!discordId && !!env.APPROVER_USER_ID && String(discordId) === String(env.APPROVER_USER_ID);
+}
+
 function userBanKey(discordId) {
   return `ban:user:${discordId}`;
 }
@@ -4282,7 +4286,8 @@ async function handleCommentPost(request, env, ctx) {
     if (await isBanned(env, [userBanKey(gate.discordId)])) {
       return json({ ok: false, error: "You can no longer comment." }, 403);
     }
-    const commentLock = await lockSecondsLeft(env, `lock:user:${gate.discordId}`);
+    const commentSuper = isSuperAdminId(env, gate.discordId);
+    const commentLock = commentSuper ? 0 : await lockSecondsLeft(env, `lock:user:${gate.discordId}`);
     if (commentLock > 0) {
       return json({ ok: false, error: `You are timed out. Please try again in ${Math.max(1, Math.ceil(commentLock / 60))} minutes.` }, 429);
     }
@@ -4292,7 +4297,7 @@ async function handleCommentPost(request, env, ctx) {
     if (!text) return json({ ok: false, error: "Please write a comment first." }, 400);
     if (text.length > COMMENT_MAX_LEN) return json({ ok: false, error: `A comment can be at most ${COMMENT_MAX_LEN} characters.` }, 400);
     if (commentHasBadWord(text)) {
-      const abWord = await commentAbuse(env, gate, "comment blocked by the word filter");
+      const abWord = commentSuper ? 0 : await commentAbuse(env, gate, "comment blocked by the word filter");
       return json({ ok: false, filtered: true, error: "Your comment contains words that are not allowed here." + abuseSuffix(abWord) }, 400);
     }
     await ensureD1(env);
@@ -4300,19 +4305,19 @@ async function handleCommentPost(request, env, ctx) {
     const recent = await env.DB.prepare("SELECT body, at FROM comments WHERE author_id = ? ORDER BY id DESC LIMIT 25").bind(gate.discordId).all();
     const rows = recent.results || [];
     const in10 = rows.filter((r) => now - r.at < 10 * 60 * 1000);
-    if (in10.length >= COMMENT_LIMIT_10MIN) {
+    if (!commentSuper && in10.length >= COMMENT_LIMIT_10MIN) {
       const ab10 = await commentAbuse(env, gate, "hit the 3 comments per 10 minutes limit");
       const wait10 = Math.max(1, Math.ceil((in10[COMMENT_LIMIT_10MIN - 1].at + 10 * 60 * 1000 - now) / 1000));
       return json({ ok: false, retryAfter: wait10, error: "Slow down a bit. You can post 3 comments every 10 minutes." + abuseSuffix(ab10) }, 429);
     }
     const inDay = rows.filter((r) => now - r.at < 24 * 60 * 60 * 1000);
-    if (inDay.length >= COMMENT_LIMIT_DAY) {
+    if (!commentSuper && inDay.length >= COMMENT_LIMIT_DAY) {
       const abDay = await commentAbuse(env, gate, "hit the daily limit of 20 comments");
       const waitDay = Math.max(1, Math.ceil((inDay[COMMENT_LIMIT_DAY - 1].at + 24 * 60 * 60 * 1000 - now) / 1000));
       return json({ ok: false, retryAfter: waitDay, error: "You reached the daily limit of 20 comments." + abuseSuffix(abDay) }, 429);
     }
     const flat = (t) => t.toLowerCase().replace(/\s+/g, " ").trim();
-    if (rows.length && flat(rows[0].body) === flat(text)) {
+    if (!commentSuper && rows.length && flat(rows[0].body) === flat(text)) {
       const abSame = await commentAbuse(env, gate, "posted the same comment twice");
       return json({ ok: false, error: "You just posted the same comment." + abuseSuffix(abSame) }, 400);
     }
@@ -5177,7 +5182,8 @@ async function handleDownloadRequest(request, env, ctx) {
     return json({ allowed: false, banned: true });
   }
   const dlBan = { ipKey: ipBan, idKey: `ban:id:${idHash}`, userKey: dlUser ? userBanKey(dlUser) : null, label: dlBanLabel };
-  const lockRaw = await env.DELETE_CODES.get(`lock:id:${idHash}`);
+  const dlSuper = isSuperAdminId(env, dlUser);
+  const lockRaw = dlSuper ? null : await env.DELETE_CODES.get(`lock:id:${idHash}`);
   if (lockRaw) {
     try {
       const lock = JSON.parse(lockRaw);
@@ -5189,7 +5195,7 @@ async function handleDownloadRequest(request, env, ctx) {
     } catch (e) {}
   }
 
-  if (ipHash) {
+  if (ipHash && !dlSuper) {
     const tempo = await rateWindowInfo(`dltempo/${ipHash}`, DL_TEMPO_WINDOW_MS);
     if (tempo.count >= DL_TEMPO_LIMIT) {
       const wait = Math.max(30, Math.ceil((tempo.oldest + DL_TEMPO_WINDOW_MS - Date.now()) / 1000));
@@ -5202,19 +5208,21 @@ async function handleDownloadRequest(request, env, ctx) {
     }
   }
 
-  const shipCount = await rateWindowPush(`ship/${idHash}/${id}`, SHIP_WINDOW_MS);
-  const allCount = await rateWindowPush(`all/${idHash}`, ALL_WINDOW_MS);
   let strike = null;
-  if (shipCount >= SHIP_LIMIT) {
-    strike = await applyStrike(env, { rule: "ship", kind: "id", hash: idHash, code, shipId: id });
-    await rateWindowClear(`ship/${idHash}/${id}`);
-  } else if (allCount > ALL_LIMIT) {
-    strike = await applyStrike(env, { rule: "all", kind: "id", hash: idHash, code });
-    await rateWindowClear(`all/${idHash}`);
+  if (!dlSuper) {
+    const shipCount = await rateWindowPush(`ship/${idHash}/${id}`, SHIP_WINDOW_MS);
+    const allCount = await rateWindowPush(`all/${idHash}`, ALL_WINDOW_MS);
+    if (shipCount >= SHIP_LIMIT) {
+      strike = await applyStrike(env, { rule: "ship", kind: "id", hash: idHash, code, shipId: id });
+      await rateWindowClear(`ship/${idHash}/${id}`);
+    } else if (allCount > ALL_LIMIT) {
+      strike = await applyStrike(env, { rule: "all", kind: "id", hash: idHash, code });
+      await rateWindowClear(`all/${idHash}`);
+    }
   }
   if (strike) return json({ allowed: false, banned: strike.banned, seconds: strike.seconds });
 
-  if (ipHash) {
+  if (ipHash && !dlSuper) {
     const issued = await rateWindowPush(`tk/${ipHash}`, 60 * 60 * 1000);
     if (issued > TICKET_IP_LIMIT_PER_HOUR) {
       if (await firstAlert(`dlip/${ipHash}`)) {
@@ -5229,7 +5237,7 @@ async function handleDownloadRequest(request, env, ctx) {
 
   let remaining = null;
   let dayLimit = null;
-  if (env.DB && ipHash) {
+  if (env.DB && ipHash && !dlSuper) {
     try {
       await ensureD1(env);
       const day = Math.floor(Date.now() / 86400000);
@@ -5283,7 +5291,7 @@ async function handleDownloadRequest(request, env, ctx) {
     }
   }
 
-  if (ipHash) await rateWindowPush(`dltempo/${ipHash}`, DL_TEMPO_WINDOW_MS);
+  if (ipHash && !dlSuper) await rateWindowPush(`dltempo/${ipHash}`, DL_TEMPO_WINDOW_MS);
 
   if (dlUser && env.DB) {
     try {
