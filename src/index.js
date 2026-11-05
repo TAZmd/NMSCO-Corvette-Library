@@ -5072,10 +5072,23 @@ async function recordDownloadStat(env, id, installId, ip) {
   const capDay = await env.DB.prepare("SELECT n FROM counters WHERE k = ?").bind(dayKey).first();
   if ((capHour && capHour.n >= STAT_CAP_PER_HOUR) || (capDay && capDay.n >= STAT_CAP_PER_DAY)) return;
 
-  const found = await findInIndex(env, id);
-  if (!found) return;
-  found.entry.downloads = (found.entry.downloads || 0) + 1;
-  await writeShard(env, found.shard, `Track download: ${id}`);
+  let wrote = false;
+  for (let attempt = 1; attempt <= 3 && !wrote; attempt++) {
+    const found = await findInIndex(env, id);
+    if (!found) return;
+    found.entry.downloads = (found.entry.downloads || 0) + 1;
+    try {
+      await writeShard(env, found.shard, `Track download: ${id}`);
+      wrote = true;
+    } catch (err) {
+      const msg = err && err.message ? err.message : String(err);
+      if (attempt < 3 && / update failed: 409/.test(msg)) {
+        await new Promise((r) => setTimeout(r, 200 + Math.floor(Math.random() * 400)));
+        continue;
+      }
+      throw err;
+    }
+  }
 
   const seenStmts = [env.DB.prepare("INSERT OR IGNORE INTO dl_seen (ship, kind, hash) VALUES (?, 'id', ?)").bind(id, idHash)];
   if (ipKind) seenStmts.push(env.DB.prepare("INSERT OR IGNORE INTO dl_seen (ship, kind, hash) VALUES (?, ?, ?)").bind(id, ipKind, idHash));
