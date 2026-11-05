@@ -8696,17 +8696,21 @@
   {
     "id": "tsf-1-ndmm7",
     "name": "TSF - 1",
-    "sha256": "a01ee5f9f7ce494cbcec712a30cd17b27c724f98d49c46669d68f038477ded0b",
+    "sha256": "a6606e58373f08e8dfc2c73d6415eb37ef1cdd1acbd1e7ff783b52ca9c9dd2a3",
     "submitter": "MiLf&CoOkIeS",
     "description": "Jump on the back to enter the cockpit.",
     "patreonUrl": "",
     "youtubeUrl": "",
     "imageCount": 3,
-    "objectCount": 99,
-    "score": 1.7,
+    "objectCount": 117,
+    "score": 3.2,
     "utilities": [
       {
         "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
         "value": 1
       },
       {
@@ -8715,6 +8719,10 @@
     ],
     "downloads": 8,
     "approvedAt": "2026-11-04T01:25:17.080Z",
-    "utilVersion": 9
+    "utilVersion": 9,
+    "version": 2,
+    "vFix": true,
+    "updatedAt": "2026-11-05T05:51:56.935Z",
+    "updateNote": "Added scanner room, extra motor to extend the ship and changed some of the body"
   }
 ]
