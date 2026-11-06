@@ -5,11 +5,14 @@
   "description": "Just a crappy ride",
   "patreonUrl": "",
   "youtubeUrl": "",
-  "objectCount": 55,
+  "objectCount": 56,
   "score": 0,
   "utilities": [],
   "imageCount": 3,
-  "sha256": "46914518f6d7c593d984da2ee7e48b2a16fc8ca379e37bc6d91c030887175969",
+  "sha256": "e7ee33bc3ec301c9012f1b13a1e52c4373b1dacb140f2ade919e67bc0d5aeefc",
   "downloads": 0,
-  "approvedAt": "2026-10-05T01:50:34.904Z"
+  "approvedAt": "2026-10-05T01:50:34.904Z",
+  "version": 2,
+  "updatedAt": "2026-11-06T02:06:36.213Z",
+  "updateNote": "Last update broke the cockpit so I had to add a secondon one."
 }
