@@ -8796,5 +8796,57 @@
     "downloads": 0,
     "approvedAt": "2026-11-07T10:52:02.581Z",
     "utilVersion": 9
+  },
+  {
+    "id": "sidewinder-08pnd",
+    "name": "Sidewinder",
+    "sha256": "95ebf80a2370ca9d4fe4baa1e5770943c399ae237f5062787e397326efaa3b37",
+    "submitter": "QuantumPickleJar",
+    "description": "Enter from rear.",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 398,
+    "score": 6.8,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 0.5
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-11-07T10:52:37.612Z",
+    "utilVersion": 9
   }
 ]
