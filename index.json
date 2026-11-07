@@ -8848,5 +8848,69 @@
     "downloads": 0,
     "approvedAt": "2026-11-07T10:52:37.612Z",
     "utilVersion": 9
+  },
+  {
+    "id": "diamondback-explorer-5m45t",
+    "name": "Diamondback Explorer",
+    "sha256": "6873810d7d54c1b7ee905355f6e7f1178d75d0b4a98eaaabf0aa249060a5fb3c",
+    "submitter": "QuantumPickleJar",
+    "description": "When unloading salvage, use the tractor beam under the main engine.",
+    "patreonUrl": "",
+    "youtubeUrl": "https://youtu.be/Nwsm0I5fX_o",
+    "imageCount": 3,
+    "objectCount": 728,
+    "score": 7.4,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 0.5
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-11-07T10:53:22.146Z",
+    "utilVersion": 9
   }
 ]
