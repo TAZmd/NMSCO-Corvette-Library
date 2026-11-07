@@ -1,0 +1,51 @@
+{
+  "name": "Viper MKIII",
+  "id": "viper-mkiii-8pa6a",
+  "submitter": "QuantumPickleJar",
+  "description": "Enter and enjoy the cosmos, commander",
+  "patreonUrl": "",
+  "youtubeUrl": "https://youtu.be/yVw0zOKTtY0",
+  "objectCount": 452,
+  "score": 6.9,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "5f2f7b2e466aec43fb793f8256b29a42dc05e6ebd5f7c40d7eb782f00c51c3c9",
+  "downloads": 0,
+  "approvedAt": "2026-11-07T16:26:21.879Z"
+}
