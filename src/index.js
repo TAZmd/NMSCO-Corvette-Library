@@ -3733,7 +3733,7 @@ async function handleDiscordStart(request, env) {
     if (ipKey && (await rateWindowPush(`ds/${ipKey.slice(7)}`, DISCORD_START_WINDOW_MS)) > DISCORD_START_LIMIT) {
       if (await firstAlert(`ds/${ipKey.slice(7)}`)) {
         await rememberIp(env, ip, ipKey);
-        await notifyAdmin(env, `Login spam: one connection started more than ${DISCORD_START_LIMIT} Discord logins in a short time. Blocked for a few minutes.${ipHint(ipKey)}`);
+        await notifyDownloadAbuse(env, `Login spam: one connection started more than ${DISCORD_START_LIMIT} Discord logins in a short time. Blocked for a few minutes.${ipHint(ipKey)}`, { ipKey, label: "Login spam", reason: "login spam" });
       }
       return new Response("Too many login attempts. Please wait a few minutes.", { status: 429 });
     }
@@ -4609,7 +4609,7 @@ async function handleMyUpdate(request, env) {
     if (!/^[a-z0-9-]{1,80}$/.test(shipId)) return json({ ok: false, error: "Invalid request." }, 400);
     if ((await rateWindowPush(`mu/${gate.discordId}`, HOUR_MS)) > 10) {
       if (await firstAlert(`mu/${gate.discordId}`)) {
-        await notifyAdmin(env, `Update spam: **${gate.username || "unknown"}** <@${gate.discordId}> tried more than 10 ship updates in 1 hour. Blocked for now.`);
+        await notifyDownloadAbuse(env, `Update spam: **${gate.username || "unknown"}** <@${gate.discordId}> tried more than 10 ship updates in 1 hour. Blocked for now.`, { userKey: userBanKey(gate.discordId), discordId: gate.discordId, label: `Update spam ${gate.username || gate.discordId}`, reason: "update spam", buttonLabel: "Ban this user" });
       }
       return json({ ok: false, error: "Too many updates in a short time. Please try again later." }, 429);
     }
@@ -4870,7 +4870,7 @@ async function notifyDownloadAbuse(env, content, ban) {
     if (env.DELETE_CODES && ban && (ban.ipKey || ban.idKey || ban.userKey)) {
       const token = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
       await env.DELETE_CODES.put(`dlalert:${token}`, JSON.stringify(ban), { expirationTtl: 7 * 24 * 60 * 60 });
-      components = [{ type: 1, components: [{ type: 2, style: 4, label: "Ban this connection", custom_id: `dlban:${token}` }] }];
+      components = [{ type: 1, components: [{ type: 2, style: 4, label: ban.buttonLabel || "Ban this connection", custom_id: `dlban:${token}` }] }];
     }
     await discordApi(`/channels/${env.ADMIN_CHANNEL_ID || env.APPROVAL_CHANNEL_ID}/messages`, env, {
       method: "POST",
@@ -4893,17 +4893,20 @@ async function handleDownloadBanButton(interaction, env, token) {
   } catch (e) {
     return ephemeral("Could not read the ban data. Nobody was banned.");
   }
+  const byName = clickerName(clicker, interaction, "a supervisor");
+  const byText = `${byName} (<@${clicker.id}>)`;
+  const reasonBy = `${ban.reason || "download abuse"} - banned by ${byName}`;
   const parts = [];
   if (ban.ipKey) {
-    await addBan(env, ban.ipKey, ban.label, "download abuse (IP)");
+    await addBan(env, ban.ipKey, ban.label, `${reasonBy} (IP)`);
     parts.push("connection (IP)");
   }
   if (ban.idKey) {
-    await addBan(env, ban.idKey, ban.label, "download abuse");
+    await addBan(env, ban.idKey, ban.label, reasonBy);
     parts.push("app installation");
   }
-  if (ban.userKey) {
-    await addBan(env, ban.userKey, ban.label, "download abuse");
+  if (ban.userKey && !isSuperAdminId(env, ban.discordId)) {
+    await addBan(env, ban.userKey, ban.label, reasonBy);
     parts.push("Discord user");
   }
   if (!parts.length) return ephemeral("Nothing to ban for this alert.");
@@ -4911,7 +4914,7 @@ async function handleDownloadBanButton(interaction, env, token) {
   return json({
     type: InteractionResponseType.UPDATE_MESSAGE,
     data: {
-      content: `${original}\n**Banned by ${clickerName(clicker, interaction, "a supervisor")}:** ${parts.join(" + ")}. Use /unban to undo.`,
+      content: `${original}\n**Banned by ${byText}:** ${parts.join(" + ")}. Use /unban to undo.`,
       components: [],
       allowed_mentions: { parse: [] }
     }
@@ -4967,7 +4970,7 @@ async function commentAbuse(env, gate, reason) {
     const cacheKey = `cabuse/${gate.discordId}`;
     const n = await rateWindowPush(cacheKey, COMMENT_ABUSE_WINDOW_MS);
     if (n === 1) {
-      await notifyAdmin(env, `Comment warning: **${gate.username || "unknown"}** <@${gate.discordId}> - ${reason}.`);
+      await notifyDownloadAbuse(env, `Comment warning: **${gate.username || "unknown"}** <@${gate.discordId}> - ${reason}.`, { userKey: userBanKey(gate.discordId), discordId: gate.discordId, label: `Comment warning ${gate.username || gate.discordId}`, reason: "comment abuse", buttonLabel: "Ban this user" });
     }
     if (n >= COMMENT_ABUSE_LIMIT) {
       await rateWindowClear(cacheKey);
@@ -5144,7 +5147,7 @@ async function frontGate(env, ip) {
   if (await firstAlert(`fg/${fh}`)) {
     const k = await ipBanKey(ip, env);
     await rememberIp(env, ip, k);
-    await notifyAdmin(env, `Request flood: one connection sent more than ${FRONT_LIMIT_PER_MIN} requests in 1 minute. Paused for 10 minutes.${ipHint(k)}`);
+    await notifyDownloadAbuse(env, `Request flood: one connection sent more than ${FRONT_LIMIT_PER_MIN} requests in 1 minute. Paused for 10 minutes.${ipHint(k)}`, { ipKey: k, label: "Request flood", reason: "request flood" });
   }
   return tooMany();
 }
@@ -5194,7 +5197,7 @@ async function handleDownloadRequest(request, env, ctx) {
     console.log(JSON.stringify({ event: "denied-ban", kind: "discord", code, ship: id }));
     return json({ allowed: false, banned: true });
   }
-  const dlBan = { ipKey: ipBan, idKey: `ban:id:${idHash}`, userKey: dlUser ? userBanKey(dlUser) : null, label: dlBanLabel };
+  const dlBan = { ipKey: ipBan, idKey: `ban:id:${idHash}`, userKey: dlUser ? userBanKey(dlUser) : null, discordId: dlUser || null, label: dlBanLabel };
   const dlSuper = isSuperAdminId(env, dlUser);
   const lockRaw = dlSuper ? null : await env.DELETE_CODES.get(`lock:id:${idHash}`);
   if (lockRaw) {
