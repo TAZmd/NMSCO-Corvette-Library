@@ -3309,6 +3309,22 @@ async function approvalExtraFields(slug, env, check, imageCount) {
     if (owner && owner.discordId) {
       fields.push({ name: "Discord user", value: `<@${owner.discordId}> (${owner.discordName || "unknown"})`, inline: true });
     }
+    if (owner && env.DB) {
+      try {
+        await ensureD1(env);
+        const upKey = owner.discordId ? userBanKey(owner.discordId) : owner.userKey || owner.ipKey;
+        const row = upKey ? await env.DB.prepare("SELECT submitted, approved, rejected FROM uploaders WHERE k = ?").bind(upKey).first() : null;
+        if (row) {
+          fields.push({
+            name: "Corvettes uploaded",
+            value: `${row.submitted} (this one included) - ${row.approved} approved, ${row.rejected} rejected`,
+            inline: true
+          });
+        }
+      } catch (e) {
+        console.error("uploader count failed for " + slug);
+      }
+    }
     if (key) {
       const code = installCode(key);
       fields.push({ name: "Installation", value: `\`${code}\` (${owner.userKey ? "app" : "connection"})`, inline: true });
