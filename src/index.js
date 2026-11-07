@@ -2244,6 +2244,437 @@ async function postApprovalMessage(env, embed, slug, images, channelId, supervis
   return false;
 }
 
+const PV_PACK_KEY = "models/nms_parts.pack";
+let pvIndexCache = null;
+let pvIndexCacheAt = 0;
+
+async function pvLoadIndex(env) {
+  const now = Date.now();
+  if (pvIndexCache && now - pvIndexCacheAt < 10 * 60 * 1000) return pvIndexCache;
+  const obj = await env.SHIPS.get(PV_PACK_KEY, { range: { offset: 0, length: 262144 } });
+  if (!obj) return null;
+  const buf = await obj.arrayBuffer();
+  const view = new DataView(buf);
+  if (view.getUint8(0) !== 78 || view.getUint8(1) !== 77 || view.getUint8(2) !== 83 || view.getUint8(3) !== 80) return null;
+  if (view.getUint32(4, true) !== 1) return null;
+  const count = view.getUint32(8, true);
+  const map = new Map();
+  let p = 12;
+  for (let i = 0; i < count; i++) {
+    const n = view.getUint8(p);
+    p += 1;
+    let name = "";
+    for (let k = 0; k < n; k++) name += String.fromCharCode(view.getUint8(p + k));
+    p += n;
+    const offset = view.getUint32(p + 4, true) * 4294967296 + view.getUint32(p, true);
+    const length = view.getUint32(p + 8, true);
+    p += 12;
+    map.set(name, { offset, length });
+  }
+  pvIndexCache = map;
+  pvIndexCacheAt = now;
+  return map;
+}
+
+async function pvReadPart(env, entry) {
+  const obj = await env.SHIPS.get(PV_PACK_KEY, { range: { offset: entry.offset, length: entry.length } });
+  if (!obj) return null;
+  const comp = await obj.arrayBuffer();
+  const stream = new Blob([comp]).stream().pipeThrough(new DecompressionStream("deflate"));
+  const raw = await new Response(stream).arrayBuffer();
+  const dv = new DataView(raw);
+  const vc = dv.getUint32(0, true);
+  const ic = dv.getUint32(4, true);
+  const use32 = dv.getUint8(8) === 1;
+  const mn = [dv.getFloat32(9, true), dv.getFloat32(13, true), dv.getFloat32(17, true)];
+  const mx = [dv.getFloat32(21, true), dv.getFloat32(25, true), dv.getFloat32(29, true)];
+  const q = new Uint16Array(raw.slice(33, 33 + vc * 6));
+  const verts = new Float32Array(vc * 3);
+  const sx = mx[0] - mn[0];
+  const sy = mx[1] - mn[1];
+  const sz = mx[2] - mn[2];
+  for (let i = 0; i < vc; i++) {
+    verts[i * 3] = mn[0] + (q[i * 3] / 65535) * sx;
+    verts[i * 3 + 1] = mn[1] + (q[i * 3 + 1] / 65535) * sy;
+    verts[i * 3 + 2] = mn[2] + (q[i * 3 + 2] / 65535) * sz;
+  }
+  const idxStart = 33 + vc * 6;
+  const indices = use32 ? new Uint32Array(raw.slice(idxStart, idxStart + ic * 4)) : new Uint16Array(raw.slice(idxStart, idxStart + ic * 2));
+  return { verts, indices };
+}
+
+function pvColorFor(id) {
+  if (id.startsWith("B_TRU") || id.startsWith("B_ENG")) return [0xe0, 0x87, 0x3c];
+  if (id.startsWith("B_WNG")) return [0x6f, 0xa8, 0xdc];
+  if (id.startsWith("B_TUR")) return [0xd9, 0x53, 0x4f];
+  if (id.startsWith("B_COK")) return [0x5c, 0xb8, 0x5c];
+  if (id.startsWith("B_LND")) return [0xe6, 0xc8, 0x4a];
+  if (id.startsWith("STA_")) return [0x8b, 0x7f, 0xd0];
+  if (id.startsWith("B_DECO") || id.startsWith("BASE_")) return [0xc4, 0xc9, 0xd1];
+  return [0x9a, 0xa7, 0xb5];
+}
+
+function pvNum(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function pvRender(objects, parts, width, height) {
+  const placements = [];
+  let totalTris = 0;
+  let placed = 0;
+  const missingIds = new Set();
+  for (const obj of objects) {
+    if (!obj || typeof obj.ObjectID !== "string") continue;
+    const id = obj.ObjectID.replace(/^\^/, "").toUpperCase();
+    if (id === "NONE") continue;
+    const mesh = parts.get(id);
+    if (!mesh) {
+      missingIds.add(id);
+      continue;
+    }
+    const pos = Array.isArray(obj.Position) ? obj.Position.map(pvNum) : [0, 0, 0];
+    let up = Array.isArray(obj.Up) ? obj.Up.map(pvNum) : [0, 1, 0];
+    let at = Array.isArray(obj.At) ? obj.At.map(pvNum) : [0, 0, 1];
+    let scale = Math.hypot(up[0], up[1], up[2]);
+    const atLen = Math.hypot(at[0], at[1], at[2]);
+    if (scale < 1e-6 || atLen < 1e-6) {
+      scale = 1;
+      up = [0, 1, 0];
+      at = [0, 0, 1];
+    } else {
+      up = [up[0] / scale, up[1] / scale, up[2] / scale];
+      at = [at[0] / atLen, at[1] / atLen, at[2] / atLen];
+    }
+    let r = [up[1] * at[2] - up[2] * at[1], up[2] * at[0] - up[0] * at[2], up[0] * at[1] - up[1] * at[0]];
+    const rl = Math.hypot(r[0], r[1], r[2]);
+    if (rl < 1e-4) continue;
+    r = [r[0] / rl, r[1] / rl, r[2] / rl];
+    placements.push({ mesh, pos, r, up, at, scale, color: pvColorFor(id) });
+    totalTris += Math.floor(mesh.indices.length / 3);
+    placed++;
+  }
+  if (!totalTris) return { png: null, placed, missingIds: [...missingIds] };
+
+  const tri = new Float32Array(totalTris * 9);
+  const triCol = new Uint8Array(totalTris * 3);
+  let ti = 0;
+  let minX = Infinity;
+  let minY = Infinity;
+  let minZ = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  let maxZ = -Infinity;
+  for (const pl of placements) {
+    const v = pl.mesh.verts;
+    const vc = v.length / 3;
+    const wv = new Float32Array(v.length);
+    const s = pl.scale;
+    for (let i = 0; i < vc; i++) {
+      const x = v[i * 3];
+      const y = v[i * 3 + 1];
+      const z = v[i * 3 + 2];
+      const wx = (x * pl.r[0] + y * pl.up[0] + z * pl.at[0]) * s + pl.pos[0];
+      const wy = (x * pl.r[1] + y * pl.up[1] + z * pl.at[1]) * s + pl.pos[1];
+      const wz = (x * pl.r[2] + y * pl.up[2] + z * pl.at[2]) * s + pl.pos[2];
+      wv[i * 3] = wx;
+      wv[i * 3 + 1] = wy;
+      wv[i * 3 + 2] = wz;
+      if (wx < minX) minX = wx;
+      if (wx > maxX) maxX = wx;
+      if (wy < minY) minY = wy;
+      if (wy > maxY) maxY = wy;
+      if (wz < minZ) minZ = wz;
+      if (wz > maxZ) maxZ = wz;
+    }
+    const idx = pl.mesh.indices;
+    for (let i = 0; i + 2 < idx.length; i += 3) {
+      const a = idx[i] * 3;
+      const b = idx[i + 1] * 3;
+      const c = idx[i + 2] * 3;
+      tri[ti * 9] = wv[a];
+      tri[ti * 9 + 1] = wv[a + 1];
+      tri[ti * 9 + 2] = wv[a + 2];
+      tri[ti * 9 + 3] = wv[b];
+      tri[ti * 9 + 4] = wv[b + 1];
+      tri[ti * 9 + 5] = wv[b + 2];
+      tri[ti * 9 + 6] = wv[c];
+      tri[ti * 9 + 7] = wv[c + 1];
+      tri[ti * 9 + 8] = wv[c + 2];
+      triCol[ti * 3] = pl.color[0];
+      triCol[ti * 3 + 1] = pl.color[1];
+      triCol[ti * 3 + 2] = pl.color[2];
+      ti++;
+    }
+  }
+
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+  const cz = (minZ + maxZ) / 2;
+  let fx = 0.6;
+  let fy = -0.5;
+  let fz = -0.75;
+  const fl = Math.hypot(fx, fy, fz);
+  fx /= fl;
+  fy /= fl;
+  fz /= fl;
+  let rx = -fz;
+  let rz = fx;
+  const rlen = Math.hypot(rx, rz);
+  rx /= rlen;
+  rz /= rlen;
+  const ry = 0;
+  const ux = ry * fz - rz * fy;
+  const uy = rz * fx - rx * fz;
+  const uz = rx * fy - ry * fx;
+
+  let sMinX = Infinity;
+  let sMaxX = -Infinity;
+  let sMinY = Infinity;
+  let sMaxY = -Infinity;
+  for (let i = 0; i < totalTris * 3; i++) {
+    const dx = tri[i * 3] - cx;
+    const dy = tri[i * 3 + 1] - cy;
+    const dz = tri[i * 3 + 2] - cz;
+    const sx = dx * rx + dy * ry + dz * rz;
+    const sy = dx * ux + dy * uy + dz * uz;
+    if (sx < sMinX) sMinX = sx;
+    if (sx > sMaxX) sMaxX = sx;
+    if (sy < sMinY) sMinY = sy;
+    if (sy > sMaxY) sMaxY = sy;
+  }
+  const spanX = Math.max(sMaxX - sMinX, 1e-3);
+  const spanY = Math.max(sMaxY - sMinY, 1e-3);
+  const ss = totalTris > 900000 ? 1 : 2;
+  const W = width * ss;
+  const H = height * ss;
+  const fit = Math.min((W * 0.9) / spanX, (H * 0.9) / spanY);
+  const midX = (sMinX + sMaxX) / 2;
+  const midY = (sMinY + sMaxY) / 2;
+
+  const colorBuf = new Uint32Array(W * H);
+  const depthBuf = new Float32Array(W * H).fill(Infinity);
+
+  let lx = -fx * 0.55 + ux * 0.7 - rx * 0.45;
+  let ly = -fy * 0.55 + uy * 0.7 - ry * 0.45;
+  let lz = -fz * 0.55 + uz * 0.7 - rz * 0.45;
+  const ll = Math.hypot(lx, ly, lz);
+  lx /= ll;
+  ly /= ll;
+  lz /= ll;
+
+  const sxA = new Float32Array(3);
+  const syA = new Float32Array(3);
+  const szA = new Float32Array(3);
+  for (let t = 0; t < totalTris; t++) {
+    const o = t * 9;
+    const e1x = tri[o + 3] - tri[o];
+    const e1y = tri[o + 4] - tri[o + 1];
+    const e1z = tri[o + 5] - tri[o + 2];
+    const e2x = tri[o + 6] - tri[o];
+    const e2y = tri[o + 7] - tri[o + 1];
+    const e2z = tri[o + 8] - tri[o + 2];
+    let nx = e1y * e2z - e1z * e2y;
+    let ny = e1z * e2x - e1x * e2z;
+    let nz = e1x * e2y - e1y * e2x;
+    const nl = Math.hypot(nx, ny, nz);
+    if (nl < 1e-9) continue;
+    nx /= nl;
+    ny /= nl;
+    nz /= nl;
+    if (nx * fx + ny * fy + nz * fz > 0) {
+      nx = -nx;
+      ny = -ny;
+      nz = -nz;
+    }
+    const shade = 0.38 + 0.62 * Math.max(0, nx * lx + ny * ly + nz * lz);
+    const cr = Math.min(255, Math.floor(triCol[t * 3] * shade));
+    const cg = Math.min(255, Math.floor(triCol[t * 3 + 1] * shade));
+    const cb = Math.min(255, Math.floor(triCol[t * 3 + 2] * shade));
+    const packed = (0xff000000 | (cr << 16) | (cg << 8) | cb) >>> 0;
+
+    for (let k = 0; k < 3; k++) {
+      const dx = tri[o + k * 3] - cx;
+      const dy = tri[o + k * 3 + 1] - cy;
+      const dz = tri[o + k * 3 + 2] - cz;
+      sxA[k] = W * 0.5 + (dx * rx + dy * ry + dz * rz - midX) * fit;
+      syA[k] = H * 0.5 - (dx * ux + dy * uy + dz * uz - midY) * fit;
+      szA[k] = dx * fx + dy * fy + dz * fz;
+    }
+    const area = (sxA[1] - sxA[0]) * (syA[2] - syA[0]) - (sxA[2] - sxA[0]) * (syA[1] - syA[0]);
+    if (Math.abs(area) < 1e-6) continue;
+    const x0 = Math.max(0, Math.floor(Math.min(sxA[0], sxA[1], sxA[2])));
+    const x1 = Math.min(W - 1, Math.ceil(Math.max(sxA[0], sxA[1], sxA[2])));
+    const y0 = Math.max(0, Math.floor(Math.min(syA[0], syA[1], syA[2])));
+    const y1 = Math.min(H - 1, Math.ceil(Math.max(syA[0], syA[1], syA[2])));
+    const inv = 1 / area;
+    for (let y = y0; y <= y1; y++) {
+      const py = y + 0.5;
+      for (let x = x0; x <= x1; x++) {
+        const px = x + 0.5;
+        const w0 = ((sxA[1] - px) * (syA[2] - py) - (sxA[2] - px) * (syA[1] - py)) * inv;
+        const w1 = ((sxA[2] - px) * (syA[0] - py) - (sxA[0] - px) * (syA[2] - py)) * inv;
+        const w2 = 1 - w0 - w1;
+        if (w0 < 0 || w1 < 0 || w2 < 0) continue;
+        const z = w0 * szA[0] + w1 * szA[1] + w2 * szA[2];
+        const di = y * W + x;
+        if (z < depthBuf[di]) {
+          depthBuf[di] = z;
+          colorBuf[di] = packed;
+        }
+      }
+    }
+  }
+
+  const rgb = new Uint8Array(width * height * 3);
+  const inv4 = 1 / (ss * ss);
+  for (let y = 0; y < height; y++) {
+    const tBg = height > 1 ? y / (height - 1) : 0;
+    const bgR = 18 + 14 * tBg;
+    const bgG = 21 + 15 * tBg;
+    const bgB = 28 + 20 * tBg;
+    for (let x = 0; x < width; x++) {
+      let sr = 0;
+      let sg = 0;
+      let sb = 0;
+      for (let sy = 0; sy < ss; sy++) {
+        for (let sx = 0; sx < ss; sx++) {
+          const c = colorBuf[(y * ss + sy) * W + (x * ss + sx)];
+          if (c === 0) {
+            sr += bgR;
+            sg += bgG;
+            sb += bgB;
+          } else {
+            sr += (c >>> 16) & 255;
+            sg += (c >>> 8) & 255;
+            sb += c & 255;
+          }
+        }
+      }
+      const o = (y * width + x) * 3;
+      rgb[o] = Math.min(255, sr * inv4);
+      rgb[o + 1] = Math.min(255, sg * inv4);
+      rgb[o + 2] = Math.min(255, sb * inv4);
+    }
+  }
+  return { rgb, placed, missingIds: [...missingIds] };
+}
+
+let pvCrcTable = null;
+function pvCrc(bytes) {
+  if (!pvCrcTable) {
+    pvCrcTable = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+      pvCrcTable[n] = c >>> 0;
+    }
+  }
+  let crc = 0xffffffff;
+  for (let i = 0; i < bytes.length; i++) crc = pvCrcTable[(crc ^ bytes[i]) & 255] ^ (crc >>> 8);
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function pvChunk(type, data) {
+  const out = new Uint8Array(12 + data.length);
+  const dv = new DataView(out.buffer);
+  dv.setUint32(0, data.length);
+  for (let i = 0; i < 4; i++) out[4 + i] = type.charCodeAt(i);
+  out.set(data, 8);
+  dv.setUint32(8 + data.length, pvCrc(out.subarray(4, 8 + data.length)));
+  return out;
+}
+
+async function pvEncodePng(rgb, w, h) {
+  const raw = new Uint8Array((w * 3 + 1) * h);
+  for (let y = 0; y < h; y++) {
+    raw[y * (w * 3 + 1)] = 0;
+    raw.set(rgb.subarray(y * w * 3, (y + 1) * w * 3), y * (w * 3 + 1) + 1);
+  }
+  const stream = new Blob([raw]).stream().pipeThrough(new CompressionStream("deflate"));
+  const idat = new Uint8Array(await new Response(stream).arrayBuffer());
+  const ihdr = new Uint8Array(13);
+  const dv = new DataView(ihdr.buffer);
+  dv.setUint32(0, w);
+  dv.setUint32(4, h);
+  ihdr[8] = 8;
+  ihdr[9] = 2;
+  const parts = [new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]), pvChunk("IHDR", ihdr), pvChunk("IDAT", idat), pvChunk("IEND", new Uint8Array(0))];
+  const total = parts.reduce((n, p) => n + p.length, 0);
+  const png = new Uint8Array(total);
+  let off = 0;
+  for (const p of parts) {
+    png.set(p, off);
+    off += p.length;
+  }
+  return png;
+}
+
+async function pvDrawShip(env, objects) {
+  const index = await pvLoadIndex(env);
+  if (!index) return { skipped: true };
+  const ids = new Set();
+  for (const o of objects) {
+    if (o && typeof o.ObjectID === "string") {
+      const id = o.ObjectID.replace(/^\^/, "").toUpperCase();
+      if (index.has(id)) ids.add(id);
+    }
+  }
+  const parts = new Map();
+  const list = [...ids];
+  for (let i = 0; i < list.length; i += 6) {
+    const chunk = list.slice(i, i + 6);
+    const loaded = await Promise.all(chunk.map((id) => pvReadPart(env, index.get(id)).catch(() => null)));
+    chunk.forEach((id, k) => {
+      if (loaded[k]) parts.set(id, loaded[k]);
+    });
+  }
+  const res = pvRender(objects, parts, 960, 540);
+  if (!res.rgb) return { error: "no known parts", placed: res.placed, missing: res.missingIds };
+  const png = await pvEncodePng(res.rgb, 960, 540);
+  return { png, placed: res.placed, missing: res.missingIds };
+}
+
+async function postShipPreview(env, slug, name, shipBytes) {
+  try {
+    if (!env.SHIPS || env.PREVIEW_OFF) return;
+    const text = await extractZipEntry(shipBytes, "objects.json");
+    if (!text) return;
+    const objects = JSON.parse(text);
+    if (!Array.isArray(objects)) return;
+    const res = await pvDrawShip(env, objects);
+    if (res.skipped) return;
+    if (!res.png) {
+      await notifyAdmin(env, `Preview could not be drawn for ${name || slug}: ${res.error || "unknown reason"}.`);
+      return;
+    }
+    const filename = "shippreview.png";
+    const missingText = res.missing.length ? `${res.missing.length} part type(s) have no model and are left out.` : "All parts have a model.";
+    const embed = {
+      title: `Preview of the uploaded file - ${name || slug}`.slice(0, 250),
+      description: `Drawn from the ship file itself, not from the photos. Grey shapes, no game colours. Thrusters orange, wings blue, turrets red, cockpit green.\n${missingText}`,
+      color: 0x3a6ea5,
+      image: { url: `attachment://${filename}` }
+    };
+    const form = new FormData();
+    form.append("payload_json", JSON.stringify({ embeds: [embed], attachments: [{ id: 0, filename }] }));
+    form.append("files[0]", new Blob([res.png], { type: "image/png" }), filename);
+    const resp = await fetch(`https://discord.com/api/v10/channels/${env.APPROVAL_CHANNEL_ID}/messages`, {
+      method: "POST",
+      headers: { Authorization: `Bot ${env.DISCORD_TOKEN}` },
+      body: form
+    });
+    if (!resp.ok) console.error("preview post failed: " + resp.status + " " + (await resp.text()).slice(0, 200));
+  } catch (err) {
+    console.error("postShipPreview failed: " + (err && err.message ? err.message : String(err)));
+    try {
+      await notifyAdmin(env, `Preview failed for ${name || slug}: ${(err && err.message ? err.message : String(err)).slice(0, 150)}`);
+    } catch (e) {
+      console.error("preview notify failed");
+    }
+  }
+}
+
 async function editApprovalMessage(env, messageId, payload, channelId) {
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
@@ -3584,6 +4015,7 @@ async function handleAppUpload(request, env, ctx) {
         const embed = approvalEmbedFor(name, builder, "via app", description, linkCheck, staged, await approvalExtraFields(slug, env, staged.check, imageBufs.length));
         const posted = await postApprovalMessage(env, embed, slug, imageBufs);
         if (!posted) console.error("approval message could not be posted for " + slug + " - use /pending");
+        if (posted) await postShipPreview(env, slug, name, shipBytes);
       })()
     );
 
@@ -4786,6 +5218,7 @@ async function handleAppBatchUpload(request, env, ctx) {
         const embed = approvalEmbedFor(name, builder, "via app (bulk)", description, linkCheck, staged, await approvalExtraFields(slug, env, staged.check, imageBufs.length));
         const posted = await postApprovalMessage(env, embed, slug, imageBufs);
         if (!posted) console.error("approval message could not be posted for " + slug + " - use /pending");
+        if (posted) await postShipPreview(env, slug, name, shipBytes);
       })()
     );
 
