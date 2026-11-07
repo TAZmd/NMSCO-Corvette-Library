@@ -2636,18 +2636,28 @@ async function pvDrawShip(env, objects) {
 }
 
 async function postShipPreview(env, slug, name, shipBytes) {
+  let step = "start";
   try {
     if (!env.SHIPS || env.PREVIEW_OFF) return;
+    step = "read ship file";
     const text = await extractZipEntry(shipBytes, "objects.json");
-    if (!text) return;
+    if (!text) {
+      await notifyAdmin(env, `Preview skipped for ${name || slug}: no objects.json found in the ship file.`);
+      return;
+    }
     const objects = JSON.parse(text);
     if (!Array.isArray(objects)) return;
+    step = "draw";
     const res = await pvDrawShip(env, objects);
-    if (res.skipped) return;
+    if (res.skipped) {
+      await notifyAdmin(env, `Preview skipped for ${name || slug}: the model pack was not found in R2 at ${PV_PACK_KEY}.`);
+      return;
+    }
     if (!res.png) {
       await notifyAdmin(env, `Preview could not be drawn for ${name || slug}: ${res.error || "unknown reason"}.`);
       return;
     }
+    step = "post to Discord";
     const filename = "shippreview.png";
     const missingText = res.missing.length ? `${res.missing.length} part type(s) have no model and are left out.` : "All parts have a model.";
     const embed = {
@@ -2664,11 +2674,16 @@ async function postShipPreview(env, slug, name, shipBytes) {
       headers: { Authorization: `Bot ${env.DISCORD_TOKEN}` },
       body: form
     });
-    if (!resp.ok) console.error("preview post failed: " + resp.status + " " + (await resp.text()).slice(0, 200));
+    if (!resp.ok) {
+      const body = (await resp.text()).slice(0, 150);
+      console.error("preview post failed: " + resp.status + " " + body);
+      await notifyAdmin(env, `Preview could not be posted for ${name || slug}: Discord said ${resp.status} ${body}`);
+    }
   } catch (err) {
-    console.error("postShipPreview failed: " + (err && err.message ? err.message : String(err)));
+    const msg = err && err.message ? err.message : String(err);
+    console.error("postShipPreview failed at " + step + ": " + msg);
     try {
-      await notifyAdmin(env, `Preview failed for ${name || slug}: ${(err && err.message ? err.message : String(err)).slice(0, 150)}`);
+      await notifyAdmin(env, `Preview failed for ${name || slug} at step "${step}": ${msg.slice(0, 150)}`);
     } catch (e) {
       console.error("preview notify failed");
     }
