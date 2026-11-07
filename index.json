@@ -8728,5 +8728,73 @@
     "vFix": true,
     "updatedAt": "2026-11-05T05:51:56.935Z",
     "updateNote": "Added scanner room, extra motor to extend the ship and changed some of the body"
+  },
+  {
+    "id": "asp-explorer-hijm9",
+    "name": "Asp Explorer",
+    "sha256": "06970d71b7da236a9feeaf90e750f3dfb72dd7e6e155d083cb148e9743e97d6b",
+    "submitter": "QuantumPickleJar",
+    "description": "1P Only. Pulse when exiting stations.",
+    "patreonUrl": "",
+    "youtubeUrl": "https://youtu.be/PC1TSzAPDNs?is=2swbi-PkL2uXcex3",
+    "imageCount": 3,
+    "objectCount": 568,
+    "score": 7.5,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Holo-Arena Game Table",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-11-07T10:52:02.581Z",
+    "utilVersion": 9
   }
 ]
