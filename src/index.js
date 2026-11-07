@@ -2244,43 +2244,15 @@ async function postApprovalMessage(env, embed, slug, images, channelId, supervis
   return false;
 }
 
-const PV_PACK_KEY = "models/nms_parts.pack";
-let pvIndexCache = null;
-let pvIndexCacheAt = 0;
-
-async function pvLoadIndex(env) {
-  const now = Date.now();
-  if (pvIndexCache && now - pvIndexCacheAt < 10 * 60 * 1000) return pvIndexCache;
-  const obj = await env.SHIPS.get(PV_PACK_KEY, { range: { offset: 0, length: 262144 } });
-  if (!obj) return null;
-  const buf = await obj.arrayBuffer();
-  const view = new DataView(buf);
-  if (view.getUint8(0) !== 78 || view.getUint8(1) !== 77 || view.getUint8(2) !== 83 || view.getUint8(3) !== 80) return null;
-  if (view.getUint32(4, true) !== 1) return null;
-  const count = view.getUint32(8, true);
-  const map = new Map();
-  let p = 12;
-  for (let i = 0; i < count; i++) {
-    const n = view.getUint8(p);
-    p += 1;
-    let name = "";
-    for (let k = 0; k < n; k++) name += String.fromCharCode(view.getUint8(p + k));
-    p += n;
-    const offset = view.getUint32(p + 4, true) * 4294967296 + view.getUint32(p, true);
-    const length = view.getUint32(p + 8, true);
-    p += 12;
-    map.set(name, { offset, length });
-  }
-  pvIndexCache = map;
-  pvIndexCacheAt = now;
-  return map;
+const PV_VIEW_HTML = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>3D preview</title><style>body{margin:0;background:#14161b;color:#d4d4d4;font-family:Segoe UI,Arial,sans-serif}.wrap{max-width:1200px;margin:0 auto;padding:12px}canvas{width:100%;height:auto;background:#12151c;border:1px solid #3f3f46;border-radius:6px}.row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:10px 0}button{background:#3a6ea5;color:#fff;border:0;border-radius:4px;padding:8px 14px;cursor:pointer}label{display:flex;gap:8px;align-items:center}.dim{color:#9da5b4;font-size:13px;margin:6px 0}.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 4px 0 10px}</style></head><body><div class="wrap"><div id="status" class="dim">Starting...</div><canvas id="c" width="1100" height="620"></canvas><div class="row"><label>Turn <input id="yaw" type="range" min="-180" max="180" value="-38.6" step="1"></label><label>Tilt <input id="pitch" type="range" min="-10" max="85" value="27.5" step="1"></label><button id="reset">Reset view</button><button id="save">Save PNG</button></div><div id="missing" class="dim"></div><div class="dim">Drawn from the uploaded ship file, in your own browser. Grey shapes, no game colours.<span class="sw" style="background:#e0873c"></span>thrusters<span class="sw" style="background:#6fa8dc"></span>wings<span class="sw" style="background:#d9534f"></span>turrets<span class="sw" style="background:#5cb85c"></span>cockpit<span class="sw" style="background:#e6c84a"></span>landing<span class="sw" style="background:#8b7fd0"></span>station parts</div></div><script>function normId(raw) {
+  if (typeof raw !== "string") return "";
+  let s = raw;
+  if (s.charAt(0) === "^") s = s.slice(1);
+  return s.toUpperCase();
 }
 
-async function pvReadPart(env, entry) {
-  const obj = await env.SHIPS.get(PV_PACK_KEY, { range: { offset: entry.offset, length: entry.length } });
-  if (!obj) return null;
-  const comp = await obj.arrayBuffer();
-  const stream = new Blob([comp]).stream().pipeThrough(new DecompressionStream("deflate"));
+async function parsePart(compBuf) {
+  const stream = new Blob([compBuf]).stream().pipeThrough(new DecompressionStream("deflate"));
   const raw = await new Response(stream).arrayBuffer();
   const dv = new DataView(raw);
   const vc = dv.getUint32(0, true);
@@ -2300,10 +2272,10 @@ async function pvReadPart(env, entry) {
   }
   const idxStart = 33 + vc * 6;
   const indices = use32 ? new Uint32Array(raw.slice(idxStart, idxStart + ic * 4)) : new Uint16Array(raw.slice(idxStart, idxStart + ic * 2));
-  return { verts, indices };
+  return { verts: verts, indices: indices };
 }
 
-function pvColorFor(id) {
+function colorFor(id) {
   if (id.startsWith("B_TRU") || id.startsWith("B_ENG")) return [0xe0, 0x87, 0x3c];
   if (id.startsWith("B_WNG")) return [0x6f, 0xa8, 0xdc];
   if (id.startsWith("B_TUR")) return [0xd9, 0x53, 0x4f];
@@ -2314,28 +2286,29 @@ function pvColorFor(id) {
   return [0x9a, 0xa7, 0xb5];
 }
 
-function pvNum(v) {
+function num(v) {
   const n = Number(v);
-  return Number.isFinite(n) ? n : 0;
+  return isFinite(n) ? n : 0;
 }
 
-function pvRender(objects, parts, width, height) {
+function buildScene(objects, parts) {
   const placements = [];
   let totalTris = 0;
   let placed = 0;
-  const missingIds = new Set();
-  for (const obj of objects) {
-    if (!obj || typeof obj.ObjectID !== "string") continue;
-    const id = obj.ObjectID.replace(/^\^/, "").toUpperCase();
-    if (id === "NONE") continue;
+  const missing = {};
+  for (let oi = 0; oi < objects.length; oi++) {
+    const obj = objects[oi];
+    if (!obj) continue;
+    const id = normId(obj.ObjectID);
+    if (!id || id === "NONE") continue;
     const mesh = parts.get(id);
     if (!mesh) {
-      missingIds.add(id);
+      missing[id] = (missing[id] || 0) + 1;
       continue;
     }
-    const pos = Array.isArray(obj.Position) ? obj.Position.map(pvNum) : [0, 0, 0];
-    let up = Array.isArray(obj.Up) ? obj.Up.map(pvNum) : [0, 1, 0];
-    let at = Array.isArray(obj.At) ? obj.At.map(pvNum) : [0, 0, 1];
+    const pos = Array.isArray(obj.Position) ? obj.Position.map(num) : [0, 0, 0];
+    let up = Array.isArray(obj.Up) ? obj.Up.map(num) : [0, 1, 0];
+    let at = Array.isArray(obj.At) ? obj.At.map(num) : [0, 0, 1];
     let scale = Math.hypot(up[0], up[1], up[2]);
     const atLen = Math.hypot(at[0], at[1], at[2]);
     if (scale < 1e-6 || atLen < 1e-6) {
@@ -2350,22 +2323,18 @@ function pvRender(objects, parts, width, height) {
     const rl = Math.hypot(r[0], r[1], r[2]);
     if (rl < 1e-4) continue;
     r = [r[0] / rl, r[1] / rl, r[2] / rl];
-    placements.push({ mesh, pos, r, up, at, scale, color: pvColorFor(id) });
+    placements.push({ mesh: mesh, pos: pos, r: r, up: up, at: at, scale: scale, color: colorFor(id) });
     totalTris += Math.floor(mesh.indices.length / 3);
     placed++;
   }
-  if (!totalTris) return { png: null, placed, missingIds: [...missingIds] };
+  if (!totalTris) return { totalTris: 0, placed: placed, missing: missing };
 
   const tri = new Float32Array(totalTris * 9);
   const triCol = new Uint8Array(totalTris * 3);
   let ti = 0;
-  let minX = Infinity;
-  let minY = Infinity;
-  let minZ = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-  let maxZ = -Infinity;
-  for (const pl of placements) {
+  let minX = Infinity, minY = Infinity, minZ = Infinity, maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+  for (let pi = 0; pi < placements.length; pi++) {
+    const pl = placements[pi];
     const v = pl.mesh.verts;
     const vc = v.length / 3;
     const wv = new Float32Array(v.length);
@@ -2392,32 +2361,37 @@ function pvRender(objects, parts, width, height) {
       const a = idx[i] * 3;
       const b = idx[i + 1] * 3;
       const c = idx[i + 2] * 3;
-      tri[ti * 9] = wv[a];
-      tri[ti * 9 + 1] = wv[a + 1];
-      tri[ti * 9 + 2] = wv[a + 2];
-      tri[ti * 9 + 3] = wv[b];
-      tri[ti * 9 + 4] = wv[b + 1];
-      tri[ti * 9 + 5] = wv[b + 2];
-      tri[ti * 9 + 6] = wv[c];
-      tri[ti * 9 + 7] = wv[c + 1];
-      tri[ti * 9 + 8] = wv[c + 2];
+      const o = ti * 9;
+      tri[o] = wv[a]; tri[o + 1] = wv[a + 1]; tri[o + 2] = wv[a + 2];
+      tri[o + 3] = wv[b]; tri[o + 4] = wv[b + 1]; tri[o + 5] = wv[b + 2];
+      tri[o + 6] = wv[c]; tri[o + 7] = wv[c + 1]; tri[o + 8] = wv[c + 2];
       triCol[ti * 3] = pl.color[0];
       triCol[ti * 3 + 1] = pl.color[1];
       triCol[ti * 3 + 2] = pl.color[2];
       ti++;
     }
   }
+  return {
+    totalTris: totalTris, placed: placed, missing: missing, tri: tri, triCol: triCol,
+    center: [(minX + maxX) / 2, (minY + maxY) / 2, (minZ + maxZ) / 2]
+  };
+}
 
-  const cx = (minX + maxX) / 2;
-  const cy = (minY + maxY) / 2;
-  const cz = (minZ + maxZ) / 2;
-  let fx = 0.6;
-  let fy = -0.5;
-  let fz = -0.75;
-  const fl = Math.hypot(fx, fy, fz);
-  fx /= fl;
-  fy /= fl;
-  fz /= fl;
+function rasterize(scene, width, height, yawDeg, pitchDeg) {
+  const tri = scene.tri;
+  const triCol = scene.triCol;
+  const totalTris = scene.totalTris;
+  const cx = scene.center[0];
+  const cy = scene.center[1];
+  const cz = scene.center[2];
+  const yaw = (yawDeg * Math.PI) / 180;
+  const pitch = (Math.max(-85, Math.min(85, pitchDeg)) * Math.PI) / 180;
+  const vx = Math.sin(yaw) * Math.cos(pitch);
+  const vy = Math.sin(pitch);
+  const vz = Math.cos(yaw) * Math.cos(pitch);
+  const fx = -vx;
+  const fy = -vy;
+  const fz = -vz;
   let rx = -fz;
   let rz = fx;
   const rlen = Math.hypot(rx, rz);
@@ -2428,10 +2402,7 @@ function pvRender(objects, parts, width, height) {
   const uy = rz * fx - rx * fz;
   const uz = rx * fy - ry * fx;
 
-  let sMinX = Infinity;
-  let sMaxX = -Infinity;
-  let sMinY = Infinity;
-  let sMaxY = -Infinity;
+  let sMinX = Infinity, sMaxX = -Infinity, sMinY = Infinity, sMaxY = -Infinity;
   for (let i = 0; i < totalTris * 3; i++) {
     const dx = tri[i * 3] - cx;
     const dy = tri[i * 3 + 1] - cy;
@@ -2451,7 +2422,6 @@ function pvRender(objects, parts, width, height) {
   const fit = Math.min((W * 0.9) / spanX, (H * 0.9) / spanY);
   const midX = (sMinX + sMaxX) / 2;
   const midY = (sMinY + sMaxY) / 2;
-
   const colorBuf = new Uint32Array(W * H);
   const depthBuf = new Float32Array(W * H).fill(Infinity);
 
@@ -2492,7 +2462,6 @@ function pvRender(objects, parts, width, height) {
     const cg = Math.min(255, Math.floor(triCol[t * 3 + 1] * shade));
     const cb = Math.min(255, Math.floor(triCol[t * 3 + 2] * shade));
     const packed = (0xff000000 | (cr << 16) | (cg << 8) | cb) >>> 0;
-
     for (let k = 0; k < 3; k++) {
       const dx = tri[o + k * 3] - cx;
       const dy = tri[o + k * 3 + 1] - cy;
@@ -2526,7 +2495,7 @@ function pvRender(objects, parts, width, height) {
     }
   }
 
-  const rgb = new Uint8Array(width * height * 3);
+  const rgba = new Uint8ClampedArray(width * height * 4);
   const inv4 = 1 / (ss * ss);
   for (let y = 0; y < height; y++) {
     const tBg = height > 1 ? y / (height - 1) : 0;
@@ -2534,9 +2503,7 @@ function pvRender(objects, parts, width, height) {
     const bgG = 21 + 15 * tBg;
     const bgB = 28 + 20 * tBg;
     for (let x = 0; x < width; x++) {
-      let sr = 0;
-      let sg = 0;
-      let sb = 0;
+      let sr = 0, sg = 0, sb = 0;
       for (let sy = 0; sy < ss; sy++) {
         for (let sx = 0; sx < ss; sx++) {
           const c = colorBuf[(y * ss + sy) * W + (x * ss + sx)];
@@ -2551,143 +2518,226 @@ function pvRender(objects, parts, width, height) {
           }
         }
       }
-      const o = (y * width + x) * 3;
-      rgb[o] = Math.min(255, sr * inv4);
-      rgb[o + 1] = Math.min(255, sg * inv4);
-      rgb[o + 2] = Math.min(255, sb * inv4);
+      const o = (y * width + x) * 4;
+      rgba[o] = sr * inv4;
+      rgba[o + 1] = sg * inv4;
+      rgba[o + 2] = sb * inv4;
+      rgba[o + 3] = 255;
     }
   }
-  return { rgb, placed, missingIds: [...missingIds] };
+  return rgba;
 }
 
-let pvCrcTable = null;
-function pvCrc(bytes) {
-  if (!pvCrcTable) {
-    pvCrcTable = new Uint32Array(256);
-    for (let n = 0; n < 256; n++) {
-      let c = n;
-      for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-      pvCrcTable[n] = c >>> 0;
-    }
-  }
-  let crc = 0xffffffff;
-  for (let i = 0; i < bytes.length; i++) crc = pvCrcTable[(crc ^ bytes[i]) & 255] ^ (crc >>> 8);
-  return (crc ^ 0xffffffff) >>> 0;
-}
-
-function pvChunk(type, data) {
-  const out = new Uint8Array(12 + data.length);
-  const dv = new DataView(out.buffer);
-  dv.setUint32(0, data.length);
-  for (let i = 0; i < 4; i++) out[4 + i] = type.charCodeAt(i);
-  out.set(data, 8);
-  dv.setUint32(8 + data.length, pvCrc(out.subarray(4, 8 + data.length)));
-  return out;
-}
-
-async function pvEncodePng(rgb, w, h) {
-  const raw = new Uint8Array((w * 3 + 1) * h);
-  for (let y = 0; y < h; y++) {
-    raw[y * (w * 3 + 1)] = 0;
-    raw.set(rgb.subarray(y * w * 3, (y + 1) * w * 3), y * (w * 3 + 1) + 1);
-  }
-  const stream = new Blob([raw]).stream().pipeThrough(new CompressionStream("deflate"));
-  const idat = new Uint8Array(await new Response(stream).arrayBuffer());
-  const ihdr = new Uint8Array(13);
-  const dv = new DataView(ihdr.buffer);
-  dv.setUint32(0, w);
-  dv.setUint32(4, h);
-  ihdr[8] = 8;
-  ihdr[9] = 2;
-  const parts = [new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]), pvChunk("IHDR", ihdr), pvChunk("IDAT", idat), pvChunk("IEND", new Uint8Array(0))];
-  const total = parts.reduce((n, p) => n + p.length, 0);
-  const png = new Uint8Array(total);
-  let off = 0;
-  for (const p of parts) {
-    png.set(p, off);
-    off += p.length;
-  }
-  return png;
-}
-
-async function pvDrawShip(env, objects) {
-  const index = await pvLoadIndex(env);
-  if (!index) return { skipped: true };
-  const ids = new Set();
-  for (const o of objects) {
-    if (o && typeof o.ObjectID === "string") {
-      const id = o.ObjectID.replace(/^\^/, "").toUpperCase();
-      if (index.has(id)) ids.add(id);
-    }
-  }
+function startViewer() {
   const parts = new Map();
-  const list = [...ids];
-  for (let i = 0; i < list.length; i += 6) {
-    const chunk = list.slice(i, i + 6);
-    const loaded = await Promise.all(chunk.map((id) => pvReadPart(env, index.get(id)).catch(() => null)));
-    chunk.forEach((id, k) => {
-      if (loaded[k]) parts.set(id, loaded[k]);
-    });
+  const pathParts = location.pathname.split("/");
+  const slug = pathParts[pathParts.length - 1];
+  const sig = new URLSearchParams(location.search).get("s") || "";
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  const statusEl = document.getElementById("status");
+  const missingEl = document.getElementById("missing");
+  const yawEl = document.getElementById("yaw");
+  const pitchEl = document.getElementById("pitch");
+  const saveEl = document.getElementById("save");
+  let scene = null;
+  let drawing = false;
+
+  function setStatus(text) {
+    statusEl.textContent = text;
   }
-  const res = pvRender(objects, parts, 960, 540);
-  if (!res.rgb) return { error: "no known parts", placed: res.placed, missing: res.missingIds };
-  const png = await pvEncodePng(res.rgb, 960, 540);
-  return { png, placed: res.placed, missing: res.missingIds };
+
+  function draw() {
+    if (!scene || drawing) return;
+    drawing = true;
+    setStatus("Drawing...");
+    setTimeout(function () {
+      try {
+        const rgba = rasterize(scene, canvas.width, canvas.height, Number(yawEl.value), Number(pitchEl.value));
+        ctx.putImageData(new ImageData(rgba, canvas.width, canvas.height), 0, 0);
+        setStatus(scene.placed + " objects drawn.");
+      } catch (e) {
+        setStatus("Drawing failed: " + (e && e.message ? e.message : e));
+      }
+      drawing = false;
+    }, 20);
+  }
+
+  async function loadParts(ids) {
+    for (let i = 0; i < ids.length; i += 20) {
+      const batch = ids.slice(i, i + 20);
+      setStatus("Loading parts " + Math.min(i + 20, ids.length) + " / " + ids.length + "...");
+      const res = await fetch("/viewparts?slug=" + encodeURIComponent(slug) + "&s=" + encodeURIComponent(sig) + "&ids=" + encodeURIComponent(batch.join(",")));
+      if (res.status === 404) throw new Error("The model pack is not in R2 yet (models/nms_parts.pack).");
+      if (!res.ok) throw new Error("Could not load parts (" + res.status + ")");
+      const buf = await res.arrayBuffer();
+      const dv = new DataView(buf);
+      let p = 0;
+      while (p < buf.byteLength) {
+        const n = dv.getUint8(p);
+        p += 1;
+        const name = new TextDecoder().decode(new Uint8Array(buf, p, n));
+        p += n;
+        const len = dv.getUint32(p, true);
+        p += 4;
+        const mesh = await parsePart(buf.slice(p, p + len));
+        parts.set(name, mesh);
+        p += len;
+      }
+    }
+  }
+
+  async function run() {
+    try {
+      setStatus("Loading ship...");
+      const shipRes = await fetch("/ship/" + encodeURIComponent(slug) + "?s=" + encodeURIComponent(sig));
+      if (!shipRes.ok) throw new Error("Ship not found. It may already be approved or rejected.");
+      const objects = JSON.parse(await shipRes.text());
+      if (!Array.isArray(objects)) throw new Error("The ship file is not a list.");
+      const seen = {};
+      const ids = [];
+      for (let i = 0; i < objects.length; i++) {
+        const id = normId(objects[i] && objects[i].ObjectID);
+        if (id && id !== "NONE" && !seen[id]) {
+          seen[id] = true;
+          ids.push(id);
+        }
+      }
+      await loadParts(ids);
+      scene = buildScene(objects, parts);
+      if (!scene.totalTris) throw new Error("None of the parts have a model.");
+      const missingIds = Object.keys(scene.missing);
+      missingEl.textContent = missingIds.length ? "No model for: " + missingIds.join(", ") : "All parts have a model.";
+      draw();
+    } catch (e) {
+      setStatus(e && e.message ? e.message : String(e));
+    }
+  }
+
+  yawEl.addEventListener("change", draw);
+  pitchEl.addEventListener("change", draw);
+  document.getElementById("reset").addEventListener("click", function () {
+    yawEl.value = "-38.6";
+    pitchEl.value = "27.5";
+    draw();
+  });
+  saveEl.addEventListener("click", function () {
+    canvas.toBlob(function (blob) {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = slug + ".png";
+      a.click();
+    });
+  });
+  run();
 }
 
-async function postShipPreview(env, slug, name, shipBytes) {
-  let step = "start";
-  try {
-    if (!env.SHIPS || env.PREVIEW_OFF) return;
-    step = "read ship file";
-    const text = await extractZipEntry(shipBytes, "objects.json");
-    if (!text) {
-      await notifyAdmin(env, `Preview skipped for ${name || slug}: no objects.json found in the ship file.`);
-      return;
-    }
-    const objects = JSON.parse(text);
-    if (!Array.isArray(objects)) return;
-    step = "draw";
-    const res = await pvDrawShip(env, objects);
-    if (res.skipped) {
-      await notifyAdmin(env, `Preview skipped for ${name || slug}: the model pack was not found in R2 at ${PV_PACK_KEY}.`);
-      return;
-    }
-    if (!res.png) {
-      await notifyAdmin(env, `Preview could not be drawn for ${name || slug}: ${res.error || "unknown reason"}.`);
-      return;
-    }
-    step = "post to Discord";
-    const filename = "shippreview.png";
-    const missingText = res.missing.length ? `${res.missing.length} part type(s) have no model and are left out.` : "All parts have a model.";
-    const embed = {
-      title: `Preview of the uploaded file - ${name || slug}`.slice(0, 250),
-      description: `Drawn from the ship file itself, not from the photos. Grey shapes, no game colours. Thrusters orange, wings blue, turrets red, cockpit green.\n${missingText}`,
-      color: 0x3a6ea5,
-      image: { url: `attachment://${filename}` }
-    };
-    const form = new FormData();
-    form.append("payload_json", JSON.stringify({ embeds: [embed], attachments: [{ id: 0, filename }] }));
-    form.append("files[0]", new Blob([res.png], { type: "image/png" }), filename);
-    const resp = await fetch(`https://discord.com/api/v10/channels/${env.APPROVAL_CHANNEL_ID}/messages`, {
-      method: "POST",
-      headers: { Authorization: `Bot ${env.DISCORD_TOKEN}` },
-      body: form
-    });
-    if (!resp.ok) {
-      const body = (await resp.text()).slice(0, 150);
-      console.error("preview post failed: " + resp.status + " " + body);
-      await notifyAdmin(env, `Preview could not be posted for ${name || slug}: Discord said ${resp.status} ${body}`);
-    }
-  } catch (err) {
-    const msg = err && err.message ? err.message : String(err);
-    console.error("postShipPreview failed at " + step + ": " + msg);
-    try {
-      await notifyAdmin(env, `Preview failed for ${name || slug} at step "${step}": ${msg.slice(0, 150)}`);
-    } catch (e) {
-      console.error("preview notify failed");
-    }
+if (typeof document !== "undefined") startViewer();
+</script></body></html>`;
+
+const PV_PACK_KEY = "models/nms_parts.pack";
+let pvIndexCache = null;
+let pvIndexCacheAt = 0;
+
+async function pvLoadIndex(env) {
+  const now = Date.now();
+  if (pvIndexCache && now - pvIndexCacheAt < 10 * 60 * 1000) return pvIndexCache;
+  const obj = await env.SHIPS.get(PV_PACK_KEY, { range: { offset: 0, length: 262144 } });
+  if (!obj) return null;
+  const buf = await obj.arrayBuffer();
+  const view = new DataView(buf);
+  if (view.getUint8(0) !== 78 || view.getUint8(1) !== 77 || view.getUint8(2) !== 83 || view.getUint8(3) !== 80) return null;
+  if (view.getUint32(4, true) !== 1) return null;
+  const count = view.getUint32(8, true);
+  const dec = new TextDecoder();
+  const map = new Map();
+  let p = 12;
+  for (let i = 0; i < count; i++) {
+    const n = view.getUint8(p);
+    p += 1;
+    const name = dec.decode(new Uint8Array(buf, p, n));
+    p += n;
+    const offset = view.getUint32(p + 4, true) * 4294967296 + view.getUint32(p, true);
+    const length = view.getUint32(p + 8, true);
+    p += 12;
+    map.set(name, { offset, length });
   }
+  pvIndexCache = map;
+  pvIndexCacheAt = now;
+  return map;
+}
+
+async function pendingViewUrl(slug, env) {
+  if (!env.DELETE_PEPPER || !workerOrigin) return undefined;
+  const sig = (await hashDeleteCode(`ship:${slug}`, "0", env)).slice(0, 24);
+  return `${workerOrigin}/view/${slug}?s=${sig}`;
+}
+
+async function handleViewPage(url, env) {
+  const m = url.pathname.match(/^\/view\/([a-z0-9-]{1,80})$/);
+  if (!m || !env.DELETE_PEPPER) return new Response("Not found", { status: 404 });
+  const sig = (await hashDeleteCode(`ship:${m[1]}`, "0", env)).slice(0, 24);
+  if ((url.searchParams.get("s") || "") !== sig) return new Response("Not found", { status: 404 });
+  return new Response(PV_VIEW_HTML, {
+    status: 200,
+    headers: {
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": "no-store",
+      "x-content-type-options": "nosniff",
+      "content-security-policy": "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src blob: data:; base-uri 'none'; frame-ancestors 'none'"
+    }
+  });
+}
+
+async function handleViewParts(url, env) {
+  const slug = url.searchParams.get("slug") || "";
+  if (!/^[a-z0-9-]{1,80}$/.test(slug) || !env.SHIPS || !env.DELETE_PEPPER) return new Response("Not found", { status: 404 });
+  const sig = (await hashDeleteCode(`ship:${slug}`, "0", env)).slice(0, 24);
+  if ((url.searchParams.get("s") || "") !== sig) return new Response("Not found", { status: 404 });
+  const ids = (url.searchParams.get("ids") || "")
+    .split(",")
+    .map((x) => x.trim().toUpperCase())
+    .filter((x) => /^[A-Z0-9_]{1,48}$/.test(x))
+    .slice(0, 24);
+  const index = await pvLoadIndex(env);
+  if (!index) return new Response("Model pack not found", { status: 404 });
+  const found = [];
+  for (const id of ids) {
+    const entry = index.get(id);
+    if (entry) found.push({ id, entry });
+  }
+  const blobs = await Promise.all(
+    found.map(async (f) => {
+      const obj = await env.SHIPS.get(PV_PACK_KEY, { range: { offset: f.entry.offset, length: f.entry.length } });
+      return obj ? new Uint8Array(await obj.arrayBuffer()) : null;
+    })
+  );
+  const enc = new TextEncoder();
+  let total = 0;
+  const items = [];
+  found.forEach((f, i) => {
+    if (!blobs[i]) return;
+    const nameBytes = enc.encode(f.id);
+    items.push({ nameBytes, blob: blobs[i] });
+    total += 1 + nameBytes.length + 4 + blobs[i].length;
+  });
+  const out = new Uint8Array(total);
+  const dv = new DataView(out.buffer);
+  let p = 0;
+  for (const it of items) {
+    out[p] = it.nameBytes.length;
+    p += 1;
+    out.set(it.nameBytes, p);
+    p += it.nameBytes.length;
+    dv.setUint32(p, it.blob.length, true);
+    p += 4;
+    out.set(it.blob, p);
+    p += it.blob.length;
+  }
+  return new Response(out, {
+    status: 200,
+    headers: { "content-type": "application/octet-stream", "cache-control": "no-store", "x-content-type-options": "nosniff" }
+  });
 }
 
 async function editApprovalMessage(env, messageId, payload, channelId) {
@@ -3286,6 +3336,8 @@ async function approvalExtraFields(slug, env, check, imageCount) {
   if (check) fields.push({ name: "File check", value: String(check).slice(0, 300), inline: false });
   const link = await pendingShipUrl(slug, env);
   if (link) fields.push({ name: "Ship file", value: `[Open the JSON in your browser](${link})`, inline: false });
+  const viewLink = await pendingViewUrl(slug, env);
+  if (viewLink) fields.push({ name: "3D preview", value: `[Open the 3D preview](${viewLink})`, inline: false });
   return fields;
 }
 
@@ -4030,7 +4082,6 @@ async function handleAppUpload(request, env, ctx) {
         const embed = approvalEmbedFor(name, builder, "via app", description, linkCheck, staged, await approvalExtraFields(slug, env, staged.check, imageBufs.length));
         const posted = await postApprovalMessage(env, embed, slug, imageBufs);
         if (!posted) console.error("approval message could not be posted for " + slug + " - use /pending");
-        if (posted) await postShipPreview(env, slug, name, shipBytes);
       })()
     );
 
@@ -5233,7 +5284,6 @@ async function handleAppBatchUpload(request, env, ctx) {
         const embed = approvalEmbedFor(name, builder, "via app (bulk)", description, linkCheck, staged, await approvalExtraFields(slug, env, staged.check, imageBufs.length));
         const posted = await postApprovalMessage(env, embed, slug, imageBufs);
         if (!posted) console.error("approval message could not be posted for " + slug + " - use /pending");
-        if (posted) await postShipPreview(env, slug, name, shipBytes);
       })()
     );
 
@@ -8092,6 +8142,8 @@ export default {
     if (request.method === "GET") {
       if (url.pathname.startsWith("/img/")) return handlePendingImage(url, env);
       if (url.pathname.startsWith("/ship/")) return handlePendingShip(url, env);
+      if (url.pathname.startsWith("/view/")) return handleViewPage(url, env);
+      if (url.pathname === "/viewparts") return handleViewParts(url, env);
       if (url.pathname === "/register") return handleRegister(url, env);
       if (url.pathname === "/upload") return new Response("Bulk upload now works inside the Optimizer app. Open the Community Library tab, press Upload Corvette to library and then Private Bulk Upload.", { status: 200, headers: { "content-type": "text/plain; charset=utf-8" } });
       if (url.pathname === "/human") return handleHumanPage(url, env);
