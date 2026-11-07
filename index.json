@@ -8912,5 +8912,34 @@
     "downloads": 2,
     "approvedAt": "2026-11-07T10:53:22.146Z",
     "utilVersion": 9
+  },
+  {
+    "id": "reaper-s-behemoth-e1o7c",
+    "name": "Reaper's Behemoth",
+    "sha256": "1f1e65e30a190a84f8e81056551e3dc6835124e8d71b2f624ccd5c609b135bf8",
+    "submitter": "Reaper",
+    "description": "Alpha version",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 2,
+    "objectCount": 240,
+    "score": 3.1,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-11-07T16:25:35.370Z",
+    "utilVersion": 9
   }
 ]
