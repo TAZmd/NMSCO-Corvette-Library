@@ -1,0 +1,67 @@
+{
+  "name": "Reaper's Behemoth Mk2",
+  "id": "reaper-s-behemoth-mk2-ac17o",
+  "submitter": "Reaper",
+  "description": "Alphja. getting there slowly.",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 251,
+  "score": 7.3,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Refiner",
+      "value": 0.5
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Stellar Extractor Room",
+      "value": 1
+    },
+    {
+      "label": "Antimatter Reactor",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    }
+  ],
+  "imageCount": 2,
+  "sha256": "5bba84be5b4a177e136f6c4c90c0ab0a94a8b0d002d7a2e16d51f8347391d8a8",
+  "downloads": 0,
+  "approvedAt": "2026-11-08T10:03:25.210Z"
+}
