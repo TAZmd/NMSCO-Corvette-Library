@@ -150,5 +150,37 @@
     "disabledBy": "Weiyv | 302000471078 (uploader)",
     "purgeAt": "2026-11-08T20:16:46.481Z",
     "noticeId": "1566546579752755306"
+  },
+  {
+    "id": "reaper-s-behemoth-e1o7c",
+    "name": "Reaper's Behemoth",
+    "sha256": "1f1e65e30a190a84f8e81056551e3dc6835124e8d71b2f624ccd5c609b135bf8",
+    "submitter": "Reaper",
+    "description": "Alpha version",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 2,
+    "objectCount": 240,
+    "score": 3.1,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 7,
+    "approvedAt": "2026-11-07T16:25:35.370Z",
+    "utilVersion": 9,
+    "disabledAt": "2026-11-08T09:20:32.320Z",
+    "disabledBy": "Reaper69 (uploader)",
+    "purgeAt": "2026-11-15T09:20:31.898Z"
   }
 ]
