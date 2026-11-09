@@ -7031,13 +7031,13 @@
   {
     "id": "gold-sabbath-lvu1e",
     "name": "Gold Sabbath",
-    "sha256": "63613f085e525f3dabf59cabe1badc03917652d7bdece48f100a8863b09645ab",
+    "sha256": "6e9c98aaecc318d3e4a12131a6ffa4493f8d382300d499550cc8ddc6b6c73c95",
     "submitter": "Phantomdark30",
     "description": "",
     "patreonUrl": "",
     "youtubeUrl": "",
-    "imageCount": 1,
-    "objectCount": 1861,
+    "imageCount": 3,
+    "objectCount": 1987,
     "score": 9.4,
     "utilities": [
       {
@@ -7151,9 +7151,9 @@
     "downloads": 73,
     "approvedAt": "2026-10-15T03:03:45.454Z",
     "utilVersion": 9,
-    "version": 3,
-    "updatedAt": "2026-10-16T04:57:46.134Z",
-    "updateNote": "added missing hull parts",
+    "version": 4,
+    "updatedAt": "2026-11-09T07:47:29.905Z",
+    "updateNote": "The ambassador habs were switched out to give abit more room",
     "vFix": true
   },
   {
