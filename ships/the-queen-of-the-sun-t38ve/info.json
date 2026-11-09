@@ -1,0 +1,28 @@
+{
+  "name": "The Queen of the Sun",
+  "id": "the-queen-of-the-sun-t38ve",
+  "submitter": "Vezy",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 45,
+  "score": 1.9,
+  "utilities": [
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "3df4a6f30ba6d22465f9c9b46c15bb106dfd672e896015e6640af07931347105",
+  "downloads": 0,
+  "approvedAt": "2026-11-09T01:54:25.032Z"
+}
