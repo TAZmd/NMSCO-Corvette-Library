@@ -9281,7 +9281,7 @@
   {
     "id": "regulus-o689p",
     "name": "Regulus",
-    "sha256": "4a06d9a1fb8aab5e7fa55d9b4e5e9d84d26efa3967d750d27b6c0dba62ac05a6",
+    "sha256": "24c1860a42aa48427c89ab8e0632c8a9d43eaae94aa0b27ec90f37a123279674",
     "submitter": "Phantomdark30",
     "description": "Power switch to the multi tool will make the base portal glow",
     "patreonUrl": "",
@@ -9393,10 +9393,10 @@
     "downloads": 2,
     "approvedAt": "2026-11-10T02:45:11.281Z",
     "utilVersion": 9,
-    "version": 2,
+    "version": 3,
     "vFix": true,
-    "updatedAt": "2026-11-10T03:11:40.827Z",
-    "updateNote": "Forgot to add autophage staff terminal"
+    "updatedAt": "2026-11-10T04:51:54.250Z",
+    "updateNote": "had to redo edit"
   },
   {
     "id": "reaper-s-blade-tn9jb",
