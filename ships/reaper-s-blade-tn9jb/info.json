@@ -1,0 +1,71 @@
+{
+  "name": "Reaper's Blade",
+  "id": "reaper-s-blade-tn9jb",
+  "submitter": "Reaper",
+  "description": "Mk1.",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 125,
+  "score": 7.6,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 0.5
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Antimatter Reactor",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    }
+  ],
+  "imageCount": 2,
+  "sha256": "ac13b677dd6e98431216fe3bf0fe1807e03ea63e4996f5f1595f24df533787c2",
+  "downloads": 0,
+  "approvedAt": "2026-11-10T02:46:49.080Z"
+}
