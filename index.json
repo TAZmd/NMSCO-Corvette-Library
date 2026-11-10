@@ -9069,14 +9069,14 @@
   {
     "id": "red-sabbath-v-2-clwwe",
     "name": "Red Sabbath V.2",
-    "sha256": "709474ce6a22875448a6398a3fde5686fe127d87e23a60ea6547b37c8d7ebca8",
+    "sha256": "8ca5b2727a399590bdee0d846596408d51e2e77627deee2183bd16fcb2dc4835",
     "submitter": "Phantomdark30",
     "description": "Redid this for a friend and wanted to share it...New habs was added for abit more room and tractor beams were added as well",
     "patreonUrl": "",
     "youtubeUrl": "",
     "imageCount": 3,
-    "objectCount": 2246,
-    "score": 9.4,
+    "objectCount": 2247,
+    "score": 9.5,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -9150,6 +9150,10 @@
         "value": 1
       },
       {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
         "label": "Autonomous Mining Unit",
         "value": 1
       },
@@ -9189,10 +9193,10 @@
     "downloads": 13,
     "approvedAt": "2026-11-09T07:48:59.549Z",
     "utilVersion": 9,
-    "version": 2,
+    "version": 3,
     "vFix": true,
-    "updatedAt": "2026-11-10T04:51:21.213Z",
-    "updateNote": "Oxygen harvester was added"
+    "updatedAt": "2026-11-10T06:07:56.595Z",
+    "updateNote": "stellar extractor wasnt added"
   },
   {
     "id": "nephilim-49alz",
