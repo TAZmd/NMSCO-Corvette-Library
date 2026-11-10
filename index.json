@@ -9585,5 +9585,38 @@
     "downloads": 6,
     "approvedAt": "2026-11-10T03:10:17.386Z",
     "utilVersion": 9
+  },
+  {
+    "id": "midnight-g73a2",
+    "name": "Midnight",
+    "sha256": "f58951466aca3001ead9ee096bd7f362498c988c50017a8d9417afff15dc840a",
+    "submitter": "Vezy",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 44,
+    "score": 2.1,
+    "utilities": [
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-11-10T19:01:23.342Z",
+    "utilVersion": 9
   }
 ]
