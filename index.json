@@ -3920,14 +3920,14 @@
   {
     "id": "ragnarok-xv-2-k27kz",
     "name": "Ragnarok XV.2",
-    "sha256": "abbc899f62ec50c2137eb96e1df879926147431f33b62789a98a3cb25e9c3374",
+    "sha256": "55b5705e3c3ca2cdc50371340cefa80855a9cf389b298b287ccfda1c9a01b5f2",
     "submitter": "Phantomdark30",
     "description": "",
     "patreonUrl": "",
     "youtubeUrl": "",
     "imageCount": 1,
-    "objectCount": 2516,
-    "score": 9.3,
+    "objectCount": 2528,
+    "score": 9.4,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -4001,6 +4001,10 @@
         "value": 1
       },
       {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
         "label": "Autonomous Mining Unit",
         "value": 1
       },
@@ -4036,9 +4040,9 @@
     "downloads": 122,
     "approvedAt": "2026-10-05T02:29:29.751Z",
     "utilVersion": 9,
-    "version": 3,
-    "updatedAt": "2026-10-22T15:23:18.684Z",
-    "updateNote": "forgot to add tractor beam",
+    "version": 4,
+    "updatedAt": "2026-11-10T19:00:41.374Z",
+    "updateNote": "Fixed issue with automatic feeder and added stellar extractor",
     "vFix": true
   },
   {
