@@ -109,10 +109,10 @@
     }
   ],
   "imageCount": 3,
-  "sha256": "4a06d9a1fb8aab5e7fa55d9b4e5e9d84d26efa3967d750d27b6c0dba62ac05a6",
+  "sha256": "24c1860a42aa48427c89ab8e0632c8a9d43eaae94aa0b27ec90f37a123279674",
   "downloads": 0,
   "approvedAt": "2026-11-10T02:45:11.281Z",
-  "version": 2,
-  "updatedAt": "2026-11-10T03:11:40.827Z",
-  "updateNote": "Forgot to add autophage staff terminal"
+  "version": 3,
+  "updatedAt": "2026-11-10T04:51:54.250Z",
+  "updateNote": "had to redo edit"
 }
