@@ -7031,14 +7031,14 @@
   {
     "id": "gold-sabbath-lvu1e",
     "name": "Gold Sabbath",
-    "sha256": "6e9c98aaecc318d3e4a12131a6ffa4493f8d382300d499550cc8ddc6b6c73c95",
+    "sha256": "c2f73406c61c6705e6f932004b97df2418740fba9736ebb1f23952bab09f0da0",
     "submitter": "Phantomdark30",
     "description": "",
     "patreonUrl": "",
     "youtubeUrl": "",
     "imageCount": 3,
     "objectCount": 1987,
-    "score": 9.4,
+    "score": 9.5,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -7112,6 +7112,10 @@
         "value": 1
       },
       {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
         "label": "Autonomous Mining Unit",
         "value": 1
       },
@@ -7151,9 +7155,9 @@
     "downloads": 79,
     "approvedAt": "2026-10-15T03:03:45.454Z",
     "utilVersion": 9,
-    "version": 4,
-    "updatedAt": "2026-11-09T07:47:29.905Z",
-    "updateNote": "The ambassador habs were switched out to give abit more room",
+    "version": 5,
+    "updatedAt": "2026-11-10T06:08:01.083Z",
+    "updateNote": "added stellar extractor",
     "vFix": true
   },
   {
