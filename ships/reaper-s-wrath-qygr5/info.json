@@ -1,0 +1,63 @@
+{
+  "name": "Reaper's Wrath",
+  "id": "reaper-s-wrath-qygr5",
+  "submitter": "Reaper",
+  "description": "Mk1.",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 134,
+  "score": 7.3,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 0.5
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Antimatter Reactor",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "30d645623ac4fc063d790261b3b1eb1d21e8f5bfbb2b96e978ebbf0c673b84b4",
+  "downloads": 0,
+  "approvedAt": "2026-11-11T19:26:42.040Z"
+}
