@@ -1,0 +1,71 @@
+{
+  "name": "Orbital",
+  "id": "orbital-45vr1",
+  "submitter": "Hafnium86",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 1625,
+  "score": 6.3,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 0.5
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Stellar Extractor Room",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "e2b98f06c9aeb9d923a5d93c68cd10dae2b35a6e79f3237cab2233f5be64b516",
+  "downloads": 0,
+  "approvedAt": "2026-11-11T05:32:25.928Z"
+}
