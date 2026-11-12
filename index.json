@@ -9754,5 +9754,65 @@
     "downloads": 3,
     "approvedAt": "2026-11-11T19:26:42.040Z",
     "utilVersion": 9
+  },
+  {
+    "id": "ed-513-ds-y2kcn",
+    "name": "ED-513 DS",
+    "sha256": "99b2969dff04e14385cc86ea6263bb629b19766e092a84b1f66b1985914f79df",
+    "submitter": "4gotAboutDre / ForgotAbtDre",
+    "description": "Full interior, many tech pieces included. It's a bit of a first step to get into the landing bay :-)",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 682,
+    "score": 7.2,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-11-12T12:02:08.506Z",
+    "utilVersion": 9
   }
 ]
