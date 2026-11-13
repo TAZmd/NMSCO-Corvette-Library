@@ -5622,7 +5622,8 @@ const DL_DAY_LIMIT_IP_USER = 100;
 const DL_TEMPO_LIMIT = 15;
 const DL_TEMPO_WINDOW_MS = 10 * 60 * 1000;
 const DL_PATTERN_INSTALLS = 4;
-const FRONT_LIMIT_PER_MIN = 120;
+const FRONT_LIMIT_PER_MIN = 60;
+const FRONT_PATH_FROM = 20;
 const IP_GATED_PATHS = new Set([
   "/my-ships",
   "/my-remove",
@@ -5650,18 +5651,53 @@ async function rateWindowInfo(cacheKey, windowMs) {
   return { count: times.length, oldest: times.length ? Math.min(...times) : now };
 }
 
-async function frontGate(env, ip) {
+async function frontPathPush(fh, label) {
+  try {
+    const req = new Request(`https://rate.internal/fgpath/${fh}`);
+    const hit = await caches.default.match(req);
+    let list = [];
+    if (hit) {
+      try {
+        list = JSON.parse(await hit.text());
+      } catch (e) {
+        list = [];
+      }
+    }
+    list.push(label);
+    if (list.length > 150) list = list.slice(-150);
+    await caches.default.put(req, new Response(JSON.stringify(list), { headers: { "Cache-Control": "max-age=120" } }));
+  } catch (e) {}
+}
+
+async function frontPathSummary(fh) {
+  try {
+    const hit = await caches.default.match(new Request(`https://rate.internal/fgpath/${fh}`));
+    if (!hit) return "";
+    const list = JSON.parse(await hit.text());
+    const counts = new Map();
+    for (const l of list) counts.set(l, (counts.get(l) || 0) + 1);
+    const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4);
+    if (!top.length) return "";
+    return ` Most requested: ${top.map(([l, c]) => `${l} x${c}`).join(", ")}.`;
+  } catch (e) {
+    return "";
+  }
+}
+
+async function frontGate(env, ip, label) {
   const fh = (await hashDeleteCode("fg:ip", ip, env)).slice(0, 24);
   const blockReq = new Request(`https://rate.internal/fgblock/${fh}`);
   const tooMany = () => new Response("Too many requests. Please wait a few minutes.", { status: 429, headers: { "retry-after": "600" } });
   if (await caches.default.match(blockReq)) return tooMany();
   const n = await rateWindowPush(`fg/${fh}`, 60 * 1000);
+  if (n >= FRONT_PATH_FROM) await frontPathPush(fh, label);
   if (n <= FRONT_LIMIT_PER_MIN) return null;
   await caches.default.put(blockReq, new Response("1", { headers: { "Cache-Control": "max-age=600" } }));
   if (await firstAlert(`fg/${fh}`)) {
     const k = await ipBanKey(ip, env);
     await rememberIp(env, ip, k);
-    await notifyDownloadAbuse(env, `Request flood: one connection sent more than ${FRONT_LIMIT_PER_MIN} requests in 1 minute. Paused for 10 minutes.${ipHint(k)}`, { ipKey: k, label: "Request flood", reason: "request flood" });
+    const pathInfo = await frontPathSummary(fh);
+    await notifyDownloadAbuse(env, `Request flood: one connection sent more than ${FRONT_LIMIT_PER_MIN} requests in 1 minute. Paused for 10 minutes.${pathInfo}${ipHint(k)}`, { ipKey: k, label: "Request flood", reason: "request flood" });
   }
   return tooMany();
 }
@@ -8144,7 +8180,8 @@ export default {
 
     const fgIp = request.headers.get("CF-Connecting-IP") || "unknown";
     if (url.pathname !== "/" && fgIp !== "unknown" && deleteCodesReady(env) && !request.headers.get("x-signature-ed25519")) {
-      const blockedResp = await frontGate(env, fgIp);
+      const fgLabel = `${request.method} /${url.pathname.split("/")[1] || ""}`;
+      const blockedResp = await frontGate(env, fgIp, fgLabel);
       if (blockedResp) return blockedResp;
       if (request.method === "POST" && IP_GATED_PATHS.has(url.pathname)) {
         if (await isBanned(env, [await ipBanKey(fgIp, env)])) {
