@@ -9898,5 +9898,33 @@
     "downloads": 0,
     "approvedAt": "2026-11-13T06:31:50.817Z",
     "utilVersion": 9
+  },
+  {
+    "id": "laat-republic-elj2f",
+    "name": "LAAT Republic",
+    "sha256": "9c30ce3575f04547776f77df6ae0a16166c53d81679b2438367e7830182e76c2",
+    "submitter": "Precision",
+    "description": "",
+    "patreonUrl": "https://www.patreon.com/cw/ThePrecisionTechnician",
+    "youtubeUrl": "",
+    "imageCount": 1,
+    "objectCount": 1501,
+    "score": 1.9,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-11-13T06:31:59.448Z",
+    "utilVersion": 9
   }
 ]
