@@ -1,0 +1,83 @@
+{
+  "name": "LAAT Black Sun",
+  "id": "laat-black-sun-glpaj",
+  "submitter": "Precision",
+  "description": "",
+  "patreonUrl": "https://www.patreon.com/cw/ThePrecisionTechnician",
+  "youtubeUrl": "",
+  "objectCount": 4239,
+  "score": 6.6,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Stellar Extractor Room",
+      "value": 1
+    },
+    {
+      "label": "Autonomous Mining Unit",
+      "value": 1
+    },
+    {
+      "label": "Gas Harvester",
+      "value": 1
+    },
+    {
+      "label": "Oxygen Harvester",
+      "value": 1
+    },
+    {
+      "label": "Antimatter Reactor",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    }
+  ],
+  "imageCount": 1,
+  "sha256": "dad844f57fcc5a86ab8f3b4eee6fe3eb5a65fa98cd6cade7990c791a4dc5e1b3",
+  "downloads": 0,
+  "approvedAt": "2026-11-13T06:31:50.817Z"
+}
