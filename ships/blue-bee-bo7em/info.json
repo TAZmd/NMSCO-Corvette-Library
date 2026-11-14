@@ -1,0 +1,24 @@
+{
+  "name": "Blue Bee",
+  "id": "blue-bee-bo7em",
+  "submitter": "Vezy",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 37,
+  "score": 1.7,
+  "utilities": [
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "51d358f3283be5faf5237b5dd29a09c1d6eaa1e41ce77ff1f9a6ed4acd3081e2",
+  "downloads": 0,
+  "approvedAt": "2026-11-14T20:06:12.505Z"
+}
