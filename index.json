@@ -10077,5 +10077,21 @@
     "downloads": 0,
     "approvedAt": "2026-11-14T20:06:12.505Z",
     "utilVersion": 9
+  },
+  {
+    "id": "worker-exocraft-mkqqj",
+    "name": "Worker Exocraft",
+    "sha256": "3a4e75833a620946db1ad56634c7e10a736d46296d1445a5138edcaf23468254",
+    "submitter": "MiLf&CoOkIeS",
+    "description": "First person view, Top rear and look down to enter the cockpit. This is just for fun, no TECH!",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 2,
+    "objectCount": 196,
+    "score": 0,
+    "utilities": [],
+    "downloads": 0,
+    "approvedAt": "2026-11-15T02:55:16.776Z",
+    "utilVersion": 9
   }
 ]
