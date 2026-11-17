@@ -10093,5 +10093,53 @@
     "downloads": 6,
     "approvedAt": "2026-11-15T02:55:16.776Z",
     "utilVersion": 9
+  },
+  {
+    "id": "crimson-fondler-6lii8",
+    "name": "Crimson Fondler",
+    "sha256": "30fa184d3646908263dd4396cd4d0b41a3d2dd21be92c1d42226a29dc56bfa00",
+    "submitter": "ShadowMaster01234",
+    "description": "Has a standard ramp in the back, as well as two tractor beams underneath it. First level is for standard decorations and mission control, second level is more for gardening. Third level is just for personal use like a bed and such.",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 266,
+    "score": 2.8,
+    "utilities": [
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-11-17T18:59:26.144Z",
+    "utilVersion": 9
   }
 ]
