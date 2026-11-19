@@ -437,11 +437,11 @@
   {
     "id": "hexagonia-auux7",
     "name": "Hexagonia",
-    "sha256": "cf2023e4928c39508851ebd75e438389f34918d2f3194fd5c06d3d96d782bed5",
+    "sha256": "41e1ae151372316ea7cacfe9896bf56817ea6b5226e9900a0b1263b9838d6a02",
     "submitter": "TAZmd",
     "patreonUrl": "",
     "imageCount": 1,
-    "objectCount": 1157,
+    "objectCount": 1158,
     "score": 4.3,
     "utilities": [
       {
@@ -486,7 +486,11 @@
     ],
     "downloads": 27,
     "approvedAt": "2026-10-01T10:23:40.868Z",
-    "utilVersion": 9
+    "utilVersion": 9,
+    "version": 2,
+    "vFix": true,
+    "updatedAt": "2026-11-19T20:45:22.985Z",
+    "updateNote": "Fixed Teleporter"
   },
   {
     "id": "aeronix-0n1h5",
