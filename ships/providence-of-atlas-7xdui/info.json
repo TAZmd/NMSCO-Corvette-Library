@@ -1,0 +1,47 @@
+{
+  "name": "Providence of Atlas",
+  "id": "providence-of-atlas-7xdui",
+  "submitter": "Michael.r1995",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 269,
+  "score": 2.7,
+  "utilities": [
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Plant Tray",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "b1b7229b11ade94c79f5bc019f41dbba84c4774f9530738cdec8530286b9839f",
+  "downloads": 0,
+  "approvedAt": "2026-11-19T17:47:27.454Z"
+}
