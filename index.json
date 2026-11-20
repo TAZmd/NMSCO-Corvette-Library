@@ -10193,5 +10193,73 @@
     "downloads": 6,
     "approvedAt": "2026-11-19T17:47:27.454Z",
     "utilVersion": 9
+  },
+  {
+    "id": "reaper-s-vengence-2z9yi",
+    "name": "Reaper's Vengence",
+    "sha256": "b1a570ff82ef498757f250fda2b06227e655d8c4399590ab96eedbbe98a43473",
+    "submitter": "Reaper",
+    "description": "Mk 3",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 136,
+    "score": 6.3,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-11-20T11:12:12.327Z",
+    "utilVersion": 9
   }
 ]
