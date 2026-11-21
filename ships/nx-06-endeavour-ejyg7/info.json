@@ -1,0 +1,35 @@
+{
+  "name": "NX-06 Endeavour",
+  "id": "nx-06-endeavour-ejyg7",
+  "submitter": "k_flynn",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 292,
+  "score": 2.3,
+  "utilities": [
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "2 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "3973a48c1e6faf162d1a7bae99b6a825e7ec22940af798accc00d93cad82e56e",
+  "downloads": 0,
+  "approvedAt": "2026-11-21T22:28:42.551Z"
+}
