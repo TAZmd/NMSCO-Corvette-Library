@@ -10649,5 +10649,45 @@
     "vFix": true,
     "updatedAt": "2026-11-21T20:58:46.593Z",
     "updateNote": "added appearance modifier, removed duplicate storage"
+  },
+  {
+    "id": "u-s-s-constitution-dcxau",
+    "name": "U.S.S. Constitution",
+    "sha256": "e3f456591fe68c2362ecd6b22ec0311632f0df9f376d0f1f9b192a19af77d1a9",
+    "submitter": "k_flynn",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 352,
+    "score": 2.4,
+    "utilities": [
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "4 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-11-21T22:28:11.738Z",
+    "utilVersion": 9
   }
 ]
