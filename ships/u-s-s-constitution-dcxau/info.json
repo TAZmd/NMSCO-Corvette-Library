@@ -1,0 +1,39 @@
+{
+  "name": "U.S.S. Constitution",
+  "id": "u-s-s-constitution-dcxau",
+  "submitter": "k_flynn",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 352,
+  "score": 2.4,
+  "utilities": [
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "4 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "e3f456591fe68c2362ecd6b22ec0311632f0df9f376d0f1f9b192a19af77d1a9",
+  "downloads": 0,
+  "approvedAt": "2026-11-21T22:28:11.738Z"
+}
