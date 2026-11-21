@@ -10533,14 +10533,14 @@
   {
     "id": "lil-betty-ujaza",
     "name": "Lil Betty",
-    "sha256": "ff0f0101be134e76804e4153c6015c85ab4ee0cdd22120d9a54d54f7dbe09ea0",
+    "sha256": "f366aeed57565d5648e118eaaf4b5af93a13e7cc82858b85242e01a74318ba89",
     "submitter": "Phantom Abyss 469",
     "description": "",
     "patreonUrl": "",
     "youtubeUrl": "",
     "imageCount": 3,
-    "objectCount": 703,
-    "score": 9,
+    "objectCount": 712,
+    "score": 9.1,
     "utilities": [
       {
         "label": "Base Teleport Module",
@@ -10559,7 +10559,7 @@
         "value": 1
       },
       {
-        "label": "11 Storage containers"
+        "label": "10 Storage containers"
       },
       {
         "label": "Mission Radar",
@@ -10626,6 +10626,10 @@
         "value": 1
       },
       {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
         "label": "Livestock Unit",
         "value": 1
       },
@@ -10640,6 +10644,10 @@
     ],
     "downloads": 2,
     "approvedAt": "2026-11-21T15:58:39.318Z",
-    "utilVersion": 9
+    "utilVersion": 9,
+    "version": 2,
+    "vFix": true,
+    "updatedAt": "2026-11-21T20:58:46.593Z",
+    "updateNote": "added appearance modifier, removed duplicate storage"
   }
 ]
