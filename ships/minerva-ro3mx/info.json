@@ -1,0 +1,43 @@
+{
+  "name": "Minerva",
+  "id": "minerva-ro3mx",
+  "submitter": "JD",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 267,
+  "score": 2.5,
+  "utilities": [
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "2 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Plant Tray",
+      "value": 1
+    }
+  ],
+  "imageCount": 1,
+  "sha256": "1855e5df9a23289a0a3e930ed89a6c2c1337211cd6c46ee702b8234fbed122b5",
+  "downloads": 0,
+  "approvedAt": "2026-11-22T08:35:13.839Z"
+}
