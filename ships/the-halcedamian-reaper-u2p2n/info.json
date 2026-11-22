@@ -1,0 +1,63 @@
+{
+  "name": "The Halcedamian Reaper",
+  "id": "the-halcedamian-reaper-u2p2n",
+  "submitter": "Reaper",
+  "description": "Mk3",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 243,
+  "score": 6,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Refiner",
+      "value": 0.5
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Exosuit Research Station",
+      "value": 1
+    },
+    {
+      "label": "Multi-Tool Research Station",
+      "value": 1
+    },
+    {
+      "label": "Utopia Build Station",
+      "value": 1
+    },
+    {
+      "label": "Antimatter Reactor",
+      "value": 1
+    }
+  ],
+  "imageCount": 2,
+  "sha256": "f5aead2a46533a18810595cfc0ce2637e3ef4bff5257e34fde746a66485283f3",
+  "downloads": 0,
+  "approvedAt": "2026-11-22T16:50:38.332Z"
+}
