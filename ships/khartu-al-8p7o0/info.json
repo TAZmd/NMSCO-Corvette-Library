@@ -1,0 +1,24 @@
+{
+  "name": "Khartu-Al",
+  "id": "khartu-al-8p7o0",
+  "submitter": "Phantom Abyss 469",
+  "description": "Use front step and screen to board",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 274,
+  "score": 3,
+  "utilities": [
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "082c5ac2701bb26ba23a075ff1152b89c5fa9ec93b7fadc01cdd625226cae3e1",
+  "downloads": 0,
+  "approvedAt": "2026-11-24T14:27:15.637Z"
+}
