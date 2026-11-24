@@ -146,5 +146,56 @@
     "disabledBy": "ThatGuyWithTheCat (uploader)",
     "purgeAt": "2026-12-01T03:12:33.955Z",
     "noticeId": "1574623748680720515"
+  },
+  {
+    "id": "providence-of-atlas-7xdui",
+    "name": "Providence of Atlas",
+    "sha256": "b1b7229b11ade94c79f5bc019f41dbba84c4774f9530738cdec8530286b9839f",
+    "submitter": "Michael.r1995",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 269,
+    "score": 2.7,
+    "utilities": [
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Plant Tray",
+        "value": 1
+      }
+    ],
+    "downloads": 9,
+    "approvedAt": "2026-11-19T17:47:27.454Z",
+    "utilVersion": 9,
+    "disabledAt": "2026-11-24T03:12:45.126Z",
+    "disabledBy": "ThatGuyWithTheCat (uploader)",
+    "purgeAt": "2026-12-01T03:12:44.594Z"
   }
 ]
