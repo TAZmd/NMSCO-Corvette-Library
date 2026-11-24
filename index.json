@@ -11013,5 +11013,21 @@
     "downloads": 0,
     "approvedAt": "2026-11-24T06:25:34.751Z",
     "utilVersion": 9
+  },
+  {
+    "id": "space-taxi-mwwg1",
+    "name": "Space Taxi",
+    "sha256": "b2ba0f2cf8effa03e1c48be358a028bfd5b5bbe324c7eb2941e208462db0a727",
+    "submitter": "k_flynn",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 2,
+    "objectCount": 53,
+    "score": 0,
+    "utilities": [],
+    "downloads": 0,
+    "approvedAt": "2026-11-24T06:59:04.834Z",
+    "utilVersion": 9
   }
 ]
