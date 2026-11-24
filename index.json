@@ -10965,5 +10965,53 @@
     "downloads": 2,
     "approvedAt": "2026-11-23T02:02:48.819Z",
     "utilVersion": 9
+  },
+  {
+    "id": "providence-of-atlas-6n6oa",
+    "name": "Providence of Atlas",
+    "sha256": "eaf3c888e3c7cf0c486f1f75d49267e0aaf9fa1093c67027b1622f607dd6e3ef",
+    "submitter": "Michael.r1995",
+    "description": "Modded. Should comes with added walls, doors, and three npcs, a korvax that scans systems, a gek that acts as a galactic trade terminal, and a vykeen that provides missions.",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 279,
+    "score": 2.7,
+    "utilities": [
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Plant Tray",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-11-24T06:25:34.751Z",
+    "utilVersion": 9
   }
 ]
