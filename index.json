@@ -11258,5 +11258,21 @@
     "downloads": 0,
     "approvedAt": "2026-11-25T20:24:13.686Z",
     "utilVersion": 9
+  },
+  {
+    "id": "the-vaccination-fv71a",
+    "name": "The Vaccination",
+    "sha256": "bbf0c502234173af07d3aece9b77b27ebadbd65a038d59d2f4079d5b88473f2e",
+    "submitter": "Phantomdark30",
+    "description": "cockpit on top front of ship",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 1,
+    "objectCount": 17,
+    "score": 0,
+    "utilities": [],
+    "downloads": 0,
+    "approvedAt": "2026-11-25T20:37:55.675Z",
+    "utilVersion": 9
   }
 ]
