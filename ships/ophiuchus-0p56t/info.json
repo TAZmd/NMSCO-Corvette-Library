@@ -5,7 +5,7 @@
   "description": "",
   "patreonUrl": "",
   "youtubeUrl": "",
-  "objectCount": 409,
+  "objectCount": 505,
   "score": 8.9,
   "utilities": [
     {
@@ -101,7 +101,10 @@
     }
   ],
   "imageCount": 3,
-  "sha256": "d8b6d907df3f21a0168b3e685bc4b80b2bcbf22c24b71c33f0cbc9e767b44c63",
+  "sha256": "4b767b718252df1d28a092a8bafb5092c7f30a393722f0f56d2e7aa6c72b5e4c",
   "downloads": 0,
-  "approvedAt": "2026-11-21T14:14:29.726Z"
+  "approvedAt": "2026-11-21T14:14:29.726Z",
+  "version": 2,
+  "updatedAt": "2026-11-25T15:36:52.098Z",
+  "updateNote": "Added landing gear and the ship's name was added on the back of the ship shown in the pic"
 }
