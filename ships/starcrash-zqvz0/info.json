@@ -1,0 +1,123 @@
+{
+  "name": "Starcrash",
+  "id": "starcrash-zqvz0",
+  "submitter": "Sahka'Dhq",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 1177,
+  "score": 9.4,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "20 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 0.5
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Staff Builder",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Holo-Arena Game Table",
+      "value": 1
+    },
+    {
+      "label": "Exosuit Research Station",
+      "value": 1
+    },
+    {
+      "label": "Multi-Tool Research Station",
+      "value": 1
+    },
+    {
+      "label": "Utopia Build Station",
+      "value": 1
+    },
+    {
+      "label": "Stellar Extractor Room",
+      "value": 1
+    },
+    {
+      "label": "Autonomous Mining Unit",
+      "value": 1
+    },
+    {
+      "label": "Gas Harvester",
+      "value": 1
+    },
+    {
+      "label": "Oxygen Harvester",
+      "value": 1
+    },
+    {
+      "label": "Antimatter Reactor",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    },
+    {
+      "label": "Livestock Unit",
+      "value": 1
+    },
+    {
+      "label": "Automated Feeder",
+      "value": 1
+    },
+    {
+      "label": "Fishpond",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "b282f21bdcd89b876c8dae9b4effa894a8e5c5f98c64c12d6af8c277479a0b25",
+  "downloads": 0,
+  "approvedAt": "2026-11-25T09:54:38.745Z"
+}
