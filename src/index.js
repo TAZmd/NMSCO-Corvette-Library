@@ -5171,7 +5171,11 @@ async function handleMyUpdate(request, env) {
     if (form.has("description")) meta.description = (form.get("description") || "").toString();
     if (form.has("youtube")) meta.youtube = (form.get("youtube") || "").toString();
     if (form.has("patreon")) meta.patreon = (form.get("patreon") || "").toString();
-    const text = await runUpdate(env, { id: gate.discordId, global_name: gate.username }, shipId, att, (form.get("name") || "").toString(), { note, photos, meta });
+    const updIp = request.headers.get("CF-Connecting-IP") || "unknown";
+    const updIpKey = updIp !== "unknown" ? await ipBanKey(updIp, env) : null;
+    const updIdKey = await installBanKey((form.get("installId") || "").toString().trim().toLowerCase(), env);
+    await rememberIp(env, updIp, updIpKey);
+    const text = await runUpdate(env, { id: gate.discordId, global_name: gate.username }, shipId, att, (form.get("name") || "").toString(), { note, photos, meta, ipKey: updIpKey, userKey: updIdKey });
     return json({ ok: /^Your (update|changes|new name)/.test(text), text });
   } catch (err) {
     console.error("handleMyUpdate failed: " + (err && err.message ? err.message : String(err)));
@@ -6316,7 +6320,7 @@ async function runUpdate(env, clicker, shipId, att, newNameRaw, extra = {}) {
     k: check.slice(0, 220)
   });
   const dname = clicker.global_name || clicker.username || "unknown";
-  await saveSubmissionOwner(slug, null, null, `${entry.name} (${hasFile ? "update v" + version : "edit"})`, env, clicker.id, dname, access.verified);
+  await saveSubmissionOwner(slug, extra.ipKey || null, extra.userKey || null, `${entry.name} (${hasFile ? "update v" + version : "edit"})`, env, clicker.id, dname, access.verified);
   await uploaderBump(env, userBanKey(clicker.id), "submitted", label);
   await env.DELETE_CODES.put(`upd:${shipId}`, slug, { expirationTtl: 14 * 86400 });
 
@@ -6800,10 +6804,9 @@ async function handleRegister(url, env) {
   };
   const banCommand = {
     name: "ban",
-    description: "Admin only: ban the app installation of a ship's submitter from uploading and counting downloads",
+    description: "Admin only: ban the Discord user, app installation and connection (IP) of a ship's submitter",
     options: [
-      { name: "ship", description: "Start typing a ship name or builder and pick the ship", type: 3, required: true, autocomplete: true },
-      { name: "also_ip", description: "Also ban their internet connection (IP). Only for extreme cases.", type: 5, required: false }
+      { name: "ship", description: "Start typing a ship name or builder and pick the ship", type: 3, required: true, autocomplete: true }
     ]
   };
   const unbanCommand = {
@@ -7740,15 +7743,13 @@ async function handleBanCommand(interaction, env) {
     parts.push("app installation");
   }
   let banIpKey = null;
-  if (opts.also_ip === true) {
-    if (owner.ipKey) {
-      await addBan(env, owner.ipKey, owner.label, "banned by admin (IP)");
-      parts.push("internet connection (IP)");
-      banIpKey = owner.ipKey;
-    }
+  if (owner.ipKey) {
+    await addBan(env, owner.ipKey, owner.label, "banned by admin (IP)");
+    parts.push("internet connection (IP)");
+    banIpKey = owner.ipKey;
   }
   if (!parts.length) {
-    return ephemeral("No Discord user or app installation was stored for this ship (guest upload or older upload), so nobody was banned. Run /ban again with also_ip set to true if you want to ban the connection.");
+    return ephemeral("No Discord user or app installation was stored for this ship (guest upload or older upload), so nobody was banned.");
   }
   await notifyAdmin(env, `Ban by ${clickerName(clicker, interaction, "a supervisor")}: **${owner.label}**${owner.discordId ? ` <@${owner.discordId}>` : ""} - banned: ${parts.join(" + ")}.${ipHint(banIpKey)}`);
   return ephemeral(`Banned the submitter of "${owner.label}" (${parts.join(" + ")}). They can no longer upload, open the library or count downloads. Use /unban to undo.`);
@@ -8076,30 +8077,32 @@ async function handleComponent(interaction, env, ctx) {
       (async () => {
         const ownerRec = await getSubmissionOwner(slug, env);
         let banNote = "";
+        let banIpKey = null;
         if (action === "rejban") {
           const owner = await getSubmissionOwner(slug, env);
           if (owner) {
+            const banParts = [];
             if (owner.discordId) {
               await addBan(env, userBanKey(owner.discordId), owner.label, "rejected and banned");
+              banParts.push("Discord user");
             }
             if (owner.userKey) {
               await addBan(env, owner.userKey, owner.label, "rejected and banned");
-              banNote = owner.discordId ? " and banned (Discord user + app installation)" : " and banned (app installation)";
-            } else if (owner.discordId) {
-              banNote = " and banned (Discord user)";
-            } else if (owner.ipKey) {
-              await addBan(env, owner.ipKey, owner.label, "rejected and banned (IP)");
-              banNote = " and banned (connection IP)";
-            } else {
-              banNote = " (no app installation or IP stored, nobody banned)";
+              banParts.push("app installation");
             }
+            if (owner.ipKey) {
+              await addBan(env, owner.ipKey, owner.label, "rejected and banned (IP)");
+              banParts.push("connection IP");
+              banIpKey = owner.ipKey;
+            }
+            banNote = banParts.length ? ` and banned (${banParts.join(" + ")})` : " (nothing stored, nobody banned)";
           } else {
             banNote = " (no submitter data found, nobody banned)";
           }
         }
         const result = await rejectPending(slug, env);
         if (result.ok && action === "rejban" && banNote.startsWith(" and banned")) {
-          const rbIp = banNote.includes("connection IP") && ownerRec ? ownerRec.ipKey : null;
+          const rbIp = banIpKey;
           await notifyAdmin(env, `Reject and ban by ${clickerName(clicker, interaction, "a supervisor")}: **${embed.title}**${ownerRec && ownerRec.discordId ? ` <@${ownerRec.discordId}>` : ""} - banned${banNote.slice(11)}.${ipHint(rbIp)}`);
         }
         if (result.ok && ownerRec) await uploaderBump(env, ownerStatKey(ownerRec), "rejected", "");
