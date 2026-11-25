@@ -1,0 +1,59 @@
+{
+  "name": "The Sultan's Emissary",
+  "id": "the-sultan-s-emissary-et9ho",
+  "submitter": "Oudi (Oudster)",
+  "description": "Royal Space Galleon, 5 decks (3 hull decks, 2 upper decks) with Legion habs throughout....all 12 plants in planters, medical wing, residential wing, 3 wide cockpit on portside...nav lights installed...Entrances to hull marked by yellow lights.",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 445,
+  "score": 5.9,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Plant Tray",
+      "value": 1
+    }
+  ],
+  "imageCount": 2,
+  "sha256": "8475bc644584e7b98043b137d9a8b80cc3fa84d7f4920ab9e368df4ef814786a",
+  "downloads": 0,
+  "approvedAt": "2026-11-25T06:08:06.711Z"
+}
