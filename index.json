@@ -11274,26 +11274,5 @@
     "downloads": 0,
     "approvedAt": "2026-11-25T20:37:55.675Z",
     "utilVersion": 9
-  },
-  {
-    "id": "the-butter-ball-4cyyf",
-    "name": "The Butter Ball",
-    "sha256": "41626b578043a702e19d06af50c947f2a0da5c22ae339d27504597665e833f8e",
-    "submitter": "KingSquatch90",
-    "description": "Happy Thanksgiving!!!",
-    "patreonUrl": "",
-    "youtubeUrl": "",
-    "imageCount": 3,
-    "objectCount": 53,
-    "score": 1.5,
-    "utilities": [
-      {
-        "label": "Base Teleport Module",
-        "value": 1
-      }
-    ],
-    "downloads": 0,
-    "approvedAt": "2026-11-26T04:17:02.169Z",
-    "utilVersion": 9
   }
 ]
