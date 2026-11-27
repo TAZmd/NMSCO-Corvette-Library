@@ -1,0 +1,39 @@
+{
+  "name": "U.S.S. Entente Dreadnought Class",
+  "id": "u-s-s-entente-dreadnought-class-r1hmb",
+  "submitter": "k_flynn",
+  "description": "",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 424,
+  "score": 2.4,
+  "utilities": [
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "4 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "42553a1fd48208620690423f26bb798eafdc0b62b4cbcefc9fa54ea0a0c88856",
+  "downloads": 0,
+  "approvedAt": "2026-11-27T06:57:41.099Z"
+}
