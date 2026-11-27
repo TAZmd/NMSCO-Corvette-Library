@@ -11450,5 +11450,57 @@
     "downloads": 0,
     "approvedAt": "2026-11-27T06:51:24.153Z",
     "utilVersion": 9
+  },
+  {
+    "id": "astraeus-vision-yvkm3",
+    "name": "Astraeus' Vision",
+    "sha256": "30e60a57c01404001c3b5a23529740dbc110dee6fbaf4dbfa7c8ddd7b7359fcb",
+    "submitter": "Spiralled_Out",
+    "description": "Exclusive to TAZmd Optimizer All the bells and whistles that you need.... storage, scanner, base terminus etc.",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 2,
+    "objectCount": 138,
+    "score": 5.5,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-11-27T06:52:23.865Z",
+    "utilVersion": 9
   }
 ]
