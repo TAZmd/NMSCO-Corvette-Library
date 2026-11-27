@@ -1,0 +1,63 @@
+{
+  "name": "CWS Dire Wolf",
+  "id": "cws-dire-wolf-8aedf",
+  "submitter": "nebula",
+  "description": "Sovyetskii Soyuz class Heavy Cruiser, flagship of Clan Wolf from Battletech. Modeled after the Mechwarrior 5 Mercenaries new model, not the original design from the '80s.",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 2875,
+  "score": 6.1,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 1
+    },
+    {
+      "label": "Weapon Case",
+      "value": 1
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Plant Tray",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "62d4e6b3bf912cf8c456d41f755fda587b1de4fd9b57a91d04b446524e921426",
+  "downloads": 0,
+  "approvedAt": "2026-11-27T06:51:24.153Z"
+}
