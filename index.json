@@ -11274,5 +11274,45 @@
     "downloads": 0,
     "approvedAt": "2026-11-25T20:37:55.675Z",
     "utilVersion": 9
+  },
+  {
+    "id": "u-s-s-constitution-v2-xz05i",
+    "name": "U.S.S. Constitution v2",
+    "sha256": "d3c70a6f7d7119708979977f7dbaca3fdf25ede6c17c98f1197fe1a553b1e1b6",
+    "submitter": "k_flynn",
+    "description": "",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 396,
+    "score": 2.4,
+    "utilities": [
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "4 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 1
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-11-27T06:50:18.652Z",
+    "utilVersion": 9
   }
 ]
