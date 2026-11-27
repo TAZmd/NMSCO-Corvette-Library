@@ -1,0 +1,71 @@
+{
+  "name": "Sword of Set",
+  "id": "sword-of-set-8vlxi",
+  "submitter": "Spiralled_Out",
+  "description": "Exclusively on TAZmd....767 pieces, facial recognition storage units to be used in first person. All the bells and whistles.",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 767,
+  "score": 7.7,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Scanner Room",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 0.5
+    },
+    {
+      "label": "Weapon Rack",
+      "value": 1
+    },
+    {
+      "label": "Signal Booster",
+      "value": 1
+    },
+    {
+      "label": "Exocraft Research Station",
+      "value": 1
+    },
+    {
+      "label": "Exosuit Research Station",
+      "value": 1
+    },
+    {
+      "label": "Multi-Tool Research Station",
+      "value": 1
+    },
+    {
+      "label": "Utopia Build Station",
+      "value": 1
+    },
+    {
+      "label": "Appearance Modifier",
+      "value": 1
+    }
+  ],
+  "imageCount": 1,
+  "sha256": "632572b90c672b3429f30889cd58618a69e240e24d774caeca1be7b56dde10bf",
+  "downloads": 0,
+  "approvedAt": "2026-11-27T06:50:27.769Z"
+}
