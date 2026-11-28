@@ -11542,5 +11542,105 @@
     "downloads": 5,
     "approvedAt": "2026-11-27T06:57:41.099Z",
     "utilVersion": 9
+  },
+  {
+    "id": "sunbreaker-9zpsb",
+    "name": "Sunbreaker",
+    "sha256": "e9fca88945c8c571d5b4a9f8f15e09bc36c8e2cd9dc41513153dddecfba990f5",
+    "submitter": "Edgerunner",
+    "description": "Stand behind storage bases behing the chair to enter cockpit",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 1285,
+    "score": 8.7,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "10 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Staff Builder",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Signal Booster",
+        "value": 1
+      },
+      {
+        "label": "Exosuit Research Station",
+        "value": 1
+      },
+      {
+        "label": "Multi-Tool Research Station",
+        "value": 1
+      },
+      {
+        "label": "Utopia Build Station",
+        "value": 1
+      },
+      {
+        "label": "Stellar Extractor Room",
+        "value": 1
+      },
+      {
+        "label": "Autonomous Mining Unit",
+        "value": 1
+      },
+      {
+        "label": "Oxygen Harvester",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-11-28T12:34:06.151Z",
+    "utilVersion": 9
   }
 ]
