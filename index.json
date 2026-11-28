@@ -11642,5 +11642,93 @@
     "downloads": 0,
     "approvedAt": "2026-11-28T12:34:06.151Z",
     "utilVersion": 9
+  },
+  {
+    "id": "ss-quasar-99d8h",
+    "name": "SS Quasar",
+    "sha256": "008d8e8e1ffadda2057a5c20ad73f635afa8152f99cce6d8e93561691ef118a6",
+    "submitter": "Malaeus",
+    "description": "main cockpit is bottom center between both landing bays. multiple levels, stairways have garage doors to close off decks, livestock devices in hidden back room. pirate loot hidden cargo hold underneath (where salvage from beam goes) so much more",
+    "patreonUrl": "",
+    "youtubeUrl": "",
+    "imageCount": 3,
+    "objectCount": 1676,
+    "score": 8,
+    "utilities": [
+      {
+        "label": "Base Teleport Module",
+        "value": 1
+      },
+      {
+        "label": "Scanner Room",
+        "value": 1
+      },
+      {
+        "label": "Galactic Trade Terminal",
+        "value": 1
+      },
+      {
+        "label": "Tractor Beam",
+        "value": 1
+      },
+      {
+        "label": "3 Storage containers"
+      },
+      {
+        "label": "Mission Radar",
+        "value": 1
+      },
+      {
+        "label": "Refiner",
+        "value": 1
+      },
+      {
+        "label": "Weapon Case",
+        "value": 1
+      },
+      {
+        "label": "Nutrition Unit",
+        "value": 0.5
+      },
+      {
+        "label": "Weapon Rack",
+        "value": 1
+      },
+      {
+        "label": "Hazard Protection Unit",
+        "value": 1
+      },
+      {
+        "label": "Health Station",
+        "value": 1
+      },
+      {
+        "label": "Antimatter Reactor",
+        "value": 1
+      },
+      {
+        "label": "Appearance Modifier",
+        "value": 1
+      },
+      {
+        "label": "Livestock Unit",
+        "value": 1
+      },
+      {
+        "label": "Automated Feeder",
+        "value": 1
+      },
+      {
+        "label": "Plant Tray",
+        "value": 1
+      },
+      {
+        "label": "Fishpond",
+        "value": 1
+      }
+    ],
+    "downloads": 0,
+    "approvedAt": "2026-11-28T12:35:14.223Z",
+    "utilVersion": 9
   }
 ]
