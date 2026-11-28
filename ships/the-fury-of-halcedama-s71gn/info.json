@@ -1,0 +1,75 @@
+{
+  "name": "The Fury Of Halcedama",
+  "id": "the-fury-of-halcedama-s71gn",
+  "submitter": "Reaper",
+  "description": "mk.1 Pretty bare at the moment. Working on interior.",
+  "patreonUrl": "",
+  "youtubeUrl": "",
+  "objectCount": 291,
+  "score": 6.4,
+  "utilities": [
+    {
+      "label": "Base Teleport Module",
+      "value": 1
+    },
+    {
+      "label": "Galactic Trade Terminal",
+      "value": 1
+    },
+    {
+      "label": "Tractor Beam",
+      "value": 1
+    },
+    {
+      "label": "10 Storage containers"
+    },
+    {
+      "label": "Mission Radar",
+      "value": 1
+    },
+    {
+      "label": "Refiner",
+      "value": 0.5
+    },
+    {
+      "label": "Nutrition Unit",
+      "value": 1
+    },
+    {
+      "label": "Hazard Protection Unit",
+      "value": 1
+    },
+    {
+      "label": "Health Station",
+      "value": 1
+    },
+    {
+      "label": "Exosuit Research Station",
+      "value": 1
+    },
+    {
+      "label": "Multi-Tool Research Station",
+      "value": 1
+    },
+    {
+      "label": "Utopia Build Station",
+      "value": 1
+    },
+    {
+      "label": "Gas Harvester",
+      "value": 1
+    },
+    {
+      "label": "Oxygen Harvester",
+      "value": 1
+    },
+    {
+      "label": "Antimatter Reactor",
+      "value": 1
+    }
+  ],
+  "imageCount": 3,
+  "sha256": "71929f4a7a73c4eb783a469a77cf5a0d98c13a25ff4c8f234e082e4a2af7b68f",
+  "downloads": 0,
+  "approvedAt": "2026-11-28T15:16:42.391Z"
+}
